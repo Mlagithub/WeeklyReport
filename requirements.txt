@@ -1,0 +1,14 @@
+argon2_cffi==23.1.0
+beautifulsoup4==4.12.3
+bleach==6.2.0
+Bootstrap_Flask==2.4.1
+Faker==30.8.2
+Flask==3.0.3
+flask_admin==2.0.0a2
+Flask_CKEditor==1.0.0
+flask_security==5.5.2
+flask_sqlalchemy==3.1.1
+flask_wtf==1.2.2
+openpyxl==3.1.5
+python_dateutil==2.9.0.post0
+WTForms==3.2.1

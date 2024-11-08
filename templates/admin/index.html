@@ -1,0 +1,29 @@
+{% if current_user.is_admin %}
+
+{% extends 'admin/master.html' %}
+
+{% block body %}
+{{ super() }}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-10 col-sm-offset-1">
+            <h1>后台数据管理</h1>
+            <p class="lead">
+                军队超级计算中心
+            </p>
+
+            <p>
+                <a class="btn btn-primary" href="/"><i class="glyphicon glyphicon-chevron-left"></i> 主页 </a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock body %}
+
+{% else %}
+
+
+<p> 需要管理员权限才能访问，请退出并用管理员账号进行 <a class="btn btn-primary" href="/"><i class="glyphicon glyphicon-chevron-left"></i> 登录 </a>
+
+
+{% endif %}

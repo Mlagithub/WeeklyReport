@@ -1,0 +1,33 @@
+{% if security.registerable or security.recoverable or security.confirmable %}
+  <hr>
+  <h2>{{ _fsdomain('Menu') }}</h2>
+  <ul>
+    {% if _fs_is_user_authenticated(current_user) %}
+      {# already authenticated user #}
+      <li>
+        <a href="{{ url_for('logout') }}">{{ _fsdomain("注销") }}</a>
+      </li>
+      {% if security.changeable %}
+        <li>
+          <a href="{{ url_for('change_password') }}">{{ _fsdomain("更改密码") }}</a>
+        </li>
+      {% endif %}
+    {% else %}
+      {% if not skip_login_menu %}
+        <li>
+          <a href="{{ url_for('login') }}{%- if 'next' in request.args -%}?next={{ request.args.next|urlencode }}{%- endif -%}">{{ _fsdomain('登录') }}</a>
+        </li>
+      {% endif %}
+      {% if security.registerable %}
+        <li>
+          <a href="{{ url_for('register') }}{%- if 'next' in request.args -%}?next={{ request.args.next|urlencode }}{%- endif -%}">{{ _fsdomain('注册') }}</a>
+        </li>
+      {% endif %}
+      {% if security.recoverable %}
+        <li>
+          <a href="{{ url_for('forgot_password') }}">{{ _fsdomain('忘记密码') }}</a>
+        </li>
+      {% endif %}
+    {% endif %}
+  </ul>
+{% endif %}

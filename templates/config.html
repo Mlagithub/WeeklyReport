@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% from 'bootstrap5/form.html' import render_form, render_field %}
+
+{% block content %}
+
+{{ render_form(form) }}
+
+{% if current_user.is_admin %}
+
+<div style="margin-top:1cm">
+    <hr>
+    <a class="btn btn-success text-white" href="admin">管理数据库 {{ render_icon('database-fill-gear') }}</a>
+</div>
+
+{% endif %}
+
+<div style="margin-top:1cm">
+    <hr>
+    <a class="btn btn-success text-white" href="change_password">更改密码 {{ render_icon('key-fill') }}</a>
+</div>
+
+{% endblock %}

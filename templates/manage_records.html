@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/table.html' import render_table %}
+{% from 'bootstrap5/pagination.html' import render_pagination %}
+{% from 'bootstrap5/form.html' import render_form, render_form_row, render_field %}
+
+{% block head %}
+    {{ super() }}
+    {{ ckeditor.load_code_theme() }}
+{% endblock %}
+
+{% block content %}
+    
+    <form action="{{ url_for('manage_records') }}" method="post" name="record_form">
+        {{ record_form.hidden_tag() }}
+
+        {% if not hide_groups %}
+        {{ render_field(record_form.user) }}
+        {{ render_form_row([record_form.groups]) }}
+        {% endif %}
+        {{ render_field(record_form.time_range) }}
+        {{ render_field(record_form.submit) }}
+    </form>
+
+    {{ render_table(data, titles, safe_columns='content, edit', responsive=True)}}
+
+    {{ render_pagination(pagination, args=request.args) }}
+
+    <div style="margin-top:1cm">
+        <hr>
+        {{ render_form(download_form) }}
+    </div>
+
+{% endblock %}

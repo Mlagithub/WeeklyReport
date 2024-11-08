@@ -1,0 +1,50 @@
+{
+    "roles": [
+        {"name": "employee", "description": "员工", "permissions" : ["view_self"]},
+        {"name": "group_leader", "description": "员工组长", "permissions" : ["view_group"]},
+        {"name": "teacher", "description": "老师，所有老师都用此角色", "permissions" : ["view_all"]},
+        {"name": "admin", "description": "Administrator", "permissions" : ["view_all", "edit_database"]}
+    ],
+    "groups": [
+        {"name": "yhpde", "description": "软件开发 PDE 小组"},
+        {"name": "yhact", "description": "软件开发 ACT 小组"},
+        {"name": "yhgrid", "description": "软件开发网格小组"},
+        {"name": "yhview", "description": "软件开发前处理小组"},
+        {"name": "manager", "description": "领导组"},
+        {"name": "admin", "description": "数据库管理组"}
+    ],
+    "users": [
+        {"name": "admin", "groups": ["admin"], "roles": ["admin"]},
+        
+        {"name": "穆利安", "groups": ["yhpde"], "roles": ["group_leader", "admin"]},
+        {"name": "贺林", "groups": ["yhpde"]},
+        {"name": "李庚林", "groups": ["yhpde"]},
+
+        {"name": "宋敏", "groups": ["yhact"], "roles": ["group_leader"]},
+        {"name": "鞠羽中", "groups": ["yhact"]},
+        {"name": "陈丽娟", "groups": ["yhact"]},
+        {"name": "石佳伟", "groups": ["yhact"]},
+        {"name": "吕浪", "groups": ["yhact"]},
+        {"name": "刘颖", "groups": ["yhact"]},
+
+        {"name": "李亭葳", "groups": ["yhview"], "roles": ["group_leader"]},
+        {"name": "王璇霖", "groups": ["yhview"]},
+        {"name": "苗雨露", "groups": ["yhview"]},
+        {"name": "程稳", "groups": ["yhview"]},
+        {"name": "贺梦颖", "groups": ["yhview"]},
+        {"name": "曾昭晰", "groups": ["yhview"]},
+        {"name": "许阳", "groups": ["yhview"]},
+        {"name": "郑丽婷", "groups": ["yhview"]},
+
+        {"name": "刘金宝", "groups": ["yhgrid"], "roles": ["group_leader"]},
+        {"name": "孙中", "groups": ["yhgrid"]},
+        {"name": "刘增晟", "groups": ["yhgrid"]},
+        {"name": "龚子瑜", "groups": ["yhgrid"]},
+        {"name": "陆翰林", "groups": ["yhgrid"]},
+
+        {"name": "郭晓威", "groups": ["manager"], "roles": ["teacher"]},
+        {"name": "李超", "groups": ["manager"], "roles": ["teacher"]},
+        {"name": "甘新标", "groups": ["manager"], "roles": ["teacher"]},
+        {"name": "高翔", "groups": ["manager"], "roles": ["teacher"]}
+    ]
+}

@@ -26,6 +26,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SECRET_KEY'] = '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I'
 app.config['CKEDITOR_FILE_UPLOADER'] = 'upload'
+app.config['CKEDITOR_SERVER_LOCAL'] = True
 # app.config['CKEDITOR_ENABLE_CSRF'] = True  # if you want to enable CSRF protect, uncomment this line
 app.config['UPLOADED_PATH'] = os.path.join(basedir, 'uploads')
 app.config['BOOTSTRAP_SERVE_LOCAL'] = True 
@@ -285,7 +286,7 @@ def logout():
     print('logout called.')
     return redirect(url_for('home'))
 
-@app.route('/security.forgot_password', methods=('GET', 'POST'))
+@app.route('/forgot_password', methods=('GET', 'POST'))
 def forgot_password():
     form = MyForgotPasswordForm()
     if form.validate_on_submit():
@@ -590,5 +591,5 @@ if __name__ == '__main__':
         # 从文件中初始化
         update_db_from_json()
         # updat_fake_data()            
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=False)
 

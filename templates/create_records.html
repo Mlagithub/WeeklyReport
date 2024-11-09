@@ -6,12 +6,9 @@
 
 {{ render_form(form) }}
 
-{{ ckeditor.load() }}
+{{ ckeditor.load( custom_url=url_for('static', filename='ckeditor/ckeditor.js') ) }}
+{{ ckeditor.load( custom_url=url_for('static', filename='ckeditor/config.js') ) }}
+{{ ckeditor.load( custom_url=url_for('static', filename='ckeditor/styles.js') ) }}
 {{ ckeditor.config(name='body') }}
-{# unconmment lines below if you load CKEditor from CDN, because codesnippet plugin is not available on CKEditor CDN #}
-<script>
-    // Enable local "codesnippet" plugin from /ckeditor/static/standard/plugins/codesnippet/ path.
-    // CKEDITOR.plugins.addExternal( 'codesnippet', '/ckeditor/static/standard/plugins/codesnippet/', 'plugin.js' );
-</script>
 
 {% endblock %}

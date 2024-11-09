@@ -6,9 +6,9 @@
 
 {{ render_form(form) }}
 
-{{ ckeditor.load( custom_url=url_for('static', filename='ckeditor/ckeditor.js') ) }}
-{{ ckeditor.load( custom_url=url_for('static', filename='ckeditor/config.js') ) }}
-{{ ckeditor.load( custom_url=url_for('static', filename='ckeditor/styles.js') ) }}
+{{ ckeditor.load( custom_url=url_for('static', filename='ckeditor4/ckeditor.js') ) }}
+{{ ckeditor.load( custom_url=url_for('static', filename='ckeditor4/config.js') ) }}
+{{ ckeditor.load( custom_url=url_for('static', filename='ckeditor4/styles.js') ) }}
 {{ ckeditor.config(name='body') }}
 
 {% endblock %}

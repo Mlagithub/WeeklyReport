@@ -62,6 +62,7 @@
                         </button>
                     </div>
                 </form>
+                <div class="text-muted small mt-3">支持按用户、组别与日期范围组合筛选。</div>
             </div>
         </div>
     </div>
@@ -99,7 +100,7 @@
     <div class="card-body p-0">
         {% if data %}
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover mb-0 align-middle">
                 <thead class="table-light">
                     <tr>
                         {% for key, label in titles %}
@@ -112,9 +113,9 @@
                     <tr>
                         <td>{{ row.name }}</td>
                         <td>
-                            <span class="text-truncate d-inline-block" style="max-width: 400px;" title="{{ row.content|striptags }}">
-                                {{ row.content[:100] }}{% if row.content|length > 100 %}...{% endif %}
-                            </span>
+                            <div class="text-muted small line-clamp-2" title="{{ row.content|striptags }}">
+                                {{ row.content[:140] }}{% if row.content|length > 140 %}...{% endif %}
+                            </div>
                         </td>
                         <td><span class="badge bg-secondary">{{ row.date }}</span></td>
                         <td>{{ row.edit|safe }}</td>
@@ -125,8 +126,8 @@
         </div>
         {% else %}
         <div class="text-center py-5 text-muted">
-            <p class="mb-2"><i class="bi bi-inbox" style="font-size: 48px;"></i></p>
-            <p>暂无记录</p>
+            <div class="mb-2"><i class="bi bi-inbox empty-state-icon"></i></div>
+            <p class="mb-3">暂无记录</p>
             <a href="{{ url_for('create_records') }}" class="btn btn-primary">新建周报</a>
         </div>
         {% endif %}

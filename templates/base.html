@@ -5,41 +5,48 @@
 <html lang="zh-cn">
     <head>
         {% block head %}
-        <!-- Required meta tags -->
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
-        <!-- 引用 Bootstrap 的 CSS 和 JS 文件 -->
         <link href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" rel="stylesheet">
         <link rel="icon" href="{{ url_for('static', filename='favicon-96.png') }}" type="image/png">
         <link rel="stylesheet" href="{{ url_for('static', filename='ckeditor4/contents.css') }}">
 
         {% block styles %}
-            <!-- Bootstrap CSS -->
             {{ bootstrap.load_css() }}
+            <style>
+                body { background-color: #f8f9fa; }
+                .page-shell { min-height: 100vh; display: flex; flex-direction: column; }
+                .page-main { flex: 1; }
+                .page-hero { background: #ffffff; border: 1px solid rgba(0,0,0,.05); }
+                .form-card { max-width: 520px; margin: 0 auto; }
+                .empty-state-icon { font-size: 2.5rem; }
+                .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+            </style>
         {% endblock %}
 
         <title>军队超级计算中心工作记录</title>
         {% endblock %}
     </head>
-    <body>
-        <!-- Your page content -->
-
-        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <body class="page-shell">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
             <div class="container">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto">
+                <ul class="navbar-nav me-auto">
                     {{ render_nav_item('home', '主页', _use_li=True) }}
                     {{ render_nav_item('create_records', '新建', _use_li=True) }}
                     {{ render_nav_item('manage_records', '查找', _use_li=True) }}
                     {{ render_nav_item('config', '配置', _use_li=True) }}
+                </ul>
+                <ul class="navbar-nav">
                     {% if current_user.is_authenticated %}
                         <li class="nav-item"><span class="nav-link text-muted">{{ current_user.username }}</span></li>
                         {{ render_nav_item('logout', '退出登录', _use_li=True) }}
                     {% else %}
+                        {{ render_nav_item('login', '登录', _use_li=True) }}
                         {{ render_nav_item('register', '注册', _use_li=True) }}
                     {% endif %}
                 </ul>
@@ -47,12 +54,12 @@
             </div>
         </nav>
         
-        <main class="container">
+        <main class="container py-4 page-main">
             {{ render_messages(container=False, dismissible=True, dismiss_animate=True) }}
             {% block content %}{% endblock %}
         </main>
 
-        <footer class="text-center", style="margin-top: 3cm;">
+        <footer class="text-center mt-5 mb-4">
             {% block footer %}
                 <small> &copy; 2024–<script>document.write(new Date().getFullYear())</script> <a href="https://github.com/Mlagithub">止一</a>
                 </small>
@@ -60,7 +67,6 @@
         </footer>
 
         {% block scripts %}
-            <!-- Optional JavaScript -->
             {{ bootstrap.load_js() }}
             <script>
                 document.addEventListener('DOMContentLoaded', function() {

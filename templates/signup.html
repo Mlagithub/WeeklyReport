@@ -3,7 +3,19 @@
 {% from 'bootstrap5/form.html' import render_form %}
 
 {% block content %}
-<h2>注册</h2>
-{{ render_form(form) }}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card shadow-sm form-card">
+            <div class="card-body">
+                <h4 class="mb-2">注册</h4>
+                <p class="text-muted mb-4">创建一个新账号。</p>
+                {{ render_form(form) }}
+                <div class="mt-3 text-muted small">
+                    已有账号？<a href="{{ url_for('login') }}">登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

@@ -6,12 +6,13 @@
 {% block content %}
 
 <div class="row justify-content-center">
-    <div class="col-lg-8">
+    <div class="col-lg-9">
         <div class="card shadow-sm">
             <div class="card-header bg-light">
                 <h5 class="mb-0">{{ render_icon('plus-circle') }} 新建周报</h5>
             </div>
             <div class="card-body">
+                <p class="text-muted mb-4">记录本周工作要点，支持富文本格式与图片。</p>
                 <form method="POST" action="" id="recordForm">
                     {{ form.hidden_tag() }}
                     
@@ -30,8 +31,8 @@
                         {{ form.body(class="form-control", style="display:none;") }}
                         <div id="editor"></div>
                         <div class="d-flex justify-content-between mt-2">
-                            <span class="text-muted small" id="charCount">字数: 0</span>
-                            <span class="text-muted small" id="wordCount">字符数: 0</span>
+                            <span class="text-muted small" id="charCount">纯文本字数: 0</span>
+                            <span class="text-muted small" id="wordCount">含格式字符数: 0</span>
                         </div>
                         {% if form.body.errors %}
                         <div class="text-danger small mt-1">
@@ -64,13 +65,33 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const updateCounts = function(editor) {
+        const data = editor.getData();
+        const text = data.replace(/<[^>]*>/g, '');
+        document.getElementById('charCount').textContent = '纯文本字数: ' + text.length;
+        document.getElementById('wordCount').textContent = '含格式字符数: ' + data.length;
+    };
+
     const editor = CKEDITOR.instances.body;
     if (editor) {
+        updateCounts(editor);
         editor.on('key', function() {
-            const data = editor.getData();
-            const text = data.replace(/<[^>]*>/g, '');
-            document.getElementById('charCount').textContent = '字数: ' + text.length;
-            document.getElementById('wordCount').textContent = '字符数: ' + data.length;
+            updateCounts(editor);
+        });
+        editor.on('change', function() {
+            updateCounts(editor);
+        });
+    } else {
+        CKEDITOR.on('instanceReady', function(evt) {
+            if (evt.editor && evt.editor.name === 'body') {
+                updateCounts(evt.editor);
+                evt.editor.on('key', function() {
+                    updateCounts(evt.editor);
+                });
+                evt.editor.on('change', function() {
+                    updateCounts(evt.editor);
+                });
+            }
         });
     }
     

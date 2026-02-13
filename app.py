@@ -6,6 +6,7 @@ from flask_security import UserMixin
 from flask_security.utils import hash_password
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import joinedload
 from flask_bootstrap import Bootstrap5
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, SubmitField, DateField, HiddenField, PasswordField
@@ -78,7 +79,7 @@ class User(db.Model, FsUserMixin):
 
     @property
     def is_admin(self):
-        return User.with_role('admin')
+        return any(role.name == 'admin' for role in self.roles)
     
     @staticmethod
     def with_role(role_name):
@@ -273,25 +274,23 @@ def home():
     this_week_start, this_week_end = DateRange.this_week()
     this_month_start, this_month_end = DateRange.this_month()
     
-    this_week_count = Record.query.join(user_records).filter(
-        user_records.c.user_id == user.id,
+    base_query = Record.query.join(user_records).filter(
+        user_records.c.user_id == user.id
+    )
+    
+    total_count = base_query.count()
+    
+    this_week_count = base_query.filter(
         Record.date >= this_week_start,
         Record.date <= this_week_end
     ).count()
     
-    this_month_count = Record.query.join(user_records).filter(
-        user_records.c.user_id == user.id,
+    this_month_count = base_query.filter(
         Record.date >= this_month_start,
         Record.date <= this_month_end
     ).count()
     
-    total_count = Record.query.join(user_records).filter(
-        user_records.c.user_id == user.id
-    ).count()
-    
-    recent_records = Record.query.join(user_records).filter(
-        user_records.c.user_id == user.id
-    ).order_by(Record.date.desc()).limit(5).all()
+    recent_records = base_query.order_by(Record.date.desc()).limit(5).all()
     
     return render_template('home.html', 
                           this_week_count=this_week_count,
@@ -391,7 +390,7 @@ def delete_record(record_id):
 @app.route('/download_records', methods=['POST'])
 @login_required
 def download_records():
-    query = db.session.query(Record).join(user_records).join(User)
+    query = db.session.query(Record).options(joinedload(Record.user)).join(user_records).join(User)
     
     tr = request.form.get('time_range')
     start_date = None
@@ -400,13 +399,21 @@ def download_records():
         start_date, end_date = DateRange.get_range(tr)
         query = query.filter(Record.date >= start_date, Record.date <= end_date)
     
-    usernames = request.form.getlist('groups')
-    if not usernames:
-        user_val = request.form.get('user')
-        if user_val:
-            usernames = [user_val]
-    if not usernames:
-        usernames = [current_user.username]
+    usernames = []
+    
+    selected_user = request.form.get('user')
+    if selected_user:
+        usernames.append(selected_user)
+    
+    selected_groups = request.form.getlist('groups')
+    if selected_groups:
+        group_users = User.query.join(User.groups).filter(
+            Group.name.in_(selected_groups)
+        ).all()
+        for u in group_users:
+            usernames.append(u.username)
+    
+    usernames = list(set(usernames)) if usernames else [current_user.username]
         
     query = query.filter(User.username.in_(usernames))
     
@@ -446,19 +453,19 @@ query_params = {
     'query' : None,
 }
 
-def joinstr(id):
-    return '''
-    <p>
-        <a class="btn btn-secondary btn-sm" href="edit_record/%d"> <i class="bi bi-pencil-fill"></i> </a>
-    </p>
-    <p>
-        <a class="btn btn-danger btn-sm" href="delete_record/%d" onclick="return confirm('确定要删除这条记录吗？');"> <i class="bi bi-trash-fill"></i> </a>
-    </p>''' % (id, id)
-
 
 @app.route('/manage_records', methods=('GET',))
 @login_required
 def manage_records():
+    def build_edit_buttons(record_id):
+        return f'''
+    <p>
+        <a class="btn btn-secondary btn-sm" href="edit_record/{record_id}"> <i class="bi bi-pencil-fill"></i> </a>
+    </p>
+    <p>
+        <a class="btn btn-danger btn-sm" href="delete_record/{record_id}" onclick="return confirm(\'确定要删除这条记录吗？\');"> <i class="bi bi-trash-fill"></i> </a>
+    </p>'''
+    
     record_form = RecordFilterForm()
     
     uchoices = [(current_user.username, current_user.username)]
@@ -470,20 +477,28 @@ def manage_records():
 
     hide_groups = not record_form.groups.choices
 
-    query = db.session.query(Record).join(user_records).join(User)
+    query = db.session.query(Record).options(joinedload(Record.user)).join(user_records).join(User)
 
     tr = request.args.get('time_range')
     if tr:
         start_date, end_date = DateRange.get_range(tr)
         query = query.filter(Record.date >= start_date, Record.date <= end_date)
     
-    usernames = request.args.getlist('groups')
-    if not usernames:
-        user_val = request.args.get('user')
-        if user_val:
-            usernames = [user_val]
-    if not usernames:
-        usernames = [current_user.username]
+    usernames = []
+    
+    selected_user = request.args.get('user')
+    if selected_user:
+        usernames.append(selected_user)
+    
+    selected_groups = request.args.getlist('groups')
+    if selected_groups:
+        group_users = User.query.join(User.groups).filter(
+            Group.name.in_(selected_groups)
+        ).all()
+        for u in group_users:
+            usernames.append(u.username)
+    
+    usernames = list(set(usernames)) if usernames else [current_user.username]
     
     query = query.filter(User.username.in_(usernames))
     query = query.order_by(Record.date.desc())
@@ -502,7 +517,7 @@ def manage_records():
     data = []
     for msg in records:
         id = msg.id
-        data.append({'name': msg.user[0].username, 'content': msg.content, 'date': msg.date, 'edit': joinstr(id)})
+        data.append({'name': msg.user[0].username, 'content': msg.content, 'date': msg.date, 'edit': build_edit_buttons(id)})
 
     return render_template('manage_records.html', 
                           pagination=pagination, 

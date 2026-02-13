@@ -37,6 +37,12 @@
                             <option value="{{ value }}" {% if value in request.args.getlist('groups') %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
+                        <div class="d-flex gap-2 mt-1">
+                            <small class="text-muted">按住 Ctrl/Cmd 可多选</small>
+                            {% if request.args.getlist('groups') %}
+                            <a href="{{ url_for('manage_records', user=request.args.get('user', ''), time_range=request.args.get('time_range', '')) }}" class="small">清除组选择</a>
+                            {% endif %}
+                        </div>
                     </div>
                     {% endif %}
                     
@@ -132,17 +138,25 @@
         {{ render_pagination(pagination, args=request.args) }}
     </div>
     <div class="col-md-6 col-12 text-md-end">
-        <form action="{{ url_for('download_records') }}" method="post" class="d-inline-block">
-            <input type="hidden" name="user" value="{{ request.args.get('user', '') }}">
-            {% for g in request.args.getlist('groups') %}
-            <input type="hidden" name="groups" value="{{ g }}">
-            {% endfor %}
-            <input type="hidden" name="time_range" value="{{ request.args.get('time_range', '') }}">
+        <form action="{{ url_for('download_records') }}" method="post" class="d-inline-block" id="downloadForm">
+            <input type="hidden" name="user" value="">
+            <input type="hidden" name="groups" value="">
+            <input type="hidden" name="time_range" value="">
             <button type="submit" class="btn btn-success">
                 {{ render_icon('download') }} 下载 Excel
             </button>
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const form = document.getElementById('downloadForm');
+    form.querySelector('input[name="user"]').value = urlParams.get('user') || '';
+    form.querySelector('input[name="groups"]').value = urlParams.get('groups') || '';
+    form.querySelector('input[name="time_range"]').value = urlParams.get('time_range') || '';
+});
+</script>
 
 {% endblock %}

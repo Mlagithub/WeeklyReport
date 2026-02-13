@@ -2,6 +2,7 @@
 {% from 'bootstrap5/table.html' import render_table %}
 {% from 'bootstrap5/pagination.html' import render_pagination %}
 {% from 'bootstrap5/form.html' import render_form, render_form_row, render_field %}
+{% from 'bootstrap5/utils.html' import render_icon %}
 
 {% block head %}
     {{ super() }}
@@ -9,25 +10,139 @@
 {% endblock %}
 
 {% block content %}
-    
-    <form action="{{ url_for('manage_records') }}" method="post" name="record_form">
-        {{ record_form.hidden_tag() }}
 
-        {% if not hide_groups %}
-        {{ render_field(record_form.user) }}
-        {{ render_form_row([record_form.groups]) }}
-        {% endif %}
-        {{ render_field(record_form.time_range) }}
-        {{ render_field(record_form.submit) }}
-    </form>
-
-    {{ render_table(data, titles, safe_columns='content, edit', responsive=True)}}
-
-    {{ render_pagination(pagination, args=request.args) }}
-
-    <div style="margin-top:1cm">
-        <hr>
-        {{ render_form(download_form) }}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">{{ render_icon('filter') }} 筛选条件</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('manage_records') }}" method="get" name="record_form" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">{{ record_form.user.label.text }}</label>
+                        <select name="user" class="form-select">
+                            <option value="">不限</option>
+                            {% for value, label in record_form.user.choices %}
+                            <option value="{{ value }}" {% if request.args.get('user') == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    {% if not hide_groups %}
+                    <div class="col-md-3">
+                        <label class="form-label">{{ record_form.groups.label.text }}</label>
+                        <select name="groups" class="form-select" multiple>
+                            {% for value, label in record_form.groups.choices %}
+                            <option value="{{ value }}" {% if value in request.args.getlist('groups') %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="col-md-3">
+                        <label class="form-label">{{ record_form.time_range.label.text }}</label>
+                        <select name="time_range" class="form-select">
+                            <option value="">不限</option>
+                            {% for value, label in record_form.time_range.choices %}
+                            <option value="{{ value }}" {% if request.args.get('time_range') == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            {{ render_icon('search') }} 筛选
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6 col-12">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title text-muted">筛选结果总数</h5>
+                <p class="display-4 fw-bold text-primary">{{ total_count }}</p>
+                <p class="card-text text-muted">条记录</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-12">
+        <div class="card shadow-sm h-100">
+            <div class="card-body text-center">
+                <h5 class="card-title text-muted">本周提交</h5>
+                <p class="display-4 fw-bold text-success">{{ this_week_count }}</p>
+                <p class="card-text text-muted">条记录</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-2">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">记录列表</h5>
+        <span class="text-muted small">筛选用户: {{ current_filter_usernames|join(', ') }}</span>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body p-0">
+        {% if data %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        {% for key, label in titles %}
+                        <th scope="col">{{ label }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr>
+                        <td>{{ row.name }}</td>
+                        <td>
+                            <span class="text-truncate d-inline-block" style="max-width: 400px;" title="{{ row.content|striptags }}">
+                                {{ row.content[:100] }}{% if row.content|length > 100 %}...{% endif %}
+                            </span>
+                        </td>
+                        <td><span class="badge bg-secondary">{{ row.date }}</span></td>
+                        <td>{{ row.edit|safe }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <p class="mb-2"><i class="bi bi-inbox" style="font-size: 48px;"></i></p>
+            <p>暂无记录</p>
+            <a href="{{ url_for('create_records') }}" class="btn btn-primary">新建周报</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row align-items-center">
+    <div class="col-md-6 col-12 mb-3 mb-md-0">
+        {{ render_pagination(pagination, args=request.args) }}
+    </div>
+    <div class="col-md-6 col-12 text-md-end">
+        <form action="{{ url_for('download_records') }}" method="post" class="d-inline-block">
+            <input type="hidden" name="user" value="{{ request.args.get('user', '') }}">
+            {% for g in request.args.getlist('groups') %}
+            <input type="hidden" name="groups" value="{{ g }}">
+            {% endfor %}
+            <input type="hidden" name="time_range" value="{{ request.args.get('time_range', '') }}">
+            <button type="submit" class="btn btn-success">
+                {{ render_icon('download') }} 下载 Excel
+            </button>
+        </form>
+    </div>
+</div>
 
 {% endblock %}

@@ -268,7 +268,36 @@ class ThemeForm(FlaskForm):
 @app.route('/')
 @login_required
 def home():
-    return render_template('home.html')
+    user = User.query.filter_by(username=current_user.username).first()
+    
+    this_week_start, this_week_end = DateRange.this_week()
+    this_month_start, this_month_end = DateRange.this_month()
+    
+    this_week_count = Record.query.join(user_records).filter(
+        user_records.c.user_id == user.id,
+        Record.date >= this_week_start,
+        Record.date <= this_week_end
+    ).count()
+    
+    this_month_count = Record.query.join(user_records).filter(
+        user_records.c.user_id == user.id,
+        Record.date >= this_month_start,
+        Record.date <= this_month_end
+    ).count()
+    
+    total_count = Record.query.join(user_records).filter(
+        user_records.c.user_id == user.id
+    ).count()
+    
+    recent_records = Record.query.join(user_records).filter(
+        user_records.c.user_id == user.id
+    ).order_by(Record.date.desc()).limit(5).all()
+    
+    return render_template('home.html', 
+                          this_week_count=this_week_count,
+                          this_month_count=this_month_count,
+                          total_count=total_count,
+                          recent_records=recent_records)
 
 @app.route('/register')
 def register():
@@ -358,6 +387,57 @@ def delete_record(record_id):
         flash(f'数据己删除')
     return redirect(url_for('manage_records'))
 
+
+@app.route('/download_records', methods=['POST'])
+@login_required
+def download_records():
+    query = db.session.query(Record).join(user_records).join(User)
+    
+    tr = request.form.get('time_range')
+    start_date = None
+    end_date = None
+    if tr:
+        start_date, end_date = DateRange.get_range(tr)
+        query = query.filter(Record.date >= start_date, Record.date <= end_date)
+    
+    usernames = request.form.getlist('groups')
+    if not usernames:
+        user_val = request.form.get('user')
+        if user_val:
+            usernames = [user_val]
+    if not usernames:
+        usernames = [current_user.username]
+        
+    query = query.filter(User.username.in_(usernames))
+    
+    all_weeks = set()
+    user_weekly_data = {}
+    records = query.all()
+
+    for record in records:
+        year, week, _ = record.date.isocalendar()
+        week_key = (year, week)
+        all_weeks.add(week_key)
+
+        username=record.user[0].username
+        if username not in user_weekly_data:
+            user_weekly_data[username] = {}
+        weekly_data = user_weekly_data[username]
+        
+        if week_key not in weekly_data:
+            weekly_data[week_key] = record.content
+        else:
+            weekly_data[week_key] += f"\n{record.content}"
+
+    from datetime import datetime
+    
+    if start_date and end_date:
+        filename = f"软件开发组周报_{start_date.strftime('%Y%m%d')}-{end_date.strftime('%Y%m%d')}.xlsx"
+    else:
+        filename = f"软件开发组周报_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+
+    return RecordDownloader().download(user_weekly_data, all_weeks, filename)
+
 # 用于分页时保存参数
 query_params = {
     'user': None,
@@ -372,108 +452,67 @@ def joinstr(id):
         <a class="btn btn-secondary btn-sm" href="edit_record/%d"> <i class="bi bi-pencil-fill"></i> </a>
     </p>
     <p>
-        <a class="btn btn-secondary btn-sm" href="delete_record/%d"> <i class="bi bi-trash"></i> </a>
+        <a class="btn btn-danger btn-sm" href="delete_record/%d" onclick="return confirm('确定要删除这条记录吗？');"> <i class="bi bi-trash-fill"></i> </a>
     </p>''' % (id, id)
 
 
-@app.route('/manage_records', methods=('POST', 'GET'))
+@app.route('/manage_records', methods=('GET',))
 @login_required
 def manage_records():
-    download_form = RecordDownloadForm()
     record_form = RecordFilterForm()
     
-    # 构建筛选条件：用户列表，组列表
-    uchoices = [('NONE', 'NONE'), (current_user.username, current_user.username)]
+    uchoices = [(current_user.username, current_user.username)]
     for g in User.managed_group(current_user):
         record_form.groups.choices.append((g.name, g.description))
         for u in g.users:
             uchoices.append((u.username, u.username))
     record_form.user.choices = sorted(list(set(uchoices)))
 
-    # 组列表为空时，在视图中隐藏组列表
     hide_groups = not record_form.groups.choices
 
-    query = Record.query
-    if record_form.validate_on_submit():
-        query = db.session.query(Record).join(user_records).join(User)
+    query = db.session.query(Record).join(user_records).join(User)
 
-        # 日期范围
-        tr = record_form.time_range.data
-        if tr:
-            start_date, end_date = DateRange.get_range(tr)
-            query = query.filter(Record.date >= start_date, Record.date <= end_date)
-        
-        usernames=[]
-        # 查询组
-        groups = record_form.groups.data
-        if groups:
-            for g in groups:
-                users = Group.query.filter_by(name=g).first().users
-                usernames = [u.username for u in users]
-        else:
-            # 查询用户
-            uname = record_form.user.data
-            if uname:
-                usernames.append(uname)
-            # 当前登录的用户
-            else:
-                usernames.append(current_user.username)
-
-        query = query.filter(User.username.in_(usernames))
-        query_params['query'] = query
-        query_params['user'] = current_user.username
-
-    else:
-        if query_params['query'] and query_params['user'] == current_user.username:
-            print(current_user.username)
-            query = query_params['query']
-        else:
-            user = User.query.filter_by(username=current_user.username).first()
-            query = Record.query.join(user_records).filter(user_records.c.user_id == user.id)
-            query_params['query'] = query
-            query_params['user'] = current_user.username
-
-    if download_form.download_submit.data and download_form.validate_on_submit():
-        # 构建按周组织的标题
-        all_weeks = set()
-        user_weekly_data = {}
-        records = query.all()
-
-        # 遍历每条记录，按周编号分组
-        for record in records:
-            # 获取记录的年-周编号
-            year, week, _ = record.date.isocalendar()
-            week_key = (year, week)
-            all_weeks.add(week_key)
-
-            username=record.user[0].username
-            if username not in user_weekly_data:
-                user_weekly_data[username] = {}
-            weekly_data = user_weekly_data[username]
-            
-            # 按周合并内容，使用换行符分隔多条记录
-            if week_key not in weekly_data:
-                weekly_data[week_key] = record.content
-            else:
-                weekly_data[week_key] += f"\n{record.content}"
-
-        return RecordDownloader().download(user_weekly_data, all_weeks, 'records.xlsx')
-
-    # 按日期降序
+    tr = request.args.get('time_range')
+    if tr:
+        start_date, end_date = DateRange.get_range(tr)
+        query = query.filter(Record.date >= start_date, Record.date <= end_date)
+    
+    usernames = request.args.getlist('groups')
+    if not usernames:
+        user_val = request.args.get('user')
+        if user_val:
+            usernames = [user_val]
+    if not usernames:
+        usernames = [current_user.username]
+    
+    query = query.filter(User.username.in_(usernames))
     query = query.order_by(Record.date.desc())
 
-    # 分页
+    total_count = query.count()
+    this_week_start, this_week_end = DateRange.this_week()
+    this_week_count = query.filter(Record.date >= this_week_start, Record.date <= this_week_end).count()
+    
+    current_filter_usernames = usernames
+
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page=page, per_page=5, error_out=False)
     records = pagination.items
 
-    titles = [('name', '#'), ('content', '内容'), ('date', '日期'), ('edit', '#')]
+    titles = [('name', '用户'), ('content', '内容'), ('date', '日期'), ('edit', '操作')]
     data = []
     for msg in records:
         id = msg.id
         data.append({'name': msg.user[0].username, 'content': msg.content, 'date': msg.date, 'edit': joinstr(id)})
 
-    return render_template('manage_records.html', pagination=pagination, titles=titles, data=data, record_form=record_form, hide_groups = hide_groups, download_form=download_form)
+    return render_template('manage_records.html', 
+                          pagination=pagination, 
+                          titles=titles, 
+                          data=data, 
+                          record_form=record_form, 
+                          hide_groups=hide_groups,
+                          total_count=total_count,
+                          this_week_count=this_week_count,
+                          current_filter_usernames=current_filter_usernames)
 
 
 @app.route('/config', methods=['GET', 'POST'])

@@ -148,7 +148,8 @@ def html_to_text(html_content):
 # 辅助函数：获取周的起始日期和结束日期
 def get_week_date_range(year, week):
     # 根据ISO日历计算周的开始日期（周一）和结束日期（周日）
-    start_date = datetime.strptime(f"{year}-W{week}-1", "%Y-W%W-%w")
+    # 使用 %G-%V-%u 格式：ISO年份-ISO周数-ISO weekday(1=周一)
+    start_date = datetime.strptime(f"{year}-{week:02d}-1", "%G-%V-%u")
     end_date = start_date + timedelta(days=6)
     return f"{start_date.strftime('%Y-%m-%d')}\n-\n{end_date.strftime('%Y-%m-%d')}"
 

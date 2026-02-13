@@ -1,14 +1,88 @@
 {% extends 'base.html' %}
 
-{% from 'bootstrap5/form.html' import render_form %}
+{% from 'bootstrap5/form.html' import render_form, render_field %}
+{% from 'bootstrap5/utils.html' import render_icon %}
 
 {% block content %}
 
-{{ render_form(form) }}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">{{ render_icon('plus-circle') }} 新建周报</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="" id="recordForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.date.label.text }}</label>
+                        {{ form.date(class="form-control", type="date") }}
+                        {% if form.date.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.date.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.body.label.text }}</label>
+                        {{ form.body(class="form-control", style="display:none;") }}
+                        <div id="editor"></div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span class="text-muted small" id="charCount">字数: 0</span>
+                            <span class="text-muted small" id="wordCount">字符数: 0</span>
+                        </div>
+                        {% if form.body.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.body.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('manage_records') }}" class="btn btn-outline-secondary">
+                            {{ render_icon('arrow-left') }} 返回
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <span class="submit-text">{{ render_icon('check-circle') }} 提交</span>
+                            <span class="loading-spinner" style="display: none;">
+                                <span class="spinner-border spinner-border-sm me-1" role="status"></span>提交中...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 {{ ckeditor.load( custom_url=url_for('static', filename='ckeditor4/ckeditor.js') ) }}
 {{ ckeditor.load( custom_url=url_for('static', filename='ckeditor4/config.js') ) }}
 {{ ckeditor.load( custom_url=url_for('static', filename='ckeditor4/styles.js') ) }}
 {{ ckeditor.config(name='body') }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const editor = CKEDITOR.instances.body;
+    if (editor) {
+        editor.on('key', function() {
+            const data = editor.getData();
+            const text = data.replace(/<[^>]*>/g, '');
+            document.getElementById('charCount').textContent = '字数: ' + text.length;
+            document.getElementById('wordCount').textContent = '字符数: ' + data.length;
+        });
+    }
+    
+    const form = document.getElementById('recordForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', function() {
+        submitBtn.disabled = true;
+        submitBtn.querySelector('.submit-text').style.display = 'none';
+        submitBtn.querySelector('.loading-spinner').style.display = 'inline-flex';
+    });
+});
+</script>
 
 {% endblock %}

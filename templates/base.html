@@ -14,12 +14,23 @@
         {% block styles %}
             {{ bootstrap.load_css() }}
             <style>
-                body { background-color: #f8f9fa; }
+                :root {
+                    --app-bg: #f8f9fa;
+                    --app-surface: #ffffff;
+                    --app-border: rgba(0, 0, 0, .08);
+                    --app-radius: .75rem;
+                    --app-radius-sm: .5rem;
+                    --app-muted: #6c757d;
+                    --app-empty-icon: 2.5rem;
+                }
+                body { background-color: var(--app-bg); }
                 .page-shell { min-height: 100vh; display: flex; flex-direction: column; }
                 .page-main { flex: 1; }
-                .page-hero { background: #ffffff; border: 1px solid rgba(0,0,0,.05); }
+                .page-hero { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: var(--app-radius); }
                 .form-card { max-width: 520px; margin: 0 auto; }
-                .empty-state-icon { font-size: 2.5rem; }
+                .card { border-radius: var(--app-radius); border-color: var(--app-border); }
+                .btn, .form-control, .form-select { border-radius: var(--app-radius-sm); }
+                .empty-state-icon { font-size: var(--app-empty-icon); color: var(--app-muted); }
                 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
             </style>
         {% endblock %}

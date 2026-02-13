@@ -105,6 +105,8 @@ from bs4 import BeautifulSoup
 
 # 将 HTML 转换为纯文本的函数，改进 convert_list
 def html_to_text(html_content):
+    if not html_content:
+        return ""
     soup = BeautifulSoup(html_content, 'html.parser')
 
     result = []

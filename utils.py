@@ -12,59 +12,64 @@ class DateRange:
         'this_year': '本年',
     }
 
-    today = datetime.today().date()
-
-    def __init__(self):
-        DateRange.today = datetime.today().date()
+    @staticmethod
+    def get_today():
+        return datetime.today().date()
 
 
     @staticmethod
     def this_week():
-        start_date = DateRange.today - timedelta(days=DateRange.today.weekday())  # 本周一
-        end_date = DateRange.today  # 今天
+        today = DateRange.get_today()
+        start_date = today - timedelta(days=today.weekday())
+        end_date = today
         return start_date, end_date
 
     @staticmethod
     def last_week():
-        start_date = DateRange.today - timedelta(days=DateRange.today.weekday() + 7)  # 上周一
+        today = DateRange.get_today()
+        start_date = today - timedelta(days=today.weekday() + 7)
         end_date = start_date + timedelta(days=6)  # 上周日
         return start_date, end_date
 
     @staticmethod
     def last_n_days(n):
-        start_date = DateRange.today - timedelta(days=n)
-        end_date = DateRange.today
+        today = DateRange.get_today()
+        start_date = today - timedelta(days=n)
+        end_date = today
         return start_date, end_date
 
     @staticmethod
     def this_month():
-        start_date = (DateRange.today.replace(day=1) - relativedelta(months=0)).replace(day=1)
-        end_date = DateRange.today
+        today = DateRange.get_today()
+        start_date = (today.replace(day=1) - relativedelta(months=0)).replace(day=1)
+        end_date = today
         return start_date, end_date
     
     @staticmethod
     def this_quarter():
-        current_month = DateRange.today.month
+        today = DateRange.get_today()
+        current_month = today.month
         start_month = (current_month - 1) // 3 * 3 + 1  # 计算当前季度的开始月份
-        start_date = datetime(DateRange.today.year, start_month, 1).date()
+        start_date = datetime(today.year, start_month, 1).date()
 
         # 计算季度结束日期
         if start_month == 1:
-            end_date = datetime(DateRange.today.year, 3, 31).date()
+            end_date = datetime(today.year, 3, 31).date()
         elif start_month == 4:
-            end_date = datetime(DateRange.today.year, 6, 30).date()
+            end_date = datetime(today.year, 6, 30).date()
         elif start_month == 7:
-            end_date = datetime(DateRange.today.year, 9, 30).date()
+            end_date = datetime(today.year, 9, 30).date()
         else:  # start_month == 10
-            end_date = datetime(DateRange.today.year, 12, 31).date()
+            end_date = datetime(today.year, 12, 31).date()
 
         return start_date, end_date
 
 
     @staticmethod
     def this_year():
-        start_date = datetime(DateRange.today.year, 1, 1).date()
-        end_date = DateRange.today  # 到今天
+        today = DateRange.get_today()
+        start_date = datetime(today.year, 1, 1).date()
+        end_date = today
         return start_date, end_date
     
     @staticmethod

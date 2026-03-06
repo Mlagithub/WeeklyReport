@@ -34,14 +34,14 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_size': 10,            # 连接池大小
     'max_overflow': 20,         # 最大溢出连接数
 }
-app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I')
+app.config['SECRET_KEY'] = '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I' #os.environ.get("SECRET_KEY", '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I')
 app.config['CKEDITOR_FILE_UPLOADER'] = 'upload'
 app.config['CKEDITOR_SERVER_LOCAL'] = True
 # app.config['CKEDITOR_ENABLE_CSRF'] = True  # if you want to enable CSRF protect, uncomment this line
 app.config['UPLOADED_PATH'] = os.path.join(basedir, 'uploads')
 app.config['BOOTSTRAP_SERVE_LOCAL'] = True
 # 生产环境应通过环境变量设置，且两个值必须不同
-app.config['SECURITY_PASSWORD_SALT'] = os.environ.get("SECURITY_PASSWORD_SALT", 'wXk3nR9qLmP2vBzYsAeJdTcFuHiGo5N7')
+app.config['SECURITY_PASSWORD_SALT'] ='1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I' # os.environ.get("SECURITY_PASSWORD_SALT", '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I')
 app.config['SECURITY_REGISTERABLE'] = False
 app.config['SECURITY_RECOVERABLE'] = True
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False

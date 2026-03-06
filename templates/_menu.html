@@ -20,7 +20,7 @@
       {% endif %}
       {% if security.registerable %}
         <li>
-          <a href="{{ url_for('register') }}{%- if 'next' in request.args -%}?next={{ request.args.next|urlencode }}{%- endif -%}">{{ _fsdomain('注册') }}</a>
+          <a href="{{ url_for('security.register') }}{%- if 'next' in request.args -%}?next={{ request.args.next|urlencode }}{%- endif -%}">{{ _fsdomain('注册') }}</a>
         </li>
       {% endif %}
       {% if security.recoverable %}

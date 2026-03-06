@@ -1,9 +1,10 @@
 from flask import Flask, render_template, redirect, flash, url_for, request, send_from_directory, abort
 from flask_security import Security, SQLAlchemyUserDatastore, login_required, login_user, logout_user, current_user
 from flask_security.models.sqla import FsUserMixin, FsRoleMixin
-from flask_security.forms import LoginForm, RegisterForm, ChangePasswordForm, username_validator
+from flask_security.forms import LoginForm, RegisterForm, ChangePasswordForm
 from flask_security import UserMixin
 from flask_security.utils import hash_password, verify_password
+import uuid
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect, text, func, case, and_
@@ -23,10 +24,18 @@ from utils import DateRange, RecordDownloader
 import os
 from datetime import date, datetime
 import json
+from functools import lru_cache
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL", 'sqlite:///app.db')
+# 数据库连接池配置，防止长时间运行导致连接泄漏
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,      # 检测失效连接
+    'pool_recycle': 3600,       # 每小时回收连接
+    'pool_size': 10,            # 连接池大小
+    'max_overflow': 20,         # 最大溢出连接数
+}
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I')
 app.config['CKEDITOR_FILE_UPLOADER'] = 'upload'
 app.config['CKEDITOR_SERVER_LOCAL'] = True
@@ -34,7 +43,7 @@ app.config['CKEDITOR_SERVER_LOCAL'] = True
 app.config['UPLOADED_PATH'] = os.path.join(basedir, 'uploads')
 app.config['BOOTSTRAP_SERVE_LOCAL'] = True 
 app.config['SECURITY_PASSWORD_SALT'] = os.environ.get("SECURITY_PASSWORD_SALT", '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I')
-app.config['SECURITY_REGISTERABLE'] = True
+app.config['SECURITY_REGISTERABLE'] = False
 app.config['SECURITY_RECOVERABLE'] = True
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 app.config['SECURITY_USERNAME_ENABLE'] = True
@@ -51,6 +60,9 @@ db = SQLAlchemy(app)
 
 def ensure_record_columns():
     inspector = inspect(db.engine)
+    # 检查 record 表是否存在
+    if 'record' not in inspector.get_table_names():
+        return
     columns = {column['name'] for column in inspector.get_columns('record')}
     if 'createtime' not in columns:
         db.session.execute(text("ALTER TABLE record ADD COLUMN createtime DATETIME"))
@@ -112,18 +124,33 @@ class User(db.Model, FsUserMixin):
             return False
     
     @staticmethod
+    @lru_cache(maxsize=128)
+    def _cached_permissions(user_id):
+        """内部缓存方法，通过user_id缓存权限"""
+        user = db.session.get(User, user_id)
+        if user:
+            return tuple(set(p for role in user.roles for p in role.permissions))
+        return tuple()
+
+    @staticmethod
     def all_permissions(user):
-        rst = list(set(p for role in user.roles for p in role.permissions))
-        return rst
+        """获取用户所有权限（带缓存）"""
+        return list(User._cached_permissions(user.id))
 
     @staticmethod
     def managed_group(user):
+        """获取用户管理的分组（使用eager loading避免N+1查询）"""
         groups = []
         all_permissions = User.all_permissions(user)
         if 'view_all' in all_permissions:
-            groups = Group.list_all()
+            groups = Group.query.options(joinedload(Group.users)).all()
         elif 'view_group' in all_permissions:
-            groups = [g for g in user.groups if User.can_view_group(g)]
+            # 使用 eager loading 加载分组和用户
+            user_with_groups = User.query.options(
+                joinedload(User.groups).joinedload(Group.users)
+            ).filter_by(id=user.id).first()
+            if user_with_groups:
+                groups = [g for g in user_with_groups.groups if User.can_view_group(g)]
 
         return groups
     
@@ -153,7 +180,7 @@ class Group(db.Model):
         if user:
             return [g for g in user.groups if User.can_view_group(g)]
         else:
-            return [group for group in Group.query.all()]
+            return Group.query.options(joinedload(Group.users)).all()
         
     
 
@@ -161,25 +188,21 @@ class Group(db.Model):
         return f'{self.name}'
 
 class UserModelView(ModelView):
-    # form_columns = ['email', 'roles']  # 显示 email 和 roles 字段
-    form_args = {
-        'roles': {
-            'query_factory': lambda: db.session.query(Role).all(),  # 显示所有角色
-            'get_label': lambda role: role.name  # 显示角色的 name 字段
-        },
-        'user': {
-            'query_factory': lambda: db.session.query(User).all(),  # 显示所有用户
-            'get_label': lambda user: user.username  # 显示用户的 name 字段
-        },
-        'users': {
-            'query_factory': lambda: db.session.query(User).all(),  # 显示所有用户
-            'get_label': lambda user: user.username  # 显示用户的 name 字段
-        },
-        'records': {
-            'query_factory': lambda: db.session.query(Record).all(),  # 显示所有 Record
-            'get_label': lambda record: record.content  # 显示 Record的 content 字段
-        }
-    }
+    # 针对不同模型使用不同的配置
+    def __init__(self, model, session, **kwargs):
+        # 对于 User 模型，限制关联字段避免加载大量数据
+        if model == User:
+            self.form_ajax_refs = {
+                'roles': {
+                    'fields': ['name']
+                },
+            }
+            self.form_excluded_columns = ['records']
+        elif model == Record:
+            # Record 视图使用分页和延迟加载
+            self.column_filters = ['date', 'content']
+            self.page_size = 20
+        super(UserModelView, self).__init__(model, session, **kwargs)
     def is_accessible(self):
         if not current_user.is_authenticated:
             return False
@@ -198,8 +221,11 @@ admin.add_view(UserModelView(Group, db.session))
 class MyLoginForm(LoginForm):
     email = HiddenField("Hide Email Field")
 
-class MyRegisterForm(RegisterForm):
-    email = HiddenField("Hide Email Field")
+class MyRegisterForm(FlaskForm):
+    username = StringField("用户名", validators=[DataRequired(), Length(min=2, max=255)])
+    password = PasswordField("密码", validators=[DataRequired(), Length(min=8, max=18)])
+    password_confirm = PasswordField("确认密码", validators=[DataRequired(), EqualTo("password", message="两次输入的密码不一致")])
+    submit = SubmitField("注册")
 
 class MyChangePasswordForm(ChangePasswordForm):
     user = UserMixin()
@@ -209,7 +235,7 @@ class MyForgotPasswordForm(FlaskForm):
     username = StringField(
         "用户名",
         render_kw={"autocomplete": "username"},
-        validators=[username_validator],
+        validators=[DataRequired(), Length(2, 255)],
     )
     new_password = PasswordField(
         "密码",
@@ -227,7 +253,7 @@ class MyForgotPasswordForm(FlaskForm):
 
 bootstrap=Bootstrap5(app)
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-security = Security(app, user_datastore, login_form=MyLoginForm, register_form=MyRegisterForm, forgot_password_form=MyForgotPasswordForm)
+security = Security(app, user_datastore, login_form=MyLoginForm)
 ckeditor = CKEditor(app)
 
 # define a context processor for merging flask-admin's template context into the
@@ -291,17 +317,20 @@ class ThemeForm(FlaskForm):
 def get_allowed_groups(user):
     permissions = User.all_permissions(user)
     if 'view_all' in permissions:
-        return Group.query.all()
+        return Group.query.options(joinedload(Group.users)).all()
     if 'view_group' in permissions:
         return User.managed_group(user)
     return []
 
 def get_allowed_usernames(user):
+    """获取允许查看的用户名列表（优化查询避免N+1问题）"""
     permissions = User.all_permissions(user)
     if 'view_all' in permissions:
-        return [u.username for u in User.query.all()]
+        # 只查询username字段，不加载完整用户对象
+        return [u.username for u in User.query.with_entities(User.username).all()]
     if 'view_group' in permissions:
         usernames = {user.username}
+        # managed_group 已经使用 eager loading
         for group in User.managed_group(user):
             for u in group.users:
                 usernames.add(u.username)
@@ -384,9 +413,27 @@ def home():
                           total_count=total_count,
                           recent_records=recent_records)
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    return render_template('security/register_user.html')
+    form = MyRegisterForm()
+    if form.validate_on_submit():
+        username = form.username.data
+        # 检查用户名是否已存在
+        if User.query.filter_by(username=username).first():
+            flash('用户名已存在', 'warning')
+            return render_template('security/register_user.html', register_user_form=form)
+        # 生成唯一的 email
+        email = f"{username}_{uuid.uuid4().hex[:8]}@local"
+        # 创建用户
+        user = user_datastore.create_user(
+            email=email,
+            username=username,
+            password=hash_password(form.password.data)
+        )
+        db.session.commit()
+        flash('注册成功，请登录')
+        return redirect(url_for('login'))
+    return render_template('security/register_user.html', register_user_form=form)
 
 @app.route('/login', methods=('GET', 'POST'))
 def login():
@@ -420,6 +467,7 @@ def forgot_password():
 @login_required
 def change_password():
     form = MyChangePasswordForm()
+    form.user = current_user
     if form.validate_on_submit():
         if User.change_user_password(current_user.username, form.new_password.data):
             logout_user()
@@ -433,11 +481,11 @@ def change_password():
 def create_records():
     form = RecordForm()
     if form.validate_on_submit():
-        date = form.date.data
+        record_date = form.date.data
         body = form.body.data
         record = Record()
         record.createtime = datetime.now()
-        record.date = date
+        record.date = record_date
         record.content = body
         current_user.records.append(record) # 关联 record 和 user
         db.session.add(record)
@@ -446,7 +494,7 @@ def create_records():
         flash('己提交')
 
         return redirect(url_for('manage_records'))
-    
+
     return render_template('create_records.html', form=form)
 
 
@@ -454,30 +502,30 @@ def create_records():
 @login_required
 def edit_record(record_id):
     form = RecordForm()
-    record = Record.query.get(record_id)
+    record = db.session.get(Record, record_id)
     if not record:
         abort(404)
     if not can_edit_record(record, current_user):
         abort(403)
     if form.validate_on_submit():
-        date = form.date.data
+        record_date = form.date.data
         body = form.body.data
         record.createtime = datetime.now()
-        record.date = date
+        record.date = record_date
         record.content = body
         db.session.commit()
         flash('己提交')
         return redirect(url_for('manage_records'))
     else:
         form.body.data = record.content
-    
+
     return render_template('create_records.html', form=form)
 
 
 @app.route('/delete_record/<int:record_id>', methods=['POST', 'GET'])
 @login_required
 def delete_record(record_id):
-    record = Record.query.get(record_id)
+    record = db.session.get(Record, record_id)
     if record and can_edit_record(record, current_user):
         db.session.delete(record)
         db.session.commit()
@@ -493,12 +541,11 @@ def delete_record(record_id):
 @login_required
 def download_records():
     query, start_date, end_date, _ = build_record_query(request.form)
-    
+
     all_weeks = set()
     user_weekly_data = {}
-    records = query.all()
 
-    for record in records:
+    for record in query.all():
         if not record.user:
             continue
         year, week, _ = record.date.isocalendar()
@@ -509,28 +556,18 @@ def download_records():
         if username not in user_weekly_data:
             user_weekly_data[username] = {}
         weekly_data = user_weekly_data[username]
-        
+
         if week_key not in weekly_data:
             weekly_data[week_key] = record.content
         else:
             weekly_data[week_key] += f"\n{record.content}"
 
-    from datetime import datetime
-    
     if start_date and end_date:
         filename = f"软件开发组周报_{start_date.strftime('%Y%m%d')}-{end_date.strftime('%Y%m%d')}.xlsx"
     else:
         filename = f"软件开发组周报_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
 
     return RecordDownloader().download(user_weekly_data, all_weeks, filename)
-
-# 用于分页时保存参数
-query_params = {
-    'user': None,
-    'time_range': None,
-    'groups': None,
-    'query' : None,
-}
 
 
 @app.route('/manage_records', methods=('GET',))
@@ -581,8 +618,8 @@ def manage_records():
     for msg in records:
         if not msg.user:
             continue
-        id = msg.id
-        data.append({'name': msg.user[0].username, 'content': msg.content, 'date': msg.date, 'edit': build_edit_buttons(id)})
+        record_id = msg.id
+        data.append({'name': msg.user[0].username, 'content': msg.content, 'date': msg.date, 'edit': build_edit_buttons(record_id)})
 
     return render_template('manage_records.html', 
                           pagination=pagination, 
@@ -723,4 +760,4 @@ if __name__ == '__main__':
         # 从文件中初始化
         update_db_from_json()
         # updat_fake_data()            
-    app.run(host='0.0.0.0', debug=False)
+    app.run(host='0.0.0.0', debug=True)

@@ -114,7 +114,7 @@
                         <td>{{ row.name }}</td>
                         <td>
                             <div class="text-muted small line-clamp-2" title="{{ row.content|striptags }}">
-                                {{ row.content[:140] }}{% if row.content|length > 140 %}...{% endif %}
+                                {{ row.content | striptags | truncate(140, True, '...') }}
                             </div>
                         </td>
                         <td><span class="badge bg-secondary">{{ row.date }}</span></td>
@@ -141,7 +141,6 @@
     <div class="col-md-6 col-12 text-md-end">
         <form action="{{ url_for('download_records') }}" method="post" class="d-inline-block" id="downloadForm">
             <input type="hidden" name="user" value="">
-            <input type="hidden" name="groups" value="">
             <input type="hidden" name="time_range" value="">
             <button type="submit" class="btn btn-success">
                 {{ render_icon('download') }} 下载 Excel
@@ -155,8 +154,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const form = document.getElementById('downloadForm');
     form.querySelector('input[name="user"]').value = urlParams.get('user') || '';
-    form.querySelector('input[name="groups"]').value = urlParams.get('groups') || '';
     form.querySelector('input[name="time_range"]').value = urlParams.get('time_range') || '';
+    // groups 支持多选，需逐一追加 hidden input
+    urlParams.getAll('groups').forEach(function(g) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'groups';
+        input.value = g;
+        form.appendChild(input);
+    });
 });
 </script>
 

@@ -1,8 +1,7 @@
-from flask import Flask, render_template, redirect, flash, url_for, request, send_from_directory, abort
+from flask import Flask, render_template, redirect, flash, url_for, request, send_from_directory, abort, session, g
 from flask_security import Security, SQLAlchemyUserDatastore, login_required, login_user, logout_user, current_user
 from flask_security.models.sqla import FsUserMixin, FsRoleMixin
 from flask_security.forms import LoginForm, RegisterForm, ChangePasswordForm
-from flask_security import UserMixin
 from flask_security.utils import hash_password, verify_password
 import uuid
 
@@ -24,7 +23,6 @@ from utils import DateRange, RecordDownloader
 import os
 from datetime import date, datetime
 import json
-from functools import lru_cache
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
@@ -41,8 +39,9 @@ app.config['CKEDITOR_FILE_UPLOADER'] = 'upload'
 app.config['CKEDITOR_SERVER_LOCAL'] = True
 # app.config['CKEDITOR_ENABLE_CSRF'] = True  # if you want to enable CSRF protect, uncomment this line
 app.config['UPLOADED_PATH'] = os.path.join(basedir, 'uploads')
-app.config['BOOTSTRAP_SERVE_LOCAL'] = True 
-app.config['SECURITY_PASSWORD_SALT'] = os.environ.get("SECURITY_PASSWORD_SALT", '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I')
+app.config['BOOTSTRAP_SERVE_LOCAL'] = True
+# 生产环境应通过环境变量设置，且两个值必须不同
+app.config['SECURITY_PASSWORD_SALT'] = os.environ.get("SECURITY_PASSWORD_SALT", 'wXk3nR9qLmP2vBzYsAeJdTcFuHiGo5N7')
 app.config['SECURITY_REGISTERABLE'] = False
 app.config['SECURITY_RECOVERABLE'] = True
 app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
@@ -124,18 +123,13 @@ class User(db.Model, FsUserMixin):
             return False
     
     @staticmethod
-    @lru_cache(maxsize=128)
-    def _cached_permissions(user_id):
-        """内部缓存方法，通过user_id缓存权限"""
-        user = db.session.get(User, user_id)
-        if user:
-            return tuple(set(p for role in user.roles for p in role.permissions))
-        return tuple()
-
-    @staticmethod
     def all_permissions(user):
-        """获取用户所有权限（带缓存）"""
-        return list(User._cached_permissions(user.id))
+        """获取用户所有权限（请求级缓存，避免跨请求权限过期问题）"""
+        cache_key = f'_user_perms_{user.id}'
+        if not hasattr(g, cache_key):
+            perms = tuple(set(p for role in user.roles for p in role.permissions))
+            setattr(g, cache_key, perms)
+        return list(getattr(g, cache_key))
 
     @staticmethod
     def managed_group(user):
@@ -228,7 +222,7 @@ class MyRegisterForm(FlaskForm):
     submit = SubmitField("注册")
 
 class MyChangePasswordForm(ChangePasswordForm):
-    user = UserMixin()
+    pass
 
 class MyForgotPasswordForm(FlaskForm):
     email = HiddenField("Hide Email Field")
@@ -376,7 +370,8 @@ def build_record_query(params):
     if usernames:
         usernames = list(set(usernames))
     else:
-        usernames = [current_user.username]
+        # 无筛选条件时，显示当前用户有权查看的全部记录
+        usernames = list(allowed_usernames) if allowed_usernames else [current_user.username]
 
     query = query.filter(User.username.in_(usernames))
     return query, start_date, end_date, usernames
@@ -384,13 +379,11 @@ def build_record_query(params):
 @app.route('/')
 @login_required
 def home():
-    user = User.query.filter_by(username=current_user.username).first()
-    
     this_week_start, this_week_end = DateRange.this_week()
     this_month_start, this_month_end = DateRange.this_month()
-    
+
     base_query = Record.query.join(user_records).filter(
-        user_records.c.user_id == user.id
+        user_records.c.user_id == current_user.id
     )
     
     total_count = base_query.count()
@@ -455,9 +448,13 @@ def logout():
 
 @app.route('/forgot_password', methods=('GET', 'POST'))
 def forgot_password():
+    # 仅管理员可重置任意用户密码
+    is_admin = current_user.is_authenticated and current_user.is_admin
+    if not is_admin:
+        return render_template('security/forgot_password.html', forgot_password_form=None)
     form = MyForgotPasswordForm()
     if form.validate_on_submit():
-        if User.change_user_password(form.username.data, form.new_password.data,):
+        if User.change_user_password(form.username.data, form.new_password.data):
             return redirect(url_for('home'))
         else:
             flash('修改密码失败：%s' % (form.username.data), 'warning')
@@ -517,6 +514,7 @@ def edit_record(record_id):
         flash('己提交')
         return redirect(url_for('manage_records'))
     else:
+        form.date.data = record.date
         form.body.data = record.content
 
     return render_template('create_records.html', form=form)
@@ -574,12 +572,14 @@ def download_records():
 @login_required
 def manage_records():
     def build_edit_buttons(record_id):
+        edit_url = url_for('edit_record', record_id=record_id)
+        delete_url = url_for('delete_record', record_id=record_id)
         return f'''
     <p>
-        <a class="btn btn-secondary btn-sm" href="edit_record/{record_id}"> <i class="bi bi-pencil-fill"></i> </a>
+        <a class="btn btn-secondary btn-sm" href="{edit_url}"> <i class="bi bi-pencil-fill"></i> </a>
     </p>
     <p>
-        <a class="btn btn-danger btn-sm" href="delete_record/{record_id}" onclick="return confirm(\'确定要删除这条记录吗？\');"> <i class="bi bi-trash-fill"></i> </a>
+        <a class="btn btn-danger btn-sm" href="{delete_url}" onclick="return confirm(\'确定要删除这条记录吗？\');"> <i class="bi bi-trash-fill"></i> </a>
     </p>'''
     
     record_form = RecordFilterForm()
@@ -632,19 +632,21 @@ def manage_records():
                           current_filter_usernames=current_filter_usernames)
 
 
+@app.before_request
+def apply_user_theme():
+    theme = session.get('theme', 'default')
+    app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = None if theme == 'default' else theme
+
+
 @app.route('/config', methods=['GET', 'POST'])
 @login_required
 def config():
     form = ThemeForm()
     if form.validate_on_submit():
-        if form.theme_name.data == 'default':
-            app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = None
-        else:
-            app.config['BOOTSTRAP_BOOTSWATCH_THEME'] = form.theme_name.data
-        flash(f'Render style has been set to {form.theme_name.data}.')
+        session['theme'] = form.theme_name.data
+        flash(f'主题已更改为 {form.theme_name.data}。')
     else:
-        if app.config['BOOTSTRAP_BOOTSWATCH_THEME'] != None:
-            form.theme_name.data = app.config['BOOTSTRAP_BOOTSWATCH_THEME']
+        form.theme_name.data = session.get('theme', 'lumen')
 
     return render_template('config.html', form=form)
 
@@ -737,27 +739,9 @@ def update_db_from_json():
     db.session.commit()
 
 
-import random
-from faker import Faker
-fake = Faker()
-
-def updat_fake_data():
-    for user in User.query.all():
-        print('为 %s 生成数据' %(user.username))
-        for _ in range(random.randint(3, 7)):
-            record = Record()
-            record.date = fake.date_this_year()
-            record.content = fake.paragraph(nb_sentences=random.randint(3, 6))
-            user.records.append(record) # 关联 record 和 user
-        db.session.commit()
-        print('为 %s 生成数据' %(user.username))
-
 
 if __name__ == '__main__':
-    # 初始化数据库
     with app.app_context():
         db.create_all()
-        # 从文件中初始化
         update_db_from_json()
-        # updat_fake_data()            
     app.run(host='0.0.0.0', debug=True)

@@ -41,7 +41,7 @@ class DateRange:
     @staticmethod
     def this_month():
         today = DateRange.get_today()
-        start_date = (today.replace(day=1) - relativedelta(months=0)).replace(day=1)
+        start_date = today.replace(day=1)
         end_date = today
         return start_date, end_date
     
@@ -91,21 +91,11 @@ class DateRange:
             start_date, end_date = DateRange.this_year()  # 默认返回本年的数据
         return start_date, end_date
 
-    @staticmethod
-    def print_info():
-        print(DateRange.this_week())
-        print(DateRange.last_week())
-        print(DateRange.this_month())
-        print(DateRange.last_n_days(14))
-        print(DateRange.this_quarter())
-        print(DateRange.this_year())
 
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, Color, Alignment, PatternFill, Border, Side
 from io import BytesIO
-import io
-from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
 # 将 HTML 转换为纯文本的函数，改进 convert_list
@@ -243,6 +233,3 @@ class RecordDownloader:
         )
 
 
-if __name__ == '__main__':
-    dr = DateRange()
-    dr.print_info()

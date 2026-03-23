@@ -219,6 +219,7 @@ class User(db.Model, FsUserMixin):
         return groups
     
     @staticmethod
+    @with_db_transaction
     def change_user_password(username, password):
         user = User.query.filter_by(username=username).first()
         if user:
@@ -477,6 +478,7 @@ def home():
                           recent_records=recent_records)
 
 @app.route('/register', methods=['GET', 'POST'])
+@with_db_transaction
 def register():
     form = MyRegisterForm()
     if form.validate_on_submit():
@@ -545,6 +547,7 @@ def change_password():
 
 @app.route('/create_records', methods=('GET', 'POST'))
 @login_required
+@with_db_transaction
 def create_records():
     form = RecordForm()
     if form.validate_on_submit():
@@ -567,6 +570,7 @@ def create_records():
 
 @app.route('/edit_record/<int:record_id>', methods=['POST', 'GET'])
 @login_required
+@with_db_transaction
 def edit_record(record_id):
     form = RecordForm()
     record = db.session.get(Record, record_id)
@@ -592,6 +596,7 @@ def edit_record(record_id):
 
 @app.route('/delete_record/<int:record_id>', methods=['POST', 'GET'])
 @login_required
+@with_db_transaction
 def delete_record(record_id):
     record = db.session.get(Record, record_id)
     if record and can_edit_record(record, current_user):

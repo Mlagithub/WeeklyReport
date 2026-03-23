@@ -1,0 +1,41 @@
+# weekly.service
+# systemd service unit for Weekly Report Management System
+# Per user decisions: D-06 (systemd), D-07 (auto-restart)
+# Deploy with: sudo cp weekly.service /etc/systemd/system/ && sudo systemctl daemon-reload
+
+[Unit]
+Description=Weekly Report Management System
+After=network.target
+
+[Service]
+Type=exec
+User=one
+Group=one
+WorkingDirectory=/home/one/weekly
+
+# Environment setup
+Environment="PATH=/home/one/weekly/.venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="FLASK_DEBUG=0"
+
+# ExecStart references gunicorn.conf.py from Task 1
+ExecStart=/home/one/weekly/.venv/bin/gunicorn \
+    --config gunicorn.conf.py \
+    app:app
+
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=30
+PrivateTmp=true
+
+# Restart policy - per D-07
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/one/weekly /var/log/weekly
+
+[Install]
+WantedBy=multi-user.target

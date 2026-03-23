@@ -70,7 +70,12 @@ Plans:
   1. Core user authentication functions have unit tests
   2. Core report CRUD operations have unit tests
   3. Tests can be run with a single command (e.g., pytest)
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Test infrastructure and utility function tests
+- [ ] 04-02-PLAN.md — User permission and authorization function tests
+- [ ] 04-03-PLAN.md — Authentication and CRUD route integration tests
 
 ### Phase 5: Code Refactoring
 **Goal**: 代码结构更清晰易维护
@@ -92,5 +97,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 1. Production WSGI Server | 0/3 | Ready to execute | - |
 | 2. Session Management | 0/1 | Ready to execute | - |
 | 3. SQLite Optimization | 0/1 | Ready to execute | - |
-| 4. Unit Testing | 0/TBD | Not started | - |
+| 4. Unit Testing | 0/3 | Ready to execute | - |
 | 5. Code Refactoring | 0/TBD | Not started | - |

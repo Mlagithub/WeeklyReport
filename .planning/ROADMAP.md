@@ -85,7 +85,12 @@ Plans:
   1. Code is organized into logical modules (separation of concerns)
   2. Configuration is centralized and manageable via environment variables or config file
   3. All existing functionality continues to work after refactoring
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Create config.py and extensions.py modules
+- [ ] 05-02-PLAN.md — Create models.py with database models and association tables
+- [ ] 05-03-PLAN.md — Create forms.py and routes.py, refactor app.py, update tests
 
 ## Progress
 
@@ -98,4 +103,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Session Management | 0/1 | Ready to execute | - |
 | 3. SQLite Optimization | 0/1 | Ready to execute | - |
 | 4. Unit Testing | 0/3 | Ready to execute | - |
-| 5. Code Refactoring | 0/TBD | Not started | - |
+| 5. Code Refactoring | 0/3 | Ready to execute | - |

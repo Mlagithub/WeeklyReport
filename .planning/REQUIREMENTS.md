@@ -18,7 +18,7 @@
 
 ### Code Quality (Optional)
 
-- [ ] **REFAC-01**: 代码结构优化（时间允许时）
+- [x] **REFAC-01**: 代码结构优化（时间允许时）
 
 ## v2 Requirements
 
@@ -46,7 +46,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STAB-03 | Phase 3 | Complete |
 | STAB-04 | Phase 2 | Complete |
 | TEST-01 | Phase 4 | Complete |
-| REFAC-01 | Phase 5 | Pending |
+| REFAC-01 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 6 total

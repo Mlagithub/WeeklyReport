@@ -88,7 +88,7 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Create config.py and extensions.py modules
+- [x] 05-01-PLAN.md — Create config.py and extensions.py modules
 - [ ] 05-02-PLAN.md — Create models.py with database models and association tables
 - [ ] 05-03-PLAN.md — Create forms.py and routes.py, refactor app.py, update tests
 

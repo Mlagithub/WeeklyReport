@@ -6,7 +6,7 @@ from flask_security.utils import hash_password, verify_password
 import uuid
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import inspect, text, func, case, and_
+from sqlalchemy import event, inspect, text, func, case, and_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 from flask_bootstrap import Bootstrap5
@@ -60,6 +60,15 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
 
 db = SQLAlchemy(app)
+
+# Enable SQLite WAL mode for better concurrent performance
+# Per D-01, D-02: Execute PRAGMA journal_mode=WAL on each connection
+@event.listens_for(db.engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    """Enable WAL mode on SQLite connections per D-01, D-02."""
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.close()
 
 def with_db_transaction(func):
     """

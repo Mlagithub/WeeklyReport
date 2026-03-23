@@ -41,18 +41,18 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| STAB-01 | — | Pending |
-| STAB-02 | — | Pending |
-| STAB-03 | — | Pending |
-| STAB-04 | — | Pending |
-| TEST-01 | — | Pending |
-| REFAC-01 | — | Pending |
+| STAB-01 | Phase 1 | Pending |
+| STAB-02 | Phase 2 | Pending |
+| STAB-03 | Phase 3 | Pending |
+| STAB-04 | Phase 2 | Pending |
+| TEST-01 | Phase 4 | Pending |
+| REFAC-01 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 6 total
-- Mapped to phases: 0
-- Unmapped: 6 ⚠️
+- Mapped to phases: 6
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-23*
-*Last updated: 2026-03-23 after initial definition*
+*Last updated: 2026-03-23 after roadmap creation*

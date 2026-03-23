@@ -23,6 +23,8 @@ from utils import DateRange, RecordDownloader
 import os
 from datetime import date, datetime
 import json
+import logging
+from logging.handlers import RotatingFileHandler
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
@@ -57,6 +59,40 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
 db = SQLAlchemy(app)
 
+def setup_logging(app):
+    """Configure production logging for Flask application.
+    Per D-08: File logging, INFO level
+    Per D-09: Logs at /var/log/weekly/
+    """
+    # Skip logging setup in debug mode
+    if app.debug:
+        return
+
+    log_dir = '/var/log/weekly'
+
+    # Create log directory if it doesn't exist (with error handling)
+    try:
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+    except PermissionError:
+        app.logger.warning(f"Cannot create log directory {log_dir}")
+        return
+
+    # Application log handler - per D-08 (INFO level)
+    file_handler = RotatingFileHandler(
+        os.path.join(log_dir, 'app.log'),
+        maxBytes=10 * 1024 * 1024,  # 10MB
+        backupCount=10
+    )
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]'
+    ))
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
+    app.logger.setLevel(logging.INFO)
+
+    app.logger.info('Weekly Report Management System starting up')
+
 def ensure_record_columns():
     inspector = inspect(db.engine)
     # 检查 record 表是否存在
@@ -69,6 +105,9 @@ def ensure_record_columns():
 
 with app.app_context():
     ensure_record_columns()
+
+# Setup production logging - per D-08, D-09
+setup_logging(app)
 
 user_records = db.Table(
     'user_records',
@@ -744,4 +783,9 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         update_db_from_json()
-    app.run(host='0.0.0.0', debug=True)
+
+    # Production: Gunicorn calls app directly, this block is skipped
+    # Development: Run with FLASK_DEBUG=true python app.py
+    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', debug=debug_mode, port=port)

@@ -14,7 +14,7 @@
 
 ### Testing
 
-- [ ] **TEST-01**: 核心功能有单元测试覆盖
+- [x] **TEST-01**: 核心功能有单元测试覆盖
 
 ### Code Quality (Optional)
 
@@ -45,7 +45,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STAB-02 | Phase 2 | Complete |
 | STAB-03 | Phase 3 | Complete |
 | STAB-04 | Phase 2 | Complete |
-| TEST-01 | Phase 4 | Pending |
+| TEST-01 | Phase 4 | Complete |
 | REFAC-01 | Phase 5 | Pending |
 
 **Coverage:**

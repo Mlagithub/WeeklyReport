@@ -143,8 +143,20 @@ def ensure_record_columns():
         db.session.execute(text("ALTER TABLE record ADD COLUMN createtime DATETIME"))
         db.session.commit()
 
+def verify_wal_mode():
+    """Verify SQLite WAL mode is enabled per D-05, D-06."""
+    try:
+        result = db.session.execute(text("PRAGMA journal_mode")).scalar()
+        if result and result.lower() == 'wal':
+            current_app.logger.info(f"SQLite WAL mode verified: {result}")
+        else:
+            current_app.logger.warning(f"SQLite WAL mode not active: {result}")
+    except Exception as e:
+        current_app.logger.warning(f"Could not verify WAL mode: {e}")
+
 with app.app_context():
     ensure_record_columns()
+    verify_wal_mode()
 
 # Setup production logging - per D-08, D-09
 setup_logging(app)

@@ -34,7 +34,8 @@ RestartSec=5
 # Security hardening
 NoNewPrivileges=true
 ProtectSystem=strict
-ProtectHome=true
+# Note: ProtectHome disabled because app runs from /home/one/weekly
+# ProtectHome=true
 ReadWritePaths=/home/one/weekly /var/log/weekly
 
 [Install]

@@ -12,3 +12,4 @@ flask_wtf==1.2.2
 openpyxl==3.1.5
 python_dateutil==2.9.0.post0
 WTForms==3.2.1
+gunicorn==25.1.0

@@ -13,3 +13,5 @@ openpyxl==3.1.5
 python_dateutil==2.9.0.post0
 WTForms==3.2.1
 gunicorn==25.1.0
+pytest==8.3.5
+pytest-cov==5.0.0

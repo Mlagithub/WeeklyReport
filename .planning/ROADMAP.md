@@ -28,7 +28,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Application runs on production-grade WSGI server (not Flask dev server with debug=True)
   2. Application handles concurrent requests without stability issues
   3. Server logs are captured for debugging and monitoring
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 01-PLAN.md — Install Gunicorn and create systemd service
+- [ ] 02-PLAN.md — Configure Flask logging and logrotate
+- [ ] 03-PLAN.md — Deploy and verify production server
 
 ### Phase 2: Session Management
 **Goal**: 数据库连接正确管理，防止连接泄漏和事务错误
@@ -78,7 +83,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Production WSGI Server | 0/TBD | Not started | - |
+| 1. Production WSGI Server | 0/3 | Ready to execute | - |
 | 2. Session Management | 0/TBD | Not started | - |
 | 3. SQLite Optimization | 0/TBD | Not started | - |
 | 4. Unit Testing | 0/TBD | Not started | - |

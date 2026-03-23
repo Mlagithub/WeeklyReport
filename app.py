@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, flash, url_for, request, send_from_directory, abort, session, g
+from flask import Flask, render_template, redirect, flash, url_for, request, send_from_directory, abort, session, g, current_app
 from flask_security import Security, SQLAlchemyUserDatastore, login_required, login_user, logout_user, current_user
 from flask_security.models.sqla import FsUserMixin, FsRoleMixin
 from flask_security.forms import LoginForm, RegisterForm, ChangePasswordForm
@@ -7,6 +7,7 @@ import uuid
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect, text, func, case, and_
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
 from flask_bootstrap import Bootstrap5
 from flask_wtf import FlaskForm
@@ -25,6 +26,7 @@ from datetime import date, datetime
 import json
 import logging
 from logging.handlers import RotatingFileHandler
+from functools import wraps
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
@@ -58,6 +60,35 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
 
 db = SQLAlchemy(app)
+
+def with_db_transaction(func):
+    """
+    Decorator for database write operations.
+    Per D-03: Unified error handling
+    Per D-05: try/except/rollback/re-raise pattern
+    Per D-06: Rollback on exception
+    Per D-07: Re-raise after rollback
+    Per D-08: Flash generic user message
+    Per D-09: Log full stack trace
+    Per D-10: Use current_app.logger.error()
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except SQLAlchemyError as e:
+            # Log full exception with stack trace (D-09, D-10)
+            current_app.logger.error(
+                f"Database error in {func.__name__}: {str(e)}",
+                exc_info=True
+            )
+            # Rollback the transaction (D-06)
+            db.session.rollback()
+            # Flash user-friendly message (D-08)
+            flash('操作失败，请重试', 'warning')
+            # Re-raise for Flask error handler (D-07)
+            raise
+    return wrapper
 
 def setup_logging(app):
     """Configure production logging for Flask application.

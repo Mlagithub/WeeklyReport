@@ -8,9 +8,9 @@
 ### Stability
 
 - [x] **STAB-01**: 应用使用生产级 WSGI 服务器运行，而非 Flask 开发服务器
-- [ ] **STAB-02**: 数据库 session 在请求结束时正确清理，防止连接泄漏
+- [x] **STAB-02**: 数据库 session 在请求结束时正确清理，防止连接泄漏
 - [ ] **STAB-03**: SQLite 启用 WAL 模式，优化并发读写性能
-- [ ] **STAB-04**: 所有数据库操作有错误处理和事务回滚机制
+- [x] **STAB-04**: 所有数据库操作有错误处理和事务回滚机制
 
 ### Testing
 
@@ -42,9 +42,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | STAB-01 | Phase 1 | Complete |
-| STAB-02 | Phase 2 | Pending |
+| STAB-02 | Phase 2 | Complete |
 | STAB-03 | Phase 3 | Pending |
-| STAB-04 | Phase 2 | Pending |
+| STAB-04 | Phase 2 | Complete |
 | TEST-01 | Phase 4 | Pending |
 | REFAC-01 | Phase 5 | Pending |
 

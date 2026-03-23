@@ -1,0 +1,18 @@
+# logrotate.weekly
+# Log rotation configuration for Weekly Report Management System
+# Deploy with: sudo cp logrotate.weekly /etc/logrotate.d/weekly
+
+/var/log/weekly/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0640 one one
+    sharedscripts
+    postrotate
+        # Signal Gunicorn to reopen log files after rotation
+        systemctl reload weekly > /dev/null 2>&1 || true
+    endscript
+}

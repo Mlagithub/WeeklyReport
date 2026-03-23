@@ -8,7 +8,7 @@ class Config:
 
     SECRET_KEY = os.environ.get('SECRET_KEY', '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I')
     SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT', '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///app.db')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'instance', 'app.db'))
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,
         'pool_recycle': 3600,

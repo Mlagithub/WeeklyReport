@@ -44,7 +44,10 @@ Plans:
   2. Database errors are caught and logged with meaningful messages
   3. Failed transactions are properly rolled back
   4. Application continues to function after database errors (no crashes)
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 02-PLAN.md — Create @with_db_transaction decorator and apply to write operations
 
 ### Phase 3: SQLite Optimization
 **Goal**: SQLite 数据库并发性能优化，避免写入锁定问题
@@ -84,7 +87,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Production WSGI Server | 0/3 | Ready to execute | - |
-| 2. Session Management | 0/TBD | Not started | - |
+| 2. Session Management | 0/1 | Ready to execute | - |
 | 3. SQLite Optimization | 0/TBD | Not started | - |
 | 4. Unit Testing | 0/TBD | Not started | - |
 | 5. Code Refactoring | 0/TBD | Not started | - |

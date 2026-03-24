@@ -160,6 +160,12 @@ app = create_app()
 # Create user_datastore for Flask-Security (used by tests)
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
+# Ensure database tables exist (for WSGI/Gunicorn startup)
+with app.app_context():
+    db.create_all()
+    ensure_record_columns()
+    verify_wal_mode()
+
 # Import helper functions from routes for backward compatibility
 from routes import can_edit_record, get_allowed_usernames, get_allowed_groups
 

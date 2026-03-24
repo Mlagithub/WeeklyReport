@@ -1,0 +1,33 @@
+# weekly.service
+# User-level systemd service for Weekly Report Management System
+# 存放位置: ~/.config/systemd/user/weekly.service
+# 不需要 sudo 权限
+
+[Unit]
+Description=Weekly Report Management System
+After=network.target
+
+[Service]
+Type=exec
+WorkingDirectory=%h/weekly
+
+# 环境变量
+Environment="PATH=%h/weekly/.venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="FLASK_DEBUG=0"
+
+# Gunicorn 启动
+ExecStart=%h/weekly/.venv/bin/gunicorn \
+    --config gunicorn.conf.py \
+    app:app
+
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=30
+PrivateTmp=true
+
+# 自动重启
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

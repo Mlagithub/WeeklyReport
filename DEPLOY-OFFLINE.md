@@ -136,25 +136,47 @@ python app.py
 
 ## 步骤 4：配置系统服务（生产环境）
 
-### 4.1 安装 systemd 服务
+### 4.1 安装用户级 systemd 服务（推荐，无需 sudo）
+
+```bash
+# 运行安装脚本并配置服务
+./install.sh --service
+
+# 启动服务
+systemctl --user start weekly
+
+# 查看状态
+systemctl --user status weekly
+
+# 开机自启（用户未登录也运行）
+loginctl enable-linger $USER
+```
+
+**用户级服务管理命令：**
+
+| 操作 | 命令 |
+|------|------|
+| 启动 | `systemctl --user start weekly` |
+| 停止 | `systemctl --user stop weekly` |
+| 重启 | `systemctl --user restart weekly` |
+| 状态 | `systemctl --user status weekly` |
+| 查看日志 | `tail -f logs/gunicorn-error.log` |
+
+### 4.2 安装系统级 systemd 服务（需要 sudo）
+
+如果需要系统级服务（所有用户可用）：
 
 ```bash
 # 复制服务文件
 sudo cp weekly.service /etc/systemd/system/
 
-# 修改服务文件中的路径（如果不是 /home/one/weekly）
+# 修改服务文件中的路径
 sudo nano /etc/systemd/system/weekly.service
-# 修改 WorkingDirectory、ExecStart、ReadWritePaths 中的路径
 
-# 重新加载 systemd
+# 重新加载并启动
 sudo systemctl daemon-reload
-
-# 启用并启动服务
 sudo systemctl enable weekly
 sudo systemctl start weekly
-
-# 检查状态
-sudo systemctl status weekly
 ```
 
 ### 4.2 配置日志轮转

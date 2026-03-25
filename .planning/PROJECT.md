@@ -1,10 +1,14 @@
 # 周报管理系统稳定性修复
 
-## Current Milestone: v2.0 (Planning)
+## Current Milestone: v1.1 UI Optimization
 
-**Goal:** 待定
+**Goal:** 改善用户体验，修复显示问题
 
-**Status:** Milestone v1.0 shipped. Ready for next milestone planning.
+**Target features:**
+- 查找页面默认过滤（近一周 + 个人记录）
+- 主页最近提交的富文本正确渲染
+
+**Status:** Planning
 
 ## What This Is
 
@@ -39,7 +43,8 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 
 ### Active
 
-*等待下一里程碑规划*
+- [ ] **UI-01**: 查找页面默认显示近一周的个人记录
+- [ ] **UI-02**: 主页最近提交正确渲染富文本格式
 
 ### Out of Scope
 
@@ -84,4 +89,23 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 
 ---
 
-*Last updated: 2026-03-24 after v1.0 milestone completion*
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
+---
+
+*Last updated: 2026-03-25 after v1.1 milestone started*

@@ -317,3 +317,34 @@ class TestRecordCRUD:
         })
         response = client.get('/edit_record/1')
         assert response.status_code == 200  # Admin can access edit page
+
+    def test_manage_records_default_user_filter(self, auth_client, test_user):
+        """Test that user dropdown defaults to current user when no URL param (FIND-01)."""
+        response = auth_client.get('/manage_records')
+        assert response.status_code == 200
+        # Check that the current user's username appears as selected in the dropdown
+        # The template should have the current user selected by default
+        import re
+        # Look for option with current user's username that has 'selected' attribute
+        # Pattern matches: <option value="testuser" selected> or <option selected value="testuser">
+        pattern = rf'<option[^>]*value="{test_user["username"]}"[^>]*selected[^>]*>'
+        assert re.search(pattern, response.text), \
+            f"Expected current user '{test_user['username']}' to be selected by default in user dropdown"
+
+    def test_manage_records_default_time_filter(self, auth_client):
+        """Test that time_range dropdown defaults to last_7_days when no URL param (FIND-02)."""
+        response = auth_client.get('/manage_records')
+        assert response.status_code == 200
+        # Check that 'last_7_days' is selected by default in time_range dropdown
+        import re
+        # Pattern matches: <option value="last_7_days" selected> or similar
+        pattern = r'<option[^>]*value="last_7_days"[^>]*selected[^>]*>'
+        assert re.search(pattern, response.text), \
+            "Expected 'last_7_days' to be selected by default in time_range dropdown"
+
+    def test_manage_records_can_clear_filters(self, auth_client):
+        """Test that user can still select empty value to clear filters (FIND-03)."""
+        response = auth_client.get('/manage_records?user=&time_range=')
+        assert response.status_code == 200
+        # Verify "不限" options are available (empty value options)
+        assert '<option value="">不限</option>' in response.text

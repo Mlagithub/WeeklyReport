@@ -32,7 +32,11 @@
   2. 查找页面打开时，"按日期"过滤默认选中最近 7 天
   3. 现有的三个过滤工具（按用户、按小组、按日期）功能不变
   4. 用户可以修改过滤条件查看其他记录
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Add 'last_7_days' time range to DateRange class
+- [ ] 06-02-PLAN.md — Update template default selection logic
 
 ### Phase 7: Homepage Rendering
 **Goal**: 主页正确显示富文本格式的周报内容
@@ -54,7 +58,7 @@
 | 3. SQLite Optimization | v1.0 | 1/1 | Complete | 2026-03-23 |
 | 4. Unit Testing | v1.0 | 3/3 | Complete | 2026-03-23 |
 | 5. Code Refactoring | v1.0 | 3/3 | Complete | 2026-03-23 |
-| 6. Find Page Filtering | v1.1 | 0/0 | Not started | - |
+| 6. Find Page Filtering | v1.1 | 0/2 | Not started | - |
 | 7. Homepage Rendering | v1.1 | 0/0 | Not started | - |
 
 ---

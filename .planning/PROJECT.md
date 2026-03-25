@@ -40,11 +40,14 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 - ✓ **STAB-04**: 数据库错误处理和回滚 — v1.0
 - ✓ **TEST-01**: 单元测试 — v1.0
 - ✓ **REFAC-01**: 代码结构优化 — v1.0
+- ✓ **FIND-01**: 查找页面默认选中当前用户 — v1.1 Phase 6
+- ✓ **FIND-02**: 查找页面默认日期范围为最近 7 天 — v1.1 Phase 6
+- ✓ **FIND-03**: 保留现有过滤工具功能 — v1.1 Phase 6
 
 ### Active
 
-- [ ] **UI-01**: 查找页面默认显示近一周的个人记录
-- [ ] **UI-02**: 主页最近提交正确渲染富文本格式
+- [ ] **RENDER-01**: 主页最近提交列表正确渲染富文本格式
+- [ ] **RENDER-02**: 渲染时保持 XSS 防护
 
 ### Out of Scope
 
@@ -63,7 +66,7 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 **代码规模：**
 - 2,476 行 Python 代码
 - 6 个模块（config, extensions, models, forms, routes, app）
-- 62 个测试用例
+- 67 个测试用例
 
 **已解决问题：**
 1. Flask 开发服务器 IO 过载 → Gunicorn + systemd
@@ -86,6 +89,7 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 | SQLAlchemy 事件监听器启用 WAL | 自动、无需手动 PRAGMA | ✓ Phase 3 完成 |
 | pytest 测试框架 | Flask 测试支持好 | ✓ Phase 4 完成 |
 | 模块化 Flask 结构 | 可维护性 | ✓ Phase 5 完成 |
+| Jinja2 template-level defaults | 用户可清除过滤器 | ✓ Phase 6 完成 |
 
 ---
 
@@ -108,4 +112,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-03-25 after v1.1 milestone started*
+*Last updated: 2026-03-25 after Phase 6 completion*

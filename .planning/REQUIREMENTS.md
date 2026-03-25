@@ -7,9 +7,9 @@
 
 ### Find Page Filtering
 
-- [ ] **FIND-01**: 查找页面默认只显示当前用户的记录
-- [ ] **FIND-02**: 查找页面默认只显示最近 7 天的记录
-- [ ] **FIND-03**: 用户可以清除默认过滤查看所有记录
+- [ ] **FIND-01**: 查找页面默认选中当前用户作为过滤条件
+- [ ] **FIND-02**: 查找页面默认日期范围为最近 7 天
+- [ ] **FIND-03**: 保留现有的三个过滤工具（按用户、按小组、按日期），仅修改默认值
 
 ### Homepage Rendering
 
@@ -31,8 +31,8 @@
 | FIND-01 | Phase 6 | Pending |
 | FIND-02 | Phase 6 | Pending |
 | FIND-03 | Phase 6 | Pending |
-| RENDER-01 | Phase 6 | Pending |
-| RENDER-02 | Phase 6 | Pending |
+| RENDER-01 | Phase 7 | Pending |
+| RENDER-02 | Phase 7 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 5 total

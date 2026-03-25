@@ -46,8 +46,12 @@ Plans:
   1. 最近提交列表中的周报内容正确渲染富文本格式（粗体、斜体、列表等）
   2. XSS 攻击代码被安全过滤，不会在浏览器中执行
   3. 原有周报内容显示不受影响
-**Plans**: TBD
+**Plans**: 2 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 07-01-PLAN.md — Create sanitize_html Jinja2 filter with bleach
+- [ ] 07-02-PLAN.md — Integrate filter into home template and add tests
 
 ## Progress
 
@@ -59,7 +63,7 @@ Plans:
 | 4. Unit Testing | v1.0 | 3/3 | Complete | 2026-03-23 |
 | 5. Code Refactoring | v1.0 | 3/3 | Complete | 2026-03-23 |
 | 6. Find Page Filtering | v1.1 | 1/2 | In Progress | - |
-| 7. Homepage Rendering | v1.1 | 0/0 | Not started | - |
+| 7. Homepage Rendering | v1.1 | 0/2 | Ready to execute | - |
 
 ---
 

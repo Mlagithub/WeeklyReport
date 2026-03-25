@@ -21,10 +21,11 @@
                 <form action="{{ url_for('manage_records') }}" method="get" name="record_form" class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label">{{ record_form.user.label.text }}</label>
+                        {% set user_selected = request.args.get('user', current_user.username) %}
                         <select name="user" class="form-select">
                             <option value="">不限</option>
                             {% for value, label in record_form.user.choices %}
-                            <option value="{{ value }}" {% if request.args.get('user') == value %}selected{% endif %}>{{ label }}</option>
+                            <option value="{{ value }}" {% if user_selected == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -48,10 +49,11 @@
                     
                     <div class="col-md-3">
                         <label class="form-label">{{ record_form.time_range.label.text }}</label>
+                        {% set time_selected = request.args.get('time_range', 'last_7_days') %}
                         <select name="time_range" class="form-select">
                             <option value="">不限</option>
                             {% for value, label in record_form.time_range.choices %}
-                            <option value="{{ value }}" {% if request.args.get('time_range') == value %}selected{% endif %}>{{ label }}</option>
+                            <option value="{{ value }}" {% if time_selected == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>

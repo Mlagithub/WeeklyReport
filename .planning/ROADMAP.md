@@ -35,7 +35,7 @@
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Add 'last_7_days' time range to DateRange class
+- [x] 06-01-PLAN.md — Add 'last_7_days' time range to DateRange class
 - [ ] 06-02-PLAN.md — Update template default selection logic
 
 ### Phase 7: Homepage Rendering
@@ -58,7 +58,7 @@ Plans:
 | 3. SQLite Optimization | v1.0 | 1/1 | Complete | 2026-03-23 |
 | 4. Unit Testing | v1.0 | 3/3 | Complete | 2026-03-23 |
 | 5. Code Refactoring | v1.0 | 3/3 | Complete | 2026-03-23 |
-| 6. Find Page Filtering | v1.1 | 0/2 | Not started | - |
+| 6. Find Page Filtering | v1.1 | 1/2 | In Progress | - |
 | 7. Homepage Rendering | v1.1 | 0/0 | Not started | - |
 
 ---

@@ -49,7 +49,7 @@
 **Plans**: 5 plans (Wave 0: test scaffolding, Wave 1: infrastructure)
 
 Plans:
-- [ ] 08-00-PLAN.md — Wave 0: Test scaffolding for exporters module
+- [x] 08-00-PLAN.md — Wave 0: Test scaffolding for exporters module
 - [ ] 08-01-PLAN.md — Wave 1: Update requirements.txt with export dependencies
 - [ ] 08-02-PLAN.md — Wave 1: Create ExporterBase abstract class
 - [ ] 08-03-PLAN.md — Wave 1: Create ExporterFactory

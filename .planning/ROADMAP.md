@@ -52,7 +52,7 @@ Plans:
 - [x] 08-00-PLAN.md — Wave 0: Test scaffolding for exporters module
 - [x] 08-01-PLAN.md — Wave 1: Update requirements.txt with export dependencies
 - [x] 08-02-PLAN.md — Wave 1: Create ExporterBase abstract class
-- [ ] 08-03-PLAN.md — Wave 1: Create ExporterFactory
+- [x] 08-03-PLAN.md — Wave 1: Create ExporterFactory
 - [x] 08-04-PLAN.md — Wave 1: Create ImageResolver utility
 
 ### Phase 9: PDF Export

@@ -641,3 +641,119 @@ class TestExcelExporter:
                 break
 
         assert found_rich_text, "At least one cell should contain CellRichText"
+
+
+class TestBatchExport:
+    """Test batch export functionality.
+
+    Tests for batch ZIP export to be implemented in Phase 12 Plan 01.
+    These tests are designed to FAIL initially and will pass once batch_export
+    is implemented.
+    """
+
+    def test_create_zip_with_files(self):
+        """Verify ZIP archive can be created with multiple files in memory."""
+        from zipfile import ZipFile
+        from io import BytesIO
+
+        # Create a ZIP in memory
+        zip_buffer = BytesIO()
+        with ZipFile(zip_buffer, 'w') as zf:
+            zf.writestr('user1_20260320.pdf', b'PDF content 1')
+            zf.writestr('user2_20260320.pdf', b'PDF content 2')
+
+        # Verify ZIP structure
+        zip_buffer.seek(0)
+        with ZipFile(zip_buffer, 'r') as zf:
+            names = zf.namelist()
+            assert 'user1_20260320.pdf' in names
+            assert 'user2_20260320.pdf' in names
+            assert zf.read('user1_20260320.pdf') == b'PDF content 1'
+
+    def test_batch_export_returns_bytesio(self):
+        """Verify batch_export helper returns BytesIO with ZIP magic bytes."""
+        from exporters.batch import create_batch_zip
+        from unittest.mock import MagicMock
+
+        # Create mock records grouped by user
+        record = MagicMock()
+        record.content = '<p>Test content</p>'
+        record.date.strftime = lambda fmt: '20260320'
+
+        records_by_user = {
+            'user1': [record],
+            'user2': [record],
+        }
+
+        result = create_batch_zip(records_by_user, format='pdf')
+
+        assert isinstance(result, BytesIO)
+        # ZIP files start with 'PK' magic bytes
+        result.seek(0)
+        header = result.read(2)
+        assert header == b'PK'
+
+    def test_batch_export_filename_format(self):
+        """Verify filename format is {username}_{start_date}-{end_date}.{ext}."""
+        from zipfile import ZipFile
+        from io import BytesIO
+        from exporters.batch import create_batch_zip
+        from unittest.mock import MagicMock
+
+        # Create mock records with different dates
+        record1 = MagicMock()
+        record1.content = '<p>Content 1</p>'
+        record1.date.strftime = lambda fmt: '20260320' if '%Y%m%d' in fmt or fmt == '%Y%m%d' else '2026-03-20'
+
+        record2 = MagicMock()
+        record2.content = '<p>Content 2</p>'
+        record2.date.strftime = lambda fmt: '20260321' if '%Y%m%d' in fmt or fmt == '%Y%m%d' else '2026-03-21'
+
+        records_by_user = {
+            'testuser': [record1, record2],
+        }
+
+        result = create_batch_zip(records_by_user, format='pdf')
+        result.seek(0)
+
+        with ZipFile(result, 'r') as zf:
+            filenames = zf.namelist()
+            # Should contain exactly one file for testuser
+            assert len(filenames) == 1
+            # Filename should match pattern: username_start-end.ext
+            assert filenames[0].startswith('testuser_')
+            assert filenames[0].endswith('.pdf')
+
+    def test_batch_export_groups_by_user(self):
+        """Verify records are correctly grouped by username before export."""
+        from exporters.batch import group_records_by_user
+        from unittest.mock import MagicMock
+
+        # Create mock users
+        user1 = MagicMock()
+        user1.username = 'alice'
+
+        user2 = MagicMock()
+        user2.username = 'bob'
+
+        # Create mock records
+        record1 = MagicMock()
+        record1.user = [user1]
+        record1.content = '<p>Alice report</p>'
+
+        record2 = MagicMock()
+        record2.user = [user2]
+        record2.content = '<p>Bob report</p>'
+
+        record3 = MagicMock()
+        record3.user = [user1]
+        record3.content = '<p>Alice second report</p>'
+
+        records = [record1, record2, record3]
+
+        result = group_records_by_user(records)
+
+        assert 'alice' in result
+        assert 'bob' in result
+        assert len(result['alice']) == 2
+        assert len(result['bob']) == 1

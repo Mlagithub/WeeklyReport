@@ -50,10 +50,10 @@
 
 Plans:
 - [x] 08-00-PLAN.md — Wave 0: Test scaffolding for exporters module
-- [ ] 08-01-PLAN.md — Wave 1: Update requirements.txt with export dependencies
+- [x] 08-01-PLAN.md — Wave 1: Update requirements.txt with export dependencies
 - [ ] 08-02-PLAN.md — Wave 1: Create ExporterBase abstract class
 - [ ] 08-03-PLAN.md — Wave 1: Create ExporterFactory
-- [ ] 08-04-PLAN.md — Wave 1: Create ImageResolver utility
+- [x] 08-04-PLAN.md — Wave 1: Create ImageResolver utility
 
 ### Phase 9: PDF Export
 **Goal**: 用户可将周报导出为保留完整格式的 PDF 文件

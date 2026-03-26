@@ -21,7 +21,7 @@ from io import BytesIO
 from extensions import db, security, admin, ckeditor
 from models import User, Record, Role, Group, user_records, roles_users, users_groups, with_db_transaction
 from forms import RecordFilterForm, RecordDownloadForm, ThemeForm, MyLoginForm, MyRegisterForm, MyChangePasswordForm, MyForgotPasswordForm
-from utils import DateRange, RecordDownloader
+from utils import DateRange
 from exporters import ExporterFactory
 
 
@@ -329,32 +329,21 @@ def register_routes(app):
             )
 
         # Excel export (default)
-        all_weeks = set()
-        user_weekly_data = {}
-
-        for record in query.all():
-            if not record.user:
-                continue
-            year, week, _ = record.date.isocalendar()
-            week_key = (year, week)
-            all_weeks.add(week_key)
-
-            username = record.user[0].username
-            if username not in user_weekly_data:
-                user_weekly_data[username] = {}
-            weekly_data = user_weekly_data[username]
-
-            if week_key not in weekly_data:
-                weekly_data[week_key] = record.content
-            else:
-                weekly_data[week_key] += f"\n{record.content}"
+        records = query.all()
+        exporter = ExporterFactory.get_exporter('xlsx')
+        output = exporter.export(records, title='周报')
 
         if start_date and end_date:
             filename = f"软件开发组周报_{start_date.strftime('%Y%m%d')}-{end_date.strftime('%Y%m%d')}.xlsx"
         else:
             filename = f"软件开发组周报_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
 
-        return RecordDownloader().download(user_weekly_data, all_weeks, filename)
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
 
     @app.route('/manage_records', methods=('GET',))
     @login_required

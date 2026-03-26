@@ -204,40 +204,100 @@ class TestDependencies:
 
     def test_python_docx_installed(self):
         """Verify python-docx is importable as docx."""
-        pytest.fail("python-docx not installed - 'import docx' should succeed")
+        import docx
+        assert docx is not None
 
     def test_weasyprint_installed(self):
         """Verify weasyprint is importable."""
-        pytest.fail("weasyprint not installed - 'import weasyprint' should succeed")
+        import weasyprint
+        assert weasyprint is not None
 
     def test_htmldocx_installed(self):
         """Verify htmldocx is importable."""
-        pytest.fail("htmldocx not installed - 'from htmldocx import HtmlToDocx' should succeed")
+        from htmldocx import HtmlToDocx
+        assert HtmlToDocx is not None
 
 
 class TestPdfExporter:
     """Test PdfExporter class behavior.
 
-    These tests define expected behavior for PDF export functionality.
-    Tests will FAIL until PdfExporter is implemented in Phase 09 Plan 01.
+    Tests for PDF export functionality implemented in Phase 09 Plan 01.
     """
 
     def test_file_extension(self):
         """Verify PdfExporter.file_extension returns 'pdf'."""
-        pytest.fail("PdfExporter not implemented - file_extension should return 'pdf'")
+        from exporters.pdf import PdfExporter
+        exporter = PdfExporter(uploads_path='/tmp')
+        assert exporter.file_extension == 'pdf'
 
     def test_mime_type(self):
         """Verify PdfExporter.mime_type returns 'application/pdf'."""
-        pytest.fail("PdfExporter not implemented - mime_type should return 'application/pdf'")
+        from exporters.pdf import PdfExporter
+        exporter = PdfExporter(uploads_path='/tmp')
+        assert exporter.mime_type == 'application/pdf'
 
     def test_export_returns_bytesio(self):
         """Verify export() returns BytesIO with PDF content."""
-        pytest.fail("PdfExporter not implemented - export() should return BytesIO with PDF bytes")
+        from exporters.pdf import PdfExporter
+        from unittest.mock import MagicMock
+
+        # Create mock records
+        record = MagicMock()
+        record.content = '<p>Test content</p>'
+        record.date.strftime = lambda fmt: '2026-03-26'
+
+        exporter = PdfExporter(uploads_path='/tmp')
+        result = exporter.export([record], title='Test Report')
+
+        assert isinstance(result, BytesIO)
+        # Verify PDF header
+        result.seek(0)
+        header = result.read(5)
+        assert header == b'%PDF-'
 
     def test_image_embedding(self):
         """Verify url_fetcher resolves /files/ URLs for image embedding."""
-        pytest.fail("PdfExporter not implemented - should use ImageResolver for /files/ URLs")
+        import tempfile
+        import os
+        from exporters.pdf import PdfExporter
+        from unittest.mock import MagicMock
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create test image file
+            test_image = os.path.join(tmpdir, 'test.png')
+            with open(test_image, 'wb') as f:
+                f.write(b'\x89PNG\r\n\x1a\n')  # PNG header
+
+            # Create mock record with image
+            record = MagicMock()
+            record.content = f'<img src="/files/test.png">'
+            record.date.strftime = lambda fmt: '2026-03-26'
+
+            exporter = PdfExporter(uploads_path=tmpdir)
+
+            # Test url_fetcher directly
+            result = exporter._resolve_image_url('/files/test.png')
+            assert result['mime_type'] == 'image/png'
+            assert result['string'] == b'\x89PNG\r\n\x1a\n'
 
     def test_headers_footers(self):
         """Verify CSS Paged Media generates headers with title and footers with page numbers."""
-        pytest.fail("PdfExporter not implemented - should support @page CSS with headers/footers")
+        from exporters.pdf import PdfExporter
+        from unittest.mock import MagicMock
+
+        record = MagicMock()
+        record.content = '<p>Content</p>'
+        record.date.strftime = lambda fmt: '2026-03-26'
+
+        exporter = PdfExporter(uploads_path='/tmp')
+        html = exporter._build_html([record], title='Test Title', include_date=True)
+
+        # Verify CSS Paged Media elements
+        assert '@page' in html
+        assert '@top-center' in html
+        assert '@bottom-left' in html
+        assert '@bottom-right' in html
+        assert 'counter(page)' in html
+        assert 'running(header)' in html
+        assert 'Test Title' in html
+        assert 'Generated:' in html

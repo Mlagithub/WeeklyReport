@@ -25,7 +25,7 @@
 
 ### Excel Enhancement
 
-- [ ] **XLSX-01**: Excel 导出支持富文本单元格（单元格内粗体、斜体等格式）
+- [x] **XLSX-01**: Excel 导出支持富文本单元格（单元格内粗体、斜体等格式）
 
 ### Batch Export
 
@@ -63,7 +63,7 @@
 | PDF-01 | Phase 9 | Complete |
 | PDF-02 | Phase 9 | Complete |
 | PDF-03 | Phase 9 | Complete |
-| XLSX-01 | Phase 11 | Pending |
+| XLSX-01 | Phase 11 | Complete |
 | BATCH-01 | Phase 12 | Pending |
 
 *Traceability updated: 2026-03-26*

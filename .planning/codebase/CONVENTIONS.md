@@ -1,13 +1,17 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-03-23
+**Analysis Date:** 2026-03-26
+
+## Summary
+
+This Flask application follows Python PEP 8 conventions with Chinese comments for business logic. Code is organized into modular files (`app.py`, `models.py`, `routes.py`, `forms.py`, `utils.py`, `config.py`, `extensions.py`) with clear separation of concerns. No formal linter/formatter configuration exists; style is maintained through consistency.
 
 ## Naming Patterns
 
 **Files:**
-- Python files use snake_case: `app.py`, `utils.py`
+- Python modules use snake_case: `app.py`, `utils.py`, `forms.py`, `routes.py`
 - Template files use snake_case with `.html` extension: `create_records.html`, `manage_records.html`
-- Static assets follow conventional naming: `db_table_data.json`
+- Test files follow pytest convention: `test_models.py`, `test_routes.py`, `test_utils.py`
 
 **Functions:**
 - Route handlers use snake_case: `create_records()`, `manage_records()`, `download_records()`
@@ -24,147 +28,153 @@
 - Form classes use PascalCase with "Form" suffix: `RecordForm`, `RecordFilterForm`, `ThemeForm`
 - View classes use PascalCase with "View" suffix: `UserModelView`
 - Utility classes use PascalCase: `DateRange`, `RecordDownloader`
+- Test classes use PascalCase with "Test" prefix: `TestUserPermissions`, `TestDateRange`
 
 **Constants:**
+- Module-level constants use SCREAMING_SNAKE_CASE: `ALLOWED_TAGS`, `ALLOWED_ATTRIBUTES`, `ALLOWED_PROTOCOLS`
 - Class-level constants use SCREAMING_SNAKE_CASE: `DateRange.TIME_RANGES`
 
 ## Code Style
 
 **Formatting:**
-- No explicit formatter configuration detected (no `.prettierrc`, `pyproject.toml`, or `.editorconfig`)
+- No explicit formatter configuration (no `.prettierrc`, `pyproject.toml`, or `.editorconfig`)
 - 4-space indentation (Python standard)
 - Lines typically under 100 characters
+- UTF-8 encoding declared at top of files: `# -*- coding: utf-8 -*-`
 
 **Linting:**
-- No explicit linter configuration detected (no `.eslintrc`, `flake8`, `ruff`, or `pylint` config)
+- No explicit linter configuration (no `flake8`, `ruff`, or `pylint` config)
 - Code follows PEP 8 style implicitly
+- Test configuration in `pytest.ini` with `-v --tb=short` options
 
-**Imports:**
-- Grouped by source: standard library, third-party packages, local modules
-- Example from `app.py` lines 1-26:
+**Docstrings:**
+- Module-level docstrings describe purpose: `"""Flask application entry point..."""`
+- Function docstrings use triple quotes with Args/Returns sections
+- Example from `/home/one/weekly/app.py`:
 ```python
-from flask import Flask, render_template, redirect, flash, url_for, request, send_from_directory, abort, session, g
-from flask_security import Security, SQLAlchemyUserDatastore, login_required, login_user, logout_user, current_user
-# ... more flask extensions
-from utils import DateRange, RecordDownloader
+def create_app(config_class=None):
+    """Create and configure the Flask application.
 
-import os
-from datetime import date, datetime
-import json
+    Args:
+        config_class: Configuration class to use. Defaults to Config.
+
+    Returns:
+        Flask application instance.
+    """
 ```
 
 ## Import Organization
 
 **Order:**
-1. Flask and extension imports (multiple imports per line grouped by package)
-2. Local application imports (`from utils import ...`)
-3. Standard library imports (os, datetime, json)
-4. Inline imports for specific functionality (e.g., `from openpyxl import Workbook` in `utils.py`)
+1. Standard library imports (`os`, `logging`, `uuid`, `datetime`)
+2. Third-party packages (Flask, SQLAlchemy, etc.)
+3. Local application imports
+
+**Example from `/home/one/weekly/routes.py`:**
+```python
+from flask import render_template, redirect, flash, url_for, request, send_from_directory, abort, session, g, current_app
+from flask_security import login_required, login_user, logout_user, current_user
+from flask_security.utils import hash_password, verify_password
+from werkzeug.utils import secure_filename
+from sqlalchemy import func, case, and_
+from sqlalchemy.orm import joinedload
+import uuid
+import os
+from datetime import datetime
+
+from extensions import db, security, admin, ckeditor
+from models import User, Record, Role, Group, user_records, roles_users, users_groups, with_db_transaction
+from forms import RecordFilterForm, RecordDownloadForm, ThemeForm, MyLoginForm, MyRegisterForm
+from utils import DateRange, RecordDownloader
+```
 
 **Path Aliases:**
 - None used; all imports use full module paths
 
+**Inline Imports:**
+- Used for functionality that requires app context: `from flask_ckeditor import CKEditorField, upload_fail, upload_success`
+
 ## Error Handling
 
-**Patterns:**
-- HTTP errors via `abort()`: `abort(404)`, `abort(403)` in `app.py` lines 504, 506, 532-534
-- User feedback via `flash()`: `flash('用户名已存在', 'warning')` in `app.py` line 416
-- Form validation via WTForms validators: `DataRequired()`, `Length()`, `EqualTo()`
-- Return value checks: `if not record: abort(404)`
-
-**Flash Message Categories:**
-- `'warning'` for errors and validation issues
-- Default category for success messages
-
-## Security Patterns
-
-**Password Handling:**
-- Use `hash_password()` from flask_security for password hashing: `app.py` lines 424, 732
-- Use `verify_password()` for authentication: `app.py` line 436
-- Minimum password length enforced: `SECURITY_PASSWORD_LENGTH_MIN = 8`
-
-**CSRF Protection:**
-- Flask-WTF provides CSRF protection for forms
-- CKEditor CSRF explicitly commented out: `app.py` line 40
+**HTTP Errors:**
+- Use `abort()` for HTTP error responses: `abort(404)`, `abort(403)`
+- Example from `/home/one/weekly/routes.py`:
 ```python
-# app.config['CKEDITOR_ENABLE_CSRF'] = True  # if you want to enable CSRF protect, uncomment this line
+if not record:
+    abort(404)
+if not can_edit_record(record, current_user):
+    abort(403)
 ```
 
-**File Upload Security:**
-- Use `secure_filename()` to sanitize uploaded filenames: `app.py` lines 658, 675
-- Extension whitelist for uploads: `['jpg', 'gif', 'png', 'jpeg']` in `app.py` line 671
-- Maximum content size: `MAX_CONTENT_LENGTH = 5 * 1024 * 1024` (5MB)
-
-**Access Control:**
-- `@login_required` decorator for protected routes
-- Permission checking via `User.all_permissions(user)` with result caching in `g`
-- Role-based access: `current_user.is_admin` property
-- Record-level authorization: `can_edit_record(record, current_user)` function
-
-**Secrets:**
-- `SECRET_KEY` and `SECURITY_PASSWORD_SALT` should come from environment variables in production
-- Current code has hardcoded values (security concern): `app.py` lines 37, 44
-
-## Database Session Management
-
-**Patterns:**
-- Explicit commits after modifications:
+**Database Errors:**
+- Use `@with_db_transaction` decorator for write operations
+- Pattern from `/home/one/weekly/models.py`:
 ```python
-# app.py line 488-489
-db.session.add(record)
-db.session.commit()
+def with_db_transaction(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except SQLAlchemyError as e:
+            current_app.logger.error(f"Database error in {func.__name__}: {str(e)}", exc_info=True)
+            db.session.rollback()
+            flash('操作失败，请重试', 'warning')
+            raise
+    return wrapper
 ```
 
-- Connection pool configuration for long-running processes:
-```python
-# app.py lines 30-36
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_pre_ping': True,      # Detect stale connections
-    'pool_recycle': 3600,       # Recycle connections every hour
-    'pool_size': 10,            # Pool size
-    'max_overflow': 20,         # Max overflow connections
-}
-```
+**User Feedback:**
+- Use `flash()` with category: `flash('用户名已存在', 'warning')`
+- Flash categories: `'warning'` for errors, default for success
 
-- Eager loading to prevent N+1 queries:
-```python
-# app.py line 140
-Group.query.options(joinedload(Group.users)).all()
-```
+**Form Validation:**
+- WTForms validators: `DataRequired()`, `Length(min=8, max=18)`, `EqualTo("password")`
 
-- Request-level caching for permissions:
+## Logging
+
+**Framework:** Python `logging` module with `RotatingFileHandler`
+
+**Configuration:**
+- Production logs to `/var/log/weekly/app.log`
+- 10MB max file size, 10 backup files
+- INFO level for production
+- Format: `%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]`
+
+**Pattern from `/home/one/weekly/app.py`:**
 ```python
-# app.py lines 127-132
-cache_key = f'_user_perms_{user.id}'
-if not hasattr(g, cache_key):
-    perms = tuple(set(p for role in user.roles for p in role.permissions))
-    setattr(g, cache_key, perms)
-return list(getattr(g, cache_key))
+def setup_logging(app):
+    if app.debug:
+        return
+    file_handler = RotatingFileHandler(
+        os.path.join('/var/log/weekly', 'app.log'),
+        maxBytes=10 * 1024 * 1024,
+        backupCount=10
+    )
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]'
+    ))
+    file_handler.setLevel(logging.INFO)
+    app.logger.addHandler(file_handler)
 ```
 
 ## Comments
 
 **When to Comment:**
 - Chinese comments for complex business logic explanations
-- Inline comments for configuration options
-- Section headers for code organization
+- Section headers using `# ====` dividers for code organization
+- Reference design decisions with tags: `Per D-01`, `Per RENDER-01`
 
-**Example from `app.py` lines 30-36:**
+**Section Headers:**
 ```python
-# 数据库连接池配置，防止长时间运行导致连接泄漏
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_pre_ping': True,      # 检测失效连接
-    'pool_recycle': 3600,       # 每小时回收连接
-    ...
-}
+# =============================================================================
+# Database Helper Functions
+# =============================================================================
 ```
 
-**Docstrings:**
-- Sparse usage; most functions lack docstrings
-- Some functions have docstrings: `User.all_permissions()` at line 127
+**Inline Comments:**
 ```python
-def all_permissions(user):
-    """获取用户所有权限（请求级缓存，避免跨请求权限过期问题）"""
+# Per D-11: Use UUID for unique filename
+filename = f"{uuid.uuid4().hex}_{secure_filename(f.filename)}"
 ```
 
 ## Function Design
@@ -172,43 +182,104 @@ def all_permissions(user):
 **Size:**
 - Route handlers typically 10-30 lines
 - Complex routes like `manage_records()` extend to ~50 lines
-- Helper functions kept small and focused
+- Helper functions kept small and focused (5-15 lines)
 
 **Parameters:**
 - Route handlers follow Flask conventions: `def edit_record(record_id):`
 - Utility functions accept explicit parameters rather than global state
+- Use Flask's `current_user` for user context in routes
 
 **Return Values:**
-- Routes return template renders or redirects
+- Routes return `render_template()` or `redirect(url_for())`
 - Utility functions return data structures (tuples, lists, dicts)
 - Permission checks return booleans
 
 ## Module Design
 
 **Exports:**
-- `app.py` exports `app` for WSGI deployment
-- `utils.py` exports utility classes: `DateRange`, `RecordDownloader`
+- `app.py` exports `app` for WSGI deployment and test imports
+- Explicit `__all__` list for public API:
+```python
+__all__ = [
+    'app', 'db', 'user_datastore', 'security', 'admin', 'ckeditor', 'bootstrap',
+    'User', 'Record', 'Role', 'Group',
+    ...
+]
+```
 
 **Barrel Files:**
 - Not used; direct imports from specific modules
 
 **Configuration:**
-- Configuration via Flask `app.config` dictionary
-- Environment variables with fallbacks: `os.environ.get("DATABASE_URL", 'sqlite:///app.db')`
+- Configuration classes: `Config`, `DevelopmentConfig`, `ProductionConfig`
+- Environment variables with fallbacks: `os.environ.get('SECRET_KEY', 'default')`
 
 ## Form Handling
 
 **Pattern:**
-- WTForms classes with validators
-- Form instantiation in route handler
-- `form.validate_on_submit()` for POST processing
-- Pre-populating form data for edit operations:
+1. Define WTForms class with validators
+2. Instantiate form in route handler
+3. Check `form.validate_on_submit()` for POST processing
+4. Access form data via `form.field_name.data`
+
+**Example from `/home/one/weekly/routes.py`:**
 ```python
-# app.py lines 517-518
-form.date.data = record.date
-form.body.data = record.content
+@app.route('/create_records', methods=('GET', 'POST'))
+@login_required
+@with_db_transaction
+def create_records():
+    form = RecordForm()
+    if form.validate_on_submit():
+        record_date = form.date.data
+        body = form.body.data
+        # ... create record
+        return redirect(url_for('manage_records'))
+    return render_template('create_records.html', form=form)
 ```
+
+**Dynamic Field Patching:**
+- CKEditor field patched at route registration time:
+```python
+RecordForm.body = CKEditorField('内容', validators=[])
+```
+
+## Decorators
+
+**Route Protection:**
+- `@login_required` for authenticated routes
+- `@with_db_transaction` for database write operations
+
+**Order (outermost first):**
+```python
+@app.route('/edit_record/<int:record_id>', methods=['POST', 'GET'])
+@login_required
+@with_db_transaction
+def edit_record(record_id):
+```
+
+## Security Patterns
+
+**Password Handling:**
+- Use `hash_password()` from Flask-Security
+- Use `verify_password()` for authentication
+- Minimum password length: 8 characters
+
+**HTML Sanitization:**
+- Custom Jinja2 filter `sanitize_html` using bleach
+- Allowed tags whitelist in `ALLOWED_TAGS`
+- Removes XSS vectors: `<script>`, `onclick`, `javascript:` URLs
+
+**File Upload Security:**
+- `secure_filename()` to sanitize uploaded filenames
+- UUID prefix for unique filenames: `f"{uuid.uuid4().hex}_{secure_filename(f.filename)}"`
+- Extension whitelist: `['jpg', 'gif', 'png', 'jpeg']`
+- Maximum content size: 5MB
+
+**Access Control:**
+- Permission-based: `User.all_permissions(user)` with caching
+- Role-based: `current_user.is_admin` property
+- Record-level: `can_edit_record(record, current_user)` function
 
 ---
 
-*Convention analysis: 2026-03-23*
+*Convention analysis: 2026-03-26*

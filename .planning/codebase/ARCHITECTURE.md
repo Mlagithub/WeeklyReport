@@ -1,182 +1,155 @@
 # Architecture
 
-**Analysis Date:** 2026-03-23
+> Last updated: 2026-03-26
+
+## Summary
+
+A Flask-based monolithic web application for weekly report management using the Application Factory pattern with modular organization. The system follows a layered architecture with clear separation between routes, models, forms, and utilities, using SQLAlchemy ORM with SQLite for data persistence and Flask-Security for authentication.
 
 ## Pattern Overview
 
-**Overall:** Flask MVC (Model-View-Controller) with Flask-Security for authentication
+**Overall:** Monolithic Flask Application with Application Factory Pattern
 
 **Key Characteristics:**
-- Single-file application core (`app.py`) with models, views, and routes
-- SQLAlchemy ORM for database abstraction
-- Flask-Security for role-based access control
-- Flask-Admin for administrative interface
-- WTForms for form validation
-- CKEditor for rich text editing
+- Extension initialization pattern: Extensions defined in `extensions.py`, bound via `init_app()` in `app.py`
+- Route registration pattern: Routes defined in `routes.py`, registered via `register_routes()` function
+- Database transaction decorator pattern: `@with_db_transaction` for unified error handling
+- Request-level caching: Permission caching on Flask's `g` object to avoid repeated queries
 
 ## Layers
 
-**Model Layer:**
-- Purpose: Data representation and persistence
-- Location: `app.py:89-183` (model definitions)
-- Contains: SQLAlchemy models (User, Role, Record, Group) and association tables
-- Depends on: SQLAlchemy, Flask-Security mixins
-- Used by: Route handlers, Flask-Admin views
+### Entry Point Layer
+- Purpose: Application initialization, extension binding, logging setup
+- Location: `/home/one/weekly/app.py`
+- Contains: `create_app()` factory, SQLAlchemy event handlers, Jinja2 filters
+- Depends on: All other modules (config, extensions, models, forms, routes)
+- Used by: WSGI server (Gunicorn) or direct Python execution
 
-**View Layer:**
-- Purpose: HTTP request handling and response generation
-- Location: `app.py:379-681` (route definitions)
-- Contains: Route functions with decorators for auth/authorization
-- Depends on: Models, Forms, Templates
-- Used by: Flask routing system
+### Configuration Layer
+- Purpose: Centralize application settings
+- Location: `/home/one/weekly/config.py`
+- Contains: `Config`, `DevelopmentConfig`, `ProductionConfig` classes
+- Depends on: Environment variables
+- Used by: Application factory in `app.py`
 
-**Template Layer:**
-- Purpose: HTML rendering with Jinja2
-- Location: `templates/` directory
-- Contains: Base template, page templates, security templates, macros
-- Depends on: Bootstrap-Flask for UI components
-- Used by: Route handlers via `render_template()`
+### Routes Layer
+- Purpose: HTTP request handling, business logic orchestration
+- Location: `/home/one/weekly/routes.py`
+- Contains: All route handlers, permission helpers (`can_edit_record`, `get_allowed_usernames`, `get_allowed_groups`), query builders
+- Depends on: models, forms, utils, extensions
+- Used by: Registered with Flask app via `register_routes(app)`
 
-**Form Layer:**
-- Purpose: Input validation and CSRF protection
-- Location: `app.py:215-310` (form definitions)
-- Contains: WTForms classes for record, filter, authentication, and configuration
-- Depends on: WTForms, Flask-WTF
-- Used by: Route handlers
+### Models Layer
+- Purpose: Data representation, database operations, permission logic
+- Location: `/home/one/weekly/models.py`
+- Contains: SQLAlchemy models (`User`, `Record`, `Role`, `Group`), association tables, `UserModelView`, `with_db_transaction` decorator
+- Depends on: extensions (db), Flask-Security mixins
+- Used by: routes, app
+
+### Forms Layer
+- Purpose: Input validation and form rendering
+- Location: `/home/one/weekly/forms.py`
+- Contains: WTForms classes (`RecordForm`, `RecordFilterForm`, `MyLoginForm`, `MyRegisterForm`, `ThemeForm`)
+- Depends on: utils (DateRange), WTForms validators
+- Used by: routes
+
+### Utilities Layer
+- Purpose: Shared helper functionality
+- Location: `/home/one/weekly/utils.py`
+- Contains: `DateRange` class for time calculations, `RecordDownloader` for Excel export, `html_to_text` conversion
+- Depends on: openpyxl, BeautifulSoup, dateutil
+- Used by: routes, forms
+
+### Extension Layer
+- Purpose: Flask extension initialization
+- Location: `/home/one/weekly/extensions.py`
+- Contains: Extension instances (`db`, `security`, `admin`, `ckeditor`, `bootstrap`)
+- Depends on: Flask extension packages
+- Used by: app, models, routes
 
 ## Data Flow
 
-**Record Creation Flow:**
+### Request Flow:
+1. HTTP request received by WSGI server (Gunicorn)
+2. Request routed to Flask application instance
+3. `@app.before_request` applies user theme from session
+4. Route handler invoked, validates authentication via `@login_required`
+5. Form data validated via WTForms
+6. Database operations via SQLAlchemy ORM
+7. Response rendered via Jinja2 templates
 
-1. User navigates to `/create_records` (GET)
-2. `create_records()` renders form with empty RecordForm
-3. User fills CKEditor field and submits (POST)
-4. Form validation via WTForms
-5. Record object created and associated with current_user
-6. Database commit and redirect to `/manage_records`
+### Record Creation Flow:
+1. User submits form at `/create_records`
+2. `RecordForm` validates input
+3. `@with_db_transaction` wraps operation for error handling
+4. `Record` model instance created and linked to `current_user`
+5. Changes committed to SQLite database
+6. User redirected to `/manage_records`
 
-**Record Query Flow:**
-
-1. User accesses `/manage_records` with optional filter params
-2. `build_record_query()` constructs SQLAlchemy query with:
-   - Permission-based user filtering
-   - Time range filtering via `DateRange` utility
-   - Group-based filtering
-3. Query executed with pagination
-4. Results rendered in table with edit/delete buttons
-
-**Authentication Flow:**
-
-1. User submits login form at `/login`
-2. `login()` validates credentials via `verify_password()`
-3. `login_user()` establishes session
-4. Redirect to `next` URL or home
-5. `@login_required` decorator protects routes
+### Record Query Flow:
+1. User accesses `/manage_records` with filter parameters
+2. Default filters applied (current user, this week) if no parameters
+3. `build_record_query()` constructs SQLAlchemy query with joins
+4. Permission filtering via `get_allowed_usernames()` and `get_allowed_groups()`
+5. Date range filtering via `DateRange.get_range()`
+6. Pagination applied (5 records per page)
+7. Results rendered with edit/delete action buttons
 
 ## Key Abstractions
 
-**Permission System:**
-- Purpose: Fine-grained access control
-- Examples: `app.py:106-132` (User permission methods)
-- Pattern: Role-based with permissions stored as list in Role model
-  - `view_self`: User can only see their own records
-  - `view_group`: Group leader can see their group's records
-  - `view_all`: Admin/teacher can see all records
-  - `edit_database`: Admin can access Flask-Admin
+### Permission System
+- Purpose: Role-based access control with group-level permissions
+- Examples: `/home/one/weekly/models.py` (User.all_permissions, User.can_view_group)
+- Pattern: Permissions stored on Role model, cached per-request on `g` object
 
-**DateRange Utility:**
-- Purpose: Calculate date ranges for filtering
-- Examples: `utils.py:6-93`
-- Pattern: Static methods returning (start_date, end_date) tuples
-  - `this_week()`, `last_week()`, `this_month()`, `this_quarter()`, `this_year()`
+### Database Transaction Wrapper
+- Purpose: Unified error handling for write operations
+- Examples: `/home/one/weekly/models.py` (`with_db_transaction` decorator)
+- Pattern: Try/except with rollback, logging, user-friendly flash messages
 
-**RecordDownloader:**
-- Purpose: Export records to Excel
-- Examples: `utils.py:154-233`
-- Pattern: Generates openpyxl Workbook with styled output
+### HTML Sanitization
+- Purpose: Prevent XSS while allowing rich text from CKEditor
+- Examples: `/home/one/weekly/app.py` (`sanitize_html` Jinja2 filter)
+- Pattern: Bleach library with whitelisted tags and attributes
 
 ## Entry Points
 
-**Main Application Entry:**
-- Location: `app.py:743-747`
-- Triggers: Direct script execution `python app.py`
-- Responsibilities: Create tables, seed data from JSON, start development server
+### WSGI Entry Point
+- Location: `/home/one/weekly/app.py` (module-level `app` instance)
+- Triggers: Gunicorn WSGI server
+- Responsibilities: Creates application, initializes database tables, sets up logging
 
-**Route Entry Points:**
-- `/` - Home dashboard (`app.py:379-407`)
-- `/login` - Authentication (`app.py:431-441`)
-- `/register` - User registration (`app.py:409-429`)
-- `/create_records` - New record form (`app.py:476-495`)
-- `/manage_records` - Record list with filters (`app.py:571-632`)
-- `/download_records` - Excel export (`app.py:538-568`)
-- `/admin` - Flask-Admin interface (`app.py:209-213`)
+### Direct Execution
+- Location: `/home/one/weekly/app.py` (`if __name__ == '__main__'` block)
+- Triggers: `python app.py`
+- Responsibilities: Development server with debug mode support
 
-**Before Request Hook:**
-- Location: `app.py:635-638`
-- Triggers: Every HTTP request
-- Responsibilities: Apply user's theme preference from session
-
-## Database Models
-
-**User Model** (`app.py:98-161`):
-- Inherits from `FsUserMixin` for Flask-Security
-- Fields: id, email, username, password, records (relationship)
-- Many-to-Many: roles (via roles_users), groups (via users_groups)
-- Methods: `is_admin`, `with_role()`, `can_view_group()`, `all_permissions()`, `managed_group()`, `change_user_password()`
-
-**Record Model** (`app.py:89-93`):
-- Fields: id, content (Text), date (Date), createtime (DateTime)
-- Many-to-Many: users (via user_records)
-
-**Role Model** (`app.py:95-97`):
-- Inherits from `FsRoleMixin` for Flask-Security
-- Fields: id, name, description, permissions (list)
-- Used for RBAC permission checks
-
-**Group Model** (`app.py:164-182`):
-- Fields: id, name, description
-- Many-to-Many: users (via users_groups)
-- Used for organizational grouping and permission scoping
-
-**Association Tables:**
-- `user_records` (`app.py:73-76`): User-Record many-to-many
-- `roles_users` (`app.py:78-81`): User-Role many-to-many
-- `users_groups` (`app.py:83-86`): User-Group many-to-many
+### Admin Interface
+- Location: `/admin/*` routes (Flask-Admin)
+- Triggers: Users with admin role or 'edit_database' permission
+- Responsibilities: CRUD operations on User, Role, Record, Group models
 
 ## Error Handling
 
-**Strategy:** HTTP status codes with flash messages
+**Strategy:** Decorator-based with rollback and logging
 
 **Patterns:**
-- `abort(404)` for missing resources (`app.py:504, 532, 660`)
-- `abort(403)` for permission denied (`app.py:506, 534`)
-- `flash()` for user feedback after actions (`app.py:491, 514, 530, 647`)
+- `@with_db_transaction` decorator catches `SQLAlchemyError`, rolls back, logs, flashes message, re-raises
+- HTTP 404/403 handled via `abort()` in route handlers
+- Authentication errors handled by Flask-Security
 
 ## Cross-Cutting Concerns
 
-**Logging:** Not configured - uses Flask defaults
+**Logging:** Rotating file handler at INFO level to `/var/log/weekly/app.log` (production only)
 
-**Validation:**
-- WTForms validators: `DataRequired`, `Length`, `EqualTo` (`app.py:14`)
-- File upload validation: extension whitelist (`app.py:671`)
+**Validation:** WTForms validators in forms.py, custom validation in route handlers
 
-**Authentication:**
-- Flask-Security with Argon2 password hashing
-- Session-based with `remember me` option
-- Custom login/register forms extending Flask-Security defaults
+**Authentication:** Flask-Security with Argon2 password hashing, session-based auth, role/permission model
 
-**Authorization:**
-- Role-based via Flask-Security roles
-- Permission checking via `User.all_permissions()` (`app.py:126-132`)
-- Request-level permission caching using Flask's `g` object
+**Theme:** User theme preference stored in session, applied via `@app.before_request`
 
-**Database Connection Pooling:**
-- Configured at `app.py:31-36`
-- `pool_pre_ping`: Detect stale connections
-- `pool_recycle`: 3600 seconds (1 hour)
-- `pool_size`: 10 connections
-- `max_overflow`: 20 additional connections
+**File Uploads:** UUID-based filenames, secure_filename validation, image-only restriction
 
 ---
 
-*Architecture analysis: 2026-03-23*
+*Architecture analysis: 2026-03-26*

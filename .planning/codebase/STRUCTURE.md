@@ -1,168 +1,225 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-03-23
+> Last updated: 2026-03-26
+
+## Summary
+
+Flask application organized as a flat module structure with clear separation of concerns. Each module handles a specific layer (routes, models, forms, utilities, config, extensions). Templates follow Jinja2 inheritance with a base template pattern. Static assets include CKEditor for rich text editing.
 
 ## Directory Layout
 
 ```
 /home/one/weekly/
-├── app.py              # Main application (748 lines) - models, routes, forms
-├── utils.py            # Utility classes (236 lines) - DateRange, RecordDownloader
+├── app.py              # Application factory and entry point
+├── config.py           # Configuration classes
+├── extensions.py       # Flask extension initialization
+├── models.py           # SQLAlchemy models
+├── forms.py            # WTForms form definitions
+├── routes.py           # Route handlers
+├── utils.py            # Utility functions and classes
 ├── requirements.txt    # Python dependencies
-├── app.spec            # PyInstaller specification
-├── instance/           # Flask instance folder (gitignored)
-│   └── app.db          # SQLite database
+├── pytest.ini          # Test configuration
+├── gunicorn.conf.py    # WSGI server configuration
+├── instance/           # Database files (SQLite)
+│   └── app.db          # Main database
 ├── static/             # Static assets
-│   ├── ckeditor/       # CKEditor 4 assets (local)
-│   ├── ckeditor4/      # CKEditor 4 full distribution
-│   ├── css/            # Custom CSS
-│   ├── db_table_data.json  # Initial data seed
-│   └── favicon-*.png   # Favicon files
+│   ├── css/            # Stylesheets
+│   ├── ckeditor4/      # CKEditor assets
+│   └── favicon-*.png   # Favicons
 ├── templates/          # Jinja2 templates
-│   ├── base.html       # Base template with layout
-│   ├── _macros.html    # Reusable Jinja macros
-│   ├── _menu.html      # Security menu partial
-│   ├── home.html       # Dashboard page
-│   ├── create_records.html  # Record form page
-│   ├── manage_records.html  # Record list page
+│   ├── base.html       # Base template
+│   ├── home.html       # Home page
 │   ├── config.html     # Theme configuration
-│   ├── security/       # Authentication templates
-│   └── admin/          # Flask-Admin override
-├── uploads/            # User uploaded files (gitignored)
-├── wheels/             # Python wheel packages for offline install
-├── build/              # PyInstaller build output (gitignored)
-├── dist/               # PyInstaller distribution (gitignored)
-└── .venv/              # Virtual environment (gitignored)
+│   ├── create_records.html
+│   ├── manage_records.html
+│   ├── _macros.html    # Template macros
+│   ├── _menu.html      # Menu partial
+│   ├── security/       # Auth-related templates
+│   │   ├── login_user.html
+│   │   ├── register_user.html
+│   │   ├── change_password.html
+│   │   └── forgot_password.html
+│   └── admin/          # Flask-Admin templates
+├── tests/              # Test suite
+│   ├── __init__.py
+│   ├── conftest.py     # Pytest fixtures
+│   ├── test_models.py
+│   ├── test_routes.py
+│   └── test_utils.py
+├── uploads/            # User uploaded files
+└── .planning/          # Planning documents
+    ├── codebase/       # Codebase analysis docs
+    └── phases/         # Phase execution records
 ```
 
 ## Directory Purposes
 
-**`instance/`:**
-- Purpose: Flask instance folder for database
-- Contains: `app.db` SQLite database file
-- Gitignored: Yes
-- Created: Automatically by SQLAlchemy
+### Root Python Files
+Application code organized as a flat module structure (no package subdirectory):
 
-**`static/`:**
-- Purpose: Static assets served directly
-- Contains: CKEditor, CSS, favicons, seed data JSON
-- Key files: `static/db_table_data.json` - initial roles/groups/users
+**`app.py`:**
+- Purpose: Application factory, WSGI entry point
+- Contains: `create_app()`, `setup_logging()`, SQLAlchemy event handlers, `sanitize_html` filter
+- Key exports: `app`, `db`, `user_datastore`, `create_app`
 
-**`templates/`:**
+**`routes.py`:**
+- Purpose: All HTTP route handlers
+- Contains: `register_routes()`, permission helpers, query builders
+- Routes: `/`, `/login`, `/logout`, `/register`, `/create_records`, `/manage_records`, `/edit_record`, `/delete_record`, `/download_records`, `/config`
+
+**`models.py`:**
+- Purpose: Database models and ORM configuration
+- Contains: `User`, `Record`, `Role`, `Group` models, association tables, `UserModelView`, `with_db_transaction`
+
+**`forms.py`:**
+- Purpose: Form validation
+- Contains: `RecordForm`, `RecordFilterForm`, `MyLoginForm`, `MyRegisterForm`, `MyChangePasswordForm`, `ThemeForm`
+
+**`utils.py`:**
+- Purpose: Shared utilities
+- Contains: `DateRange` (time calculations), `RecordDownloader` (Excel export), `html_to_text`
+
+**`config.py`:**
+- Purpose: Environment configuration
+- Contains: `Config` base class, `DevelopmentConfig`, `ProductionConfig`
+
+**`extensions.py`:**
+- Purpose: Extension instances
+- Contains: `db`, `security`, `admin`, `ckeditor`, `bootstrap` instances
+
+### instance/
+- Purpose: Instance-specific data (database, secrets)
+- Contains: SQLite database files (`app.db`, WAL files)
+- Key files: `app.db` - main application database
+
+### static/
+- Purpose: Static web assets served directly
+- Contains: CSS, CKEditor assets, favicons
+- Key files: `css/bootstrap-icons.css`, `ckeditor4/` directory
+
+### templates/
 - Purpose: Jinja2 HTML templates
-- Contains: Page templates and partials
-- Key files: `templates/base.html` - defines common layout
+- Contains: All HTML templates organized by feature
+- Key files: `base.html` (master layout), `home.html` (dashboard), `manage_records.html` (record list)
 
-**`templates/security/`:**
-- Purpose: Override Flask-Security default templates
-- Contains: Login, register, password change, password reset forms
-- Naming: `*_user.html` pattern
+### tests/
+- Purpose: Automated test suite
+- Contains: pytest tests and fixtures
+- Key files: `conftest.py` (fixtures), `test_routes.py` (integration tests)
 
-**`uploads/`:**
-- Purpose: CKEditor image uploads
-- Contains: User-uploaded images
-- Gitignored: Yes
-- Max size: 5MB (configured in `app.py:55`)
+### uploads/
+- Purpose: User uploaded files (CKEditor images)
+- Contains: Uploaded image files with UUID filenames
 
-**`wheels/`:**
-- Purpose: Offline Python package installation
-- Contains: `.whl` files for all dependencies
-- Use case: Deploy to air-gapped environments
+### .planning/
+- Purpose: Project planning and phase documentation
+- Contains: `codebase/` (analysis docs), `phases/` (execution records)
 
 ## Key File Locations
 
-**Entry Points:**
-- `app.py:743-747`: Main script execution
-- `app.py:28-58`: Flask app initialization and configuration
+### Entry Points
+- `/home/one/weekly/app.py`: WSGI application object and factory
+- `/home/one/weekly/gunicorn.conf.py`: Production server configuration
 
-**Configuration:**
-- `app.py:29-55`: App configuration (database, security, upload limits)
-- `requirements.txt`: Python dependencies
-- `.gitignore`: Version control exclusions
+### Configuration
+- `/home/one/weekly/config.py`: Application configuration classes
+- `/home/one/weekly/requirements.txt`: Python dependencies
+- `/home/one/weekly/pytest.ini`: Test configuration
 
-**Core Logic:**
-- `app.py:89-183`: Database models (Record, Role, User, Group)
-- `app.py:215-310`: WTForms definitions
-- `app.py:379-681`: Route handlers
-- `utils.py:6-93`: DateRange utility class
-- `utils.py:154-233`: RecordDownloader Excel export
+### Core Logic
+- `/home/one/weekly/routes.py`: All route handlers (438 lines)
+- `/home/one/weekly/models.py`: Data models and ORM (219 lines)
+- `/home/one/weekly/utils.py`: Business utilities (238 lines)
 
-**Testing:**
-- Not present - no test files detected
+### Templates
+- `/home/one/weekly/templates/base.html`: Base template with navigation, scripts
+- `/home/one/weekly/templates/home.html`: Dashboard with statistics
+- `/home/one/weekly/templates/manage_records.html`: Record listing with filters
 
-**Database:**
-- `instance/app.db`: SQLite database file
-- `app.py:60-71`: Schema migration helper (`ensure_record_columns`)
-- `app.py:683-739`: Data seeding from JSON (`update_db_from_json`)
+### Testing
+- `/home/one/weekly/tests/conftest.py`: Test fixtures (`client`, `test_user`, `auth_client`)
+- `/home/one/weekly/tests/test_routes.py`: Route integration tests
+- `/home/one/weekly/tests/test_models.py`: Model unit tests
 
 ## Naming Conventions
 
-**Files:**
-- Python: `snake_case.py` (e.g., `app.py`, `utils.py`)
-- Templates: `snake_case.html` (e.g., `create_records.html`)
-- Static: Mixed (CKEditor uses own conventions)
+### Files
+- Python modules: lowercase with underscores (`routes.py`, `models.py`)
+- Templates: lowercase with underscores (`create_records.html`, `manage_records.html`)
+- Configuration: lowercase with underscores (`gunicorn.conf.py`)
+- Tests: `test_<module>.py` pattern (`test_routes.py`, `test_models.py`)
 
-**Directories:**
-- Lowercase with underscores: `templates/security/`
-- Special Flask directories: `instance/`, `static/`, `templates/`
+### Directories
+- lowercase without separators (`tests`, `templates`, `static`, `instance`)
 
-**Python Identifiers:**
-- Functions: `snake_case` (e.g., `create_records`, `build_record_query`)
-- Classes: `PascalCase` (e.g., `RecordFilterForm`, `DateRange`)
-- Constants: `UPPER_SNAKE_CASE` (not used in this codebase)
-- Private methods: Leading underscore (e.g., `_fsdomain` in templates)
+### Python Identifiers
+- Classes: PascalCase (`User`, `RecordFilterForm`, `DateRange`)
+- Functions: snake_case (`create_app`, `get_allowed_usernames`, `build_record_query`)
+- Constants: UPPER_SNAKE_CASE (`ALLOWED_TAGS`, `ALLOWED_ATTRIBUTES`)
+- Decorators: snake_case (`with_db_transaction`)
+
+### Database
+- Tables: lowercase (`user`, `record`, `role`, `group`)
+- Association tables: snake_case (`user_records`, `roles_users`, `users_groups`)
 
 ## Where to Add New Code
 
-**New Route:**
-- Add to `app.py` after existing routes (around line 680)
-- Create corresponding template in `templates/`
-- Use `@app.route()` decorator and `@login_required` if needed
+### New Feature (e.g., new record type)
+- Route handler: `/home/one/weekly/routes.py` (add inside `register_routes()`)
+- Model: `/home/one/weekly/models.py` (add new class)
+- Form: `/home/one/weekly/forms.py` (add form class)
+- Template: `/home/one/weekly/templates/<feature>.html`
+- Tests: `/home/one/weekly/tests/test_routes.py` (add test class/function)
 
-**New Model:**
-- Add class definition in `app.py` after existing models (around line 180)
-- Inherit from `db.Model`
-- Add to Flask-Admin: `admin.add_view(UserModelView(NewModel, db.session))`
+### New Model
+- Implementation: `/home/one/weekly/models.py`
+- Admin view: `/home/one/weekly/app.py` (add to admin in `create_app()`)
+- Tests: `/home/one/weekly/tests/test_models.py`
 
-**New Form:**
-- Add WTForms class in `app.py` after existing forms (around line 310)
-- Inherit from `FlaskForm`
-- Add field validators as needed
+### New Route
+- Implementation: `/home/one/weekly/routes.py` inside `register_routes()` function
+- Template: `/home/one/weekly/templates/<route_name>.html`
+- Tests: `/home/one/weekly/tests/test_routes.py`
 
-**New Permission:**
-- Add to role definitions in `static/db_table_data.json`
-- Check in route handlers via `User.all_permissions(current_user)`
+### New Utility Function
+- Implementation: `/home/one/weekly/utils.py`
+- Tests: `/home/one/weekly/tests/test_utils.py`
 
-**New Utility:**
-- Add to `utils.py` for date/formatting utilities
-- Keep as static methods in utility classes
+### New Form
+- Implementation: `/home/one/weekly/forms.py`
+- Template: `/home/one/weekly/templates/<form_page>.html`
 
-**New Template:**
-- Create in `templates/` directory
-- Extend `base.html` for consistent layout
-- Use Bootstrap-Flask components for UI
-
-**New Static Asset:**
-- Add to `static/` directory
-- Reference with `url_for('static', filename='...')`
+### New Static Asset
+- CSS: `/home/one/weekly/static/css/`
+- Images: `/home/one/weekly/static/`
+- JavaScript: Inline in templates or `/home/one/weekly/static/`
 
 ## Special Directories
 
-**`wheels/`:**
-- Purpose: Offline package installation
-- Contains: Pre-downloaded `.whl` and `.tar.gz` files
-- Generated: Manually via `pip download`
-- Committed: Yes (for air-gapped deployment)
+### instance/
+- Purpose: Instance-specific SQLite database
+- Generated: No (user data)
+- Committed: No (in .gitignore)
 
-**`build/` and `dist/`:**
-- Purpose: PyInstaller output
-- Generated: By PyInstaller build process
-- Committed: No (gitignored)
+### uploads/
+- Purpose: User uploaded CKEditor images
+- Generated: Yes (at runtime)
+- Committed: No (in .gitignore)
 
-**`.venv/`:**
+### static/ckeditor4/
+- Purpose: CKEditor WYSIWYG editor assets
+- Generated: No (third-party library)
+- Committed: Yes
+
+### .planning/phases/
+- Purpose: Phase execution records from GSD workflow
+- Generated: Yes (during planning/execution)
+- Committed: Yes
+
+### .venv/
 - Purpose: Python virtual environment
-- Generated: By `python -m venv`
-- Committed: No (gitignored)
+- Generated: Yes (via `python -m venv`)
+- Committed: No (excluded via .gitignore)
 
 ## Template Inheritance
 
@@ -187,4 +244,4 @@ base.html
 
 ---
 
-*Structure analysis: 2026-03-23*
+*Structure analysis: 2026-03-26*

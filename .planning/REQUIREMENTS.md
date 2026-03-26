@@ -19,9 +19,9 @@
 
 ### PDF Export
 
-- [ ] **PDF-01**: 用户可将周报导出为 PDF 格式（完整 HTML 渲染）
-- [ ] **PDF-02**: 导出的 PDF 文档中图片嵌入
-- [ ] **PDF-03**: PDF 导出包含页眉页脚（页码、日期、文档标题）
+- [x] **PDF-01**: 用户可将周报导出为 PDF 格式（完整 HTML 渲染）
+- [x] **PDF-02**: 导出的 PDF 文档中图片嵌入
+- [x] **PDF-03**: PDF 导出包含页眉页脚（页码、日期、文档标题）
 
 ### Excel Enhancement
 
@@ -60,9 +60,9 @@
 |--------|-------|--------|
 | DOCX-01 | Phase 10 | Pending |
 | DOCX-02 | Phase 10 | Pending |
-| PDF-01 | Phase 9 | Pending |
-| PDF-02 | Phase 9 | Pending |
-| PDF-03 | Phase 9 | Pending |
+| PDF-01 | Phase 9 | Complete |
+| PDF-02 | Phase 9 | Complete |
+| PDF-03 | Phase 9 | Complete |
 | XLSX-01 | Phase 11 | Pending |
 | BATCH-01 | Phase 12 | Pending |
 

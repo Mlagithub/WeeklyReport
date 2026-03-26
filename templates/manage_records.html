@@ -116,7 +116,7 @@
                         <td>{{ row.name }}</td>
                         <td>
                             <div class="text-muted small line-clamp-2" title="{{ row.content|striptags }}">
-                                {{ row.content | striptags | truncate(140, True, '...') }}
+                                {{ row.content | sanitize_html | truncate(140) | safe }}
                             </div>
                         </td>
                         <td><span class="badge bg-secondary">{{ row.date }}</span></td>

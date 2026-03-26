@@ -49,19 +49,100 @@ class TestExporterFactory:
 
     def test_register_exporter(self):
         """Verify register(format, exporter_class) class method exists."""
-        pytest.fail("ExporterFactory not implemented - register() class method should exist")
+        from exporters import ExporterFactory, ExporterBase
+
+        # Create a concrete exporter for testing
+        class MockExporter(ExporterBase):
+            @property
+            def file_extension(self):
+                return 'mock'
+
+            @property
+            def mime_type(self):
+                return 'application/mock'
+
+            def _generate(self, data, options):
+                from io import BytesIO
+                return BytesIO(b'mock')
+
+        # Test that register method exists and works
+        ExporterFactory.register('mock', MockExporter)
+        assert 'mock' in ExporterFactory.supported_formats()
+
+        # Clean up registry
+        ExporterFactory._registry.pop('mock', None)
 
     def test_get_exporter_returns_instance(self):
         """Verify get_exporter(format) returns exporter instance."""
-        pytest.fail("ExporterFactory not implemented - get_exporter() should return ExporterBase instance")
+        from exporters import ExporterFactory, ExporterBase
+
+        # Create a concrete exporter for testing
+        class TestExporter(ExporterBase):
+            @property
+            def file_extension(self):
+                return 'test'
+
+            @property
+            def mime_type(self):
+                return 'application/test'
+
+            def _generate(self, data, options):
+                from io import BytesIO
+                return BytesIO(b'test')
+
+        ExporterFactory.register('test', TestExporter)
+        exporter = ExporterFactory.get_exporter('test')
+
+        assert isinstance(exporter, ExporterBase)
+        assert isinstance(exporter, TestExporter)
+
+        # Clean up registry
+        ExporterFactory._registry.pop('test', None)
 
     def test_get_exporter_invalid_format_raises(self):
         """Verify ValueError raised for unsupported format."""
-        pytest.fail("ExporterFactory not implemented - get_exporter('invalid') should raise ValueError")
+        from exporters import ExporterFactory
+
+        # Clear registry to ensure no formats registered
+        original_registry = ExporterFactory._registry.copy()
+        ExporterFactory._registry.clear()
+
+        try:
+            with pytest.raises(ValueError) as exc_info:
+                ExporterFactory.get_exporter('invalid')
+
+            assert 'Unsupported export format' in str(exc_info.value)
+            assert 'invalid' in str(exc_info.value)
+        finally:
+            # Restore registry
+            ExporterFactory._registry.update(original_registry)
 
     def test_supported_formats_returns_list(self):
         """Verify supported_formats() returns list of format strings."""
-        pytest.fail("ExporterFactory not implemented - supported_formats() should return list of strings")
+        from exporters import ExporterFactory, ExporterBase
+
+        # Create a concrete exporter for testing
+        class FormatExporter(ExporterBase):
+            @property
+            def file_extension(self):
+                return 'format'
+
+            @property
+            def mime_type(self):
+                return 'application/format'
+
+            def _generate(self, data, options):
+                from io import BytesIO
+                return BytesIO(b'format')
+
+        ExporterFactory.register('format', FormatExporter)
+        formats = ExporterFactory.supported_formats()
+
+        assert isinstance(formats, list)
+        assert 'format' in formats
+
+        # Clean up registry
+        ExporterFactory._registry.pop('format', None)
 
 
 class TestImageResolver:

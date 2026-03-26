@@ -1,12 +1,15 @@
 # 周报管理系统稳定性修复
 
-## Current Milestone: v1.1 UI Optimization
+## Current Milestone: v1.2 增强富文本导出功能
 
-**Goal:** 改善用户体验，修复显示问题
+**Goal:** 让团队领导能导出保留格式的周报，支持多种格式和批量导出
 
 **Target features:**
-- 查找页面默认过滤（近一周 + 个人记录）
-- 主页最近提交的富文本正确渲染
+- DOCX 导出 — Word 格式，支持图片、链接、列表、表格、代码片段
+- PDF 导出 — 只读格式，方便分享
+- Excel 增强 — 增强现有导出，支持富文本
+- 批量导出 — 团队领导可一键导出整个组的周报
+- 图片嵌入 — 图片嵌入文档，离线可查看
 
 **Status:** Planning
 
@@ -48,7 +51,11 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 
 ### Active
 
-*All v1.1 requirements completed. Ready for next milestone.*
+- **EXPORT-01**: 用户可导出周报为 DOCX 格式（保留富文本格式）
+- **EXPORT-02**: 用户可导出周报为 PDF 格式（保留富文本格式）
+- **EXPORT-03**: Excel 导出支持富文本格式
+- **EXPORT-04**: 团队领导可批量导出整个组的周报
+- **EXPORT-05**: 导出时图片嵌入文档（离线可查看）
 
 ### Out of Scope
 
@@ -113,4 +120,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-03-25 after Phase 6 completion*
+*Last updated: 2026-03-26 — Milestone v1.2 started*

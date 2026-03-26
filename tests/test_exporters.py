@@ -301,3 +301,196 @@ class TestPdfExporter:
         assert 'running(header)' in html
         assert 'Test Title' in html
         assert 'Generated:' in html
+
+
+class TestDocxExporter:
+    """Test DocxExporter class behavior.
+
+    Tests for DOCX export functionality to be implemented in Phase 10 Plan 01.
+    These tests are designed to FAIL initially and will pass once DocxExporter
+    is implemented.
+    """
+
+    def test_file_extension(self):
+        """Verify DocxExporter.file_extension returns 'docx'."""
+        from exporters.docx import DocxExporter
+        exporter = DocxExporter(uploads_path='/tmp')
+        assert exporter.file_extension == 'docx'
+
+    def test_mime_type(self):
+        """Verify DocxExporter.mime_type returns correct DOCX MIME type."""
+        from exporters.docx import DocxExporter
+        exporter = DocxExporter(uploads_path='/tmp')
+        expected_mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        assert exporter.mime_type == expected_mime
+
+    def test_export_returns_bytesio(self):
+        """Verify export() returns BytesIO with valid DOCX content (ZIP magic bytes)."""
+        from exporters.docx import DocxExporter
+        from unittest.mock import MagicMock
+
+        # Create mock records
+        record = MagicMock()
+        record.content = '<p>Test content</p>'
+        record.date.strftime = lambda fmt: '2026-03-26'
+
+        exporter = DocxExporter(uploads_path='/tmp')
+        result = exporter.export([record], title='Test Report')
+
+        assert isinstance(result, BytesIO)
+        # DOCX files are ZIP archives with PK magic bytes
+        result.seek(0)
+        header = result.read(2)
+        assert header == b'PK'
+
+    def test_html_to_docx_conversion(self):
+        """Verify HTML elements are converted to DOCX equivalents."""
+        from exporters.docx import DocxExporter
+        from unittest.mock import MagicMock
+        from docx import Document
+
+        # Create mock record with various HTML elements
+        record = MagicMock()
+        record.content = '''
+        <h1>Heading 1</h1>
+        <h2>Heading 2</h2>
+        <h3>Heading 3</h3>
+        <p>Paragraph with <strong>bold</strong> and <em>italic</em> text.</p>
+        <ul>
+            <li>Unordered item 1</li>
+            <li>Unordered item 2</li>
+        </ul>
+        <ol>
+            <li>Ordered item 1</li>
+            <li>Ordered item 2</li>
+        </ol>
+        <table>
+            <tr><th>Header</th></tr>
+            <tr><td>Cell</td></tr>
+        </table>
+        <a href="https://example.com">Link</a>
+        <pre><code>Code block</code></pre>
+        '''
+        record.date.strftime = lambda fmt: '2026-03-26'
+
+        exporter = DocxExporter(uploads_path='/tmp')
+        result = exporter.export([record], title='Test Report')
+
+        # Parse the DOCX to verify structure
+        result.seek(0)
+        from docx import Document
+        doc = Document(result)
+
+        # Verify document is not empty
+        assert len(doc.paragraphs) > 0
+
+        # Verify headings exist (document should have styled paragraphs)
+        heading_found = any(p.style.name.startswith('Heading') for p in doc.paragraphs)
+        assert heading_found, "Document should contain heading styles"
+
+        # Verify lists exist (bullet points or numbered)
+        # Lists in python-docx appear as paragraphs with list styling
+        list_found = any(
+            p.style.name in ['List Bullet', 'List Number', 'List Paragraph']
+            for p in doc.paragraphs
+        )
+        assert list_found, "Document should contain list styles"
+
+        # Verify tables exist
+        assert len(doc.tables) > 0, "Document should contain tables"
+
+    def test_image_embedding(self):
+        """Verify image embedding via _extract_images and _add_image_to_document methods."""
+        import tempfile
+        import os
+        from exporters.docx import DocxExporter
+        from unittest.mock import MagicMock
+        from docx import Document
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create test image file (valid PNG header)
+            test_image = os.path.join(tmpdir, 'test.png')
+            png_header = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde'
+            with open(test_image, 'wb') as f:
+                f.write(png_header)
+
+            # Create mock record with image
+            record = MagicMock()
+            record.content = '<p>Text before image.</p><img src="/files/test.png"><p>Text after image.</p>'
+            record.date.strftime = lambda fmt: '2026-03-26'
+
+            exporter = DocxExporter(uploads_path=tmpdir)
+            result = exporter.export([record], title='Test Report')
+
+            # Parse the DOCX and verify image is embedded
+            result.seek(0)
+            doc = Document(result)
+
+            # Check that document has inline shapes (images)
+            # Images in python-docx appear as InlineShape objects
+            image_count = 0
+            for paragraph in doc.paragraphs:
+                for run in paragraph.runs:
+                    if run._element.xpath('.//a:blip'):
+                        image_count += 1
+                    # Also check for drawing elements
+                    if run._element.xpath('.//w:drawing'):
+                        image_count += 1
+
+            # Verify at least one image was found
+            assert image_count > 0, "Document should contain embedded images"
+
+    def test_extract_images_helper(self):
+        """Verify _extract_images extracts img tags from HTML."""
+        from exporters.docx import DocxExporter
+
+        exporter = DocxExporter(uploads_path='/tmp')
+
+        html = '''
+        <p>Text before</p>
+        <img src="/files/image1.png">
+        <p>Text between</p>
+        <img src="/files/image2.jpg" alt="Second image">
+        <p>Text after</p>
+        '''
+
+        images = exporter._extract_images(html)
+
+        # Should return list of (element, url) tuples
+        assert isinstance(images, list)
+        assert len(images) == 2
+        assert images[0][1] == '/files/image1.png'
+        assert images[1][1] == '/files/image2.jpg'
+
+    def test_add_image_to_document_helper(self):
+        """Verify _add_image_to_document embeds image bytes into document."""
+        import tempfile
+        import os
+        from exporters.docx import DocxExporter
+        from docx import Document
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create test image
+            test_image = os.path.join(tmpdir, 'embed_test.png')
+            png_data = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde'
+            with open(test_image, 'wb') as f:
+                f.write(png_data)
+
+            exporter = DocxExporter(uploads_path=tmpdir)
+            doc = Document()
+
+            # Add a paragraph first
+            paragraph = doc.add_paragraph()
+
+            # Add image to document
+            image_bytes = exporter.image_resolver.get_image_bytes('/files/embed_test.png')
+            assert image_bytes is not None, "Image bytes should be retrieved"
+
+            exporter._add_image_to_document(doc, paragraph, '/files/embed_test.png', image_bytes)
+
+            # Verify image was added (document should have relationships)
+            # Check for drawing elements in the paragraph
+            has_drawing = len(paragraph.runs) > 0 and any(
+                run._element.xpath('.//w:drawing') for run in paragraph.runs
+            )
+            assert has_drawing, "Paragraph should contain drawing element after image added"

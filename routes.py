@@ -343,7 +343,14 @@ def register_routes(app):
 
         hide_groups = not record_form.groups.choices
 
-        query, _, _, current_filter_usernames = build_record_query(request.args)
+        # Apply default filters if no URL parameters provided (FIND-01, FIND-02)
+        filter_args = request.args.copy()
+        if 'user' not in filter_args:
+            filter_args['user'] = current_user.username
+        if 'time_range' not in filter_args:
+            filter_args['time_range'] = 'last_7_days'
+
+        query, _, _, current_filter_usernames = build_record_query(filter_args)
         query = query.order_by(Record.date.desc())
 
         this_week_start, this_week_end = DateRange.this_week()

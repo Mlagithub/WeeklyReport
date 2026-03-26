@@ -87,8 +87,8 @@ __all__ = ['ExporterFactory', 'ExporterBase', 'ImageResolver']
 
 # Register exporters as they are implemented (Phases 9-11)
 from .pdf import PdfExporter
-# from .docx import DocxExporter
+from .docx import DocxExporter
 # from .excel import ExcelExporter
 ExporterFactory.register('pdf', PdfExporter)
-# ExporterFactory.register('docx', DocxExporter)
+ExporterFactory.register('docx', DocxExporter)
 # ExporterFactory.register('xlsx', ExcelExporter)

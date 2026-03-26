@@ -10,7 +10,7 @@
 
 ### v1.2 增强富文本导出功能 (Current)
 
-- [ ] **Phase 8: Export Foundation** - 导出架构基础设施
+- [x] **Phase 8: Export Foundation** - 导出架构基础设施
 - [ ] **Phase 9: PDF Export** - PDF 格式导出完整功能
 - [ ] **Phase 10: DOCX Export** - Word 格式导出完整功能
 - [ ] **Phase 11: Excel Enhancement** - Excel 富文本单元格支持
@@ -64,7 +64,12 @@ Plans:
   2. 导出的 PDF 正确渲染富文本格式（粗体、斜体、列表、表格、标题、链接）
   3. 导出的 PDF 包含嵌入的图片，离线可查看
   4. PDF 文档包含页眉（文档标题）和页脚（页码、日期）
-**Plans**: TBD
+**Plans**: 3 plans (Wave 0: test scaffolding, Wave 1: PdfExporter, Wave 2: integration)
+
+Plans:
+- [ ] 09-00-PLAN.md — Wave 0: Test scaffolding for PdfExporter
+- [ ] 09-01-PLAN.md — Wave 1: Create PdfExporter with image embedding and headers/footers
+- [ ] 09-02-PLAN.md — Wave 2: Route and form integration
 
 ### Phase 10: DOCX Export
 **Goal**: 用户可将周报导出为可编辑的 Word 文档，保留完整格式
@@ -107,8 +112,8 @@ Plans:
 | 5. Code Refactoring | v1.0 | 3/3 | Complete | 2026-03-23 |
 | 6. Find Page Filtering | v1.1 | 1/2 | In Progress | - |
 | 7. Homepage Rendering | v1.1 | 0/2 | Ready to execute | - |
-| 8. Export Foundation | v1.2 | 0/5 | Ready to execute | - |
-| 9. PDF Export | v1.2 | 0/? | Not started | - |
+| 8. Export Foundation | v1.2 | 5/5 | Complete | 2026-03-26 |
+| 9. PDF Export | v1.2 | 0/3 | Ready to execute | - |
 | 10. DOCX Export | v1.2 | 0/? | Not started | - |
 | 11. Excel Enhancement | v1.2 | 0/? | Not started | - |
 | 12. Batch Export | v1.2 | 0/? | Not started | - |

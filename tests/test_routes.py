@@ -348,3 +348,109 @@ class TestRecordCRUD:
         assert response.status_code == 200
         # Verify "不限" options are available (empty value options)
         assert '<option value="">不限</option>' in response.text
+
+class TestHomeRendering:
+    """Integration tests for home page rich text rendering (RENDER-01)."""
+
+    def test_home_shows_bold_text(self, auth_client):
+        """Test that bold tags are rendered, not escaped."""
+        # Create a record with bold content
+        auth_client.post('/create_records', data={
+            'date': '2026-03-26',
+            'body': '<p>This is <b>bold</b> text</p>'
+        }, follow_redirects=True)
+
+        # Fetch home page
+        response = auth_client.get('/')
+        assert response.status_code == 200
+
+        # Bold tag should appear in output (not escaped)
+        # The sanitize_html filter preserves <b> tags
+        assert b'<b>' in response.data or b'<strong>' in response.data
+
+    def test_home_shows_italic_text(self, auth_client):
+        """Test that italic tags are rendered, not escaped."""
+        auth_client.post('/create_records', data={
+            'date': '2026-03-26',
+            'body': '<p>This is <i>italic</i> text</p>'
+        }, follow_redirects=True)
+
+        response = auth_client.get('/')
+        assert response.status_code == 200
+
+        # Italic tag should appear in output
+        assert b'<i>' in response.data or b'<em>' in response.data
+
+    def test_home_shows_list_items(self, auth_client):
+        """Test that list tags are rendered correctly."""
+        auth_client.post('/create_records', data={
+            'date': '2026-03-26',
+            'body': '<ul><li>Item 1</li><li>Item 2</li></ul>'
+        }, follow_redirects=True)
+
+        response = auth_client.get('/')
+        assert response.status_code == 200
+
+        # List tags should appear in output
+        assert b'<ul>' in response.data or b'<li>' in response.data
+
+
+class TestXSSPrevention:
+    """Integration tests for XSS prevention on home page (RENDER-02)."""
+
+    def test_xss_script_filtered_on_home(self, auth_client):
+        """Test that script tags are escaped in user content on home page."""
+        # Create a record with XSS attempt
+        auth_client.post('/create_records', data={
+            'date': '2026-03-26',
+            'body': '<script>alert("xss")</script><p>safe content</p>'
+        }, follow_redirects=True)
+
+        response = auth_client.get('/')
+        assert response.status_code == 200
+
+        # Script tag in user content should be escaped (bleach removes it)
+        # The XSS payload should NOT appear as raw executable script
+        # Check that safe content is preserved and script is escaped
+        assert b'safe content' in response.data
+        # The script content should be escaped, not rendered as HTML script
+        assert b'&lt;script&gt;' in response.data or b'<script>alert' not in response.data
+
+    def test_xss_onclick_filtered_on_home(self, auth_client):
+        """Test that onclick attributes are removed from home page."""
+        auth_client.post('/create_records', data={
+            'date': '2026-03-26',
+            'body': '<a onclick="evil()">click me</a>'
+        }, follow_redirects=True)
+
+        response = auth_client.get('/')
+        assert response.status_code == 200
+
+        # onclick should NOT appear in output
+        assert b'onclick' not in response.data
+
+    def test_xss_javascript_url_filtered_on_home(self, auth_client):
+        """Test that javascript: URLs are removed from home page."""
+        auth_client.post('/create_records', data={
+            'date': '2026-03-26',
+            'body': '<a href="javascript:alert(1)">dangerous link</a>'
+        }, follow_redirects=True)
+
+        response = auth_client.get('/')
+        assert response.status_code == 200
+
+        # javascript: should NOT appear in href
+        assert b'javascript:' not in response.data
+
+    def test_xss_onerror_filtered_on_home(self, auth_client):
+        """Test that onerror attributes are removed from home page."""
+        auth_client.post('/create_records', data={
+            'date': '2026-03-26',
+            'body': '<img src="x" onerror="alert(1)">'
+        }, follow_redirects=True)
+
+        response = auth_client.get('/')
+        assert response.status_code == 200
+
+        # onerror should NOT appear in output
+        assert b'onerror' not in response.data

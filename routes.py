@@ -7,7 +7,7 @@ Uses the register_routes pattern per D-01 (no Blueprints).
 Per D-11: Upload files use UUID for unique filenames.
 """
 
-from flask import render_template, redirect, flash, url_for, request, send_from_directory, abort, session, g, current_app
+from flask import render_template, redirect, flash, url_for, request, send_from_directory, abort, session, g, current_app, send_file
 from flask_security import login_required, login_user, logout_user, current_user
 from flask_security.utils import hash_password, verify_password
 from werkzeug.utils import secure_filename
@@ -16,11 +16,13 @@ from sqlalchemy.orm import joinedload
 import uuid
 import os
 from datetime import datetime
+from io import BytesIO
 
 from extensions import db, security, admin, ckeditor
 from models import User, Record, Role, Group, user_records, roles_users, users_groups, with_db_transaction
 from forms import RecordFilterForm, RecordDownloadForm, ThemeForm, MyLoginForm, MyRegisterForm, MyChangePasswordForm, MyForgotPasswordForm
 from utils import DateRange, RecordDownloader
+from exporters import ExporterFactory
 
 
 # =============================================================================
@@ -290,7 +292,26 @@ def register_routes(app):
     @login_required
     def download_records():
         query, start_date, end_date, _ = build_record_query(request.form)
+        format = request.form.get('format', 'xlsx')
 
+        if format == 'pdf':
+            records = query.all()
+            exporter = ExporterFactory.get_exporter('pdf')
+            output = exporter.export(records, title='周报')
+
+            if start_date and end_date:
+                filename = f"周报_{start_date.strftime('%Y%m%d')}-{end_date.strftime('%Y%m%d')}.pdf"
+            else:
+                filename = f"周报_{datetime.now().strftime('%Y%m%d')}.pdf"
+
+            return send_file(
+                output,
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name=filename
+            )
+
+        # Excel export (default)
         all_weeks = set()
         user_weekly_data = {}
 

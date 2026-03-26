@@ -12,6 +12,9 @@ flask_wtf==1.2.2
 openpyxl==3.1.5
 python_dateutil==2.9.0.post0
 WTForms==3.2.1
+weasyprint==68.1
 gunicorn==25.1.0
+htmldocx==0.0.6
 pytest==8.3.5
 pytest-cov==5.0.0
+python-docx==1.2.0

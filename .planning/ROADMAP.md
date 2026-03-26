@@ -13,7 +13,7 @@
 - [x] **Phase 8: Export Foundation** - 导出架构基础设施
 - [x] **Phase 9: PDF Export** - PDF 格式导出完整功能
 - [x] **Phase 10: DOCX Export** - Word 格式导出完整功能
-- [ ] **Phase 11: Excel Enhancement** - Excel 富文本单元格支持
+- [x] **Phase 11: Excel Enhancement** - Excel 富文本单元格支持
 - [ ] **Phase 12: Batch Export** - 团队领导批量导出功能
 
 <details>
@@ -109,7 +109,12 @@ Plans:
   2. 点击后可选择导出格式（PDF、DOCX、Excel）
   3. 系统生成 ZIP 压缩包，包含所选时间范围内所有组员的周报
   4. ZIP 文件中的每个周报文件名包含用户名和日期，便于识别
-**Plans**: TBD
+**Plans**: 3 plans (Wave 0: test scaffolding, Wave 1: route, Wave 2: UI)
+
+Plans:
+- [ ] 12-00-PLAN.md — Wave 0: Test scaffolding for batch export
+- [ ] 12-01-PLAN.md — Wave 1: Create batch_export route with ZIP generation
+- [ ] 12-02-PLAN.md — Wave 2: Add UI button to manage_records.html
 
 ## Progress
 
@@ -125,8 +130,8 @@ Plans:
 | 8. Export Foundation | v1.2 | 5/5 | Complete | 2026-03-26 |
 | 9. PDF Export | v1.2 | 3/3 | Complete | 2026-03-26 |
 | 10. DOCX Export | v1.2 | 3/3 | Complete | 2026-03-26 |
-| 11. Excel Enhancement | v1.2 | 3/3 | Complete   | 2026-03-26 |
-| 12. Batch Export | v1.2 | 0/? | Not started | - |
+| 11. Excel Enhancement | v1.2 | 3/3 | Complete | 2026-03-26 |
+| 12. Batch Export | v1.2 | 0/3 | Ready to execute | - |
 
 ---
 

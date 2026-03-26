@@ -4,7 +4,7 @@ This module provides the PdfExporter class for generating PDF documents
 from weekly report records with embedded images and professional headers/footers.
 """
 
-from weasyprint import HTML
+from weasyprint import HTML, default_url_fetcher
 from io import BytesIO
 from typing import List, Dict, Any, Optional
 import os
@@ -139,7 +139,7 @@ class PdfExporter(ExporterBase):
         }
 
         body {
-            font-family: "Microsoft YaHei", Arial, sans-serif;
+            font-family: "Noto Sans CJK SC", "Noto Sans SC", "WenQuanYi Micro Hei", "Microsoft YaHei", Arial, sans-serif;
             line-height: 1.6;
         }
 
@@ -193,10 +193,7 @@ class PdfExporter(ExporterBase):
 
         Returns:
             Dict with 'string' (bytes) and 'mime_type' for images,
-            or raises exception for unresolvable URLs
-
-        Raises:
-            Exception: If URL cannot be resolved
+            or delegates to default_url_fetcher for external URLs
         """
         if url.startswith('/files/'):
             filename = url[7:]  # Remove '/files/' prefix
@@ -218,5 +215,5 @@ class PdfExporter(ExporterBase):
 
                 return {'string': image_data, 'mime_type': mime_type}
 
-        # External URLs or missing files are not resolved
-        raise Exception(f"Cannot resolve URL: {url}")
+        # For external URLs or missing files, use default fetcher
+        return default_url_fetcher(url)

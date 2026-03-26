@@ -9,6 +9,7 @@ from io import BytesIO
 from typing import List, Dict, Any, Optional
 import os
 from datetime import datetime
+from urllib.parse import unquote
 
 from .base import ExporterBase
 from .image_resolver import ImageResolver
@@ -158,9 +159,11 @@ class PdfExporter(ExporterBase):
         content_sections = []
         for record in records:
             if record.content:
+                # Get user names for this record
+                user_names = ', '.join(u.username for u in record.user) if record.user else '未知用户'
                 content_sections.append(f'''
                 <div class="record">
-                    <p class="date"><small>{record.date.strftime('%Y-%m-%d')}</small></p>
+                    <p class="date"><strong>{user_names}</strong> — <small>{record.date.strftime('%Y-%m-%d')}</small></p>
                     {record.content}
                 </div>
                 <hr>
@@ -196,7 +199,10 @@ class PdfExporter(ExporterBase):
             or delegates to default_url_fetcher for external URLs
         """
         if url.startswith('/files/'):
-            filename = url[7:]  # Remove '/files/' prefix
+            # URL-decode the filename (handles Chinese characters)
+            encoded_filename = url[7:]  # Remove '/files/' prefix
+            filename = unquote(encoded_filename)
+
             local_path = os.path.join(self.uploads_path, filename)
 
             if os.path.exists(local_path):

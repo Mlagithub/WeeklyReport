@@ -447,10 +447,19 @@ def register_routes(app):
     @login_required
     def uploaded_files(filename):
         path = app.config['UPLOADED_PATH']
+        # URL-decode filename to handle Chinese characters
+        from urllib.parse import unquote
+        decoded_name = unquote(filename)
+
+        # Try decoded name first (for Chinese filenames), then secure_filename
+        if os.path.exists(os.path.join(path, decoded_name)):
+            return send_from_directory(path, decoded_name)
+
         safe_name = secure_filename(filename)
-        if not safe_name:
-            abort(404)
-        return send_from_directory(path, safe_name)
+        if safe_name and os.path.exists(os.path.join(path, safe_name)):
+            return send_from_directory(path, safe_name)
+
+        abort(404)
 
     @app.route('/upload', methods=['POST'])
     @login_required

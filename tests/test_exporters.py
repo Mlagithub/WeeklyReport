@@ -213,3 +213,31 @@ class TestDependencies:
     def test_htmldocx_installed(self):
         """Verify htmldocx is importable."""
         pytest.fail("htmldocx not installed - 'from htmldocx import HtmlToDocx' should succeed")
+
+
+class TestPdfExporter:
+    """Test PdfExporter class behavior.
+
+    These tests define expected behavior for PDF export functionality.
+    Tests will FAIL until PdfExporter is implemented in Phase 09 Plan 01.
+    """
+
+    def test_file_extension(self):
+        """Verify PdfExporter.file_extension returns 'pdf'."""
+        pytest.fail("PdfExporter not implemented - file_extension should return 'pdf'")
+
+    def test_mime_type(self):
+        """Verify PdfExporter.mime_type returns 'application/pdf'."""
+        pytest.fail("PdfExporter not implemented - mime_type should return 'application/pdf'")
+
+    def test_export_returns_bytesio(self):
+        """Verify export() returns BytesIO with PDF content."""
+        pytest.fail("PdfExporter not implemented - export() should return BytesIO with PDF bytes")
+
+    def test_image_embedding(self):
+        """Verify url_fetcher resolves /files/ URLs for image embedding."""
+        pytest.fail("PdfExporter not implemented - should use ImageResolver for /files/ URLs")
+
+    def test_headers_footers(self):
+        """Verify CSS Paged Media generates headers with title and footers with page numbers."""
+        pytest.fail("PdfExporter not implemented - should support @page CSS with headers/footers")

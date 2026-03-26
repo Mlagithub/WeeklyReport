@@ -68,8 +68,8 @@ Plans:
 
 Plans:
 - [x] 09-00-PLAN.md — Wave 0: Test scaffolding for PdfExporter
-- [ ] 09-01-PLAN.md — Wave 1: Create PdfExporter with image embedding and headers/footers
-- [ ] 09-02-PLAN.md — Wave 2: Route and form integration
+- [x] 09-01-PLAN.md — Wave 1: Create PdfExporter with image embedding and headers/footers
+- [x] 09-02-PLAN.md — Wave 2: Route and form integration
 
 ### Phase 10: DOCX Export
 **Goal**: 用户可将周报导出为可编辑的 Word 文档，保留完整格式

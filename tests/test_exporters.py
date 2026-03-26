@@ -627,7 +627,7 @@ class TestExcelExporter:
         # Re-open to check cell content
         from openpyxl import load_workbook
         result.seek(0)
-        wb = load_workbook(result)
+        wb = load_workbook(result, rich_text=True)  # rich_text=True preserves CellRichText
         ws = wb.active
 
         # Find a cell with rich text content (skip header row)

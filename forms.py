@@ -68,6 +68,7 @@ class RecordDownloadForm(FlaskForm):
     format = SelectField("格式", choices=[
         ('xlsx', 'Excel'),
         ('pdf', 'PDF'),
+        ('docx', 'Word'),
     ], default='xlsx')
     download_submit = SubmitField("下载")
 

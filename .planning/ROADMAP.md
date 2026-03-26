@@ -2,13 +2,27 @@
 
 ## Milestones
 
-- **v1.1 UI Optimization** — Phases 6-7 (current)
+- **v1.2 增强富文本导出功能** — Phases 8-12 (current)
+- **v1.1 UI Optimization** — Phases 6-7 (in progress)
 - ✅ **v1.0 FixIOBug** — Phases 1-5 (shipped 2026-03-24)
 
 ## Phases
 
-- [ ] **Phase 6: Find Page Filtering** - 默认过滤减少信息过载
-- [ ] **Phase 7: Homepage Rendering** - 富文本渲染与 XSS 防护
+### v1.2 增强富文本导出功能 (Current)
+
+- [ ] **Phase 8: Export Foundation** - 导出架构基础设施
+- [ ] **Phase 9: PDF Export** - PDF 格式导出完整功能
+- [ ] **Phase 10: DOCX Export** - Word 格式导出完整功能
+- [ ] **Phase 11: Excel Enhancement** - Excel 富文本单元格支持
+- [ ] **Phase 12: Batch Export** - 团队领导批量导出功能
+
+<details>
+<summary>v1.1 UI Optimization (Phases 6-7) — In Progress</summary>
+
+- [x] Phase 6: Find Page Filtering (1/2 plans) — 默认过滤减少信息过载
+- [ ] Phase 7: Homepage Rendering (0/2 plans) — 富文本渲染与 XSS 防护
+
+</details>
 
 <details>
 <summary>✅ v1.0 FixIOBug (Phases 1-5) — SHIPPED 2026-03-24</summary>
@@ -23,35 +37,57 @@
 
 ## Phase Details
 
-### Phase 6: Find Page Filtering
-**Goal**: 查找页面默认显示用户关注的记录，减少信息过载
-**Depends on**: Nothing (independent feature)
-**Requirements**: FIND-01, FIND-02, FIND-03
+### Phase 8: Export Foundation
+**Goal**: 建立导出功能的架构基础，为后续格式导出提供可复用组件
+**Depends on**: Phase 7 (v1.1 complete)
+**Requirements**: None (infrastructure phase)
 **Success Criteria** (what must be TRUE):
-  1. 查找页面打开时，"按用户"过滤默认选中当前用户
-  2. 查找页面打开时，"按日期"过滤默认选中最近 7 天
-  3. 现有的三个过滤工具（按用户、按小组、按日期）功能不变
-  4. 用户可以修改过滤条件查看其他记录
-**Plans**: 2 plans
+  1. 项目依赖已更新，包含 python-docx、WeasyPrint 等导出库
+  2. exporters/ 模块已创建，包含 ExporterBase 抽象基类
+  3. ImageResolver 工具类可将 CKEditor 图片 URL 转换为文件系统路径
+  4. ExporterFactory 可根据格式参数返回对应的导出器实例
+**Plans**: TBD
 
-Plans:
-- [x] 06-01-PLAN.md — Add 'last_7_days' time range to DateRange class
-- [ ] 06-02-PLAN.md — Update template default selection logic
-
-### Phase 7: Homepage Rendering
-**Goal**: 主页正确显示富文本格式的周报内容
-**Depends on**: Nothing (independent feature)
-**Requirements**: RENDER-01, RENDER-02
+### Phase 9: PDF Export
+**Goal**: 用户可将周报导出为保留完整格式的 PDF 文件
+**Depends on**: Phase 8
+**Requirements**: PDF-01, PDF-02, PDF-03
 **Success Criteria** (what must be TRUE):
-  1. 最近提交列表中的周报内容正确渲染富文本格式（粗体、斜体、列表等）
-  2. XSS 攻击代码被安全过滤，不会在浏览器中执行
-  3. 原有周报内容显示不受影响
-**Plans**: 2 plans
-**UI hint**: yes
+  1. 用户点击导出按钮可选择 PDF 格式下载周报
+  2. 导出的 PDF 正确渲染富文本格式（粗体、斜体、列表、表格、标题、链接）
+  3. 导出的 PDF 包含嵌入的图片，离线可查看
+  4. PDF 文档包含页眉（文档标题）和页脚（页码、日期）
+**Plans**: TBD
 
-Plans:
-- [ ] 07-01-PLAN.md — Create sanitize_html Jinja2 filter with bleach
-- [ ] 07-02-PLAN.md — Integrate filter into home template and add tests
+### Phase 10: DOCX Export
+**Goal**: 用户可将周报导出为可编辑的 Word 文档，保留完整格式
+**Depends on**: Phase 8
+**Requirements**: DOCX-01, DOCX-02
+**Success Criteria** (what must be TRUE):
+  1. 用户点击导出按钮可选择 DOCX 格式下载周报
+  2. 导出的 DOCX 正确保留富文本格式（粗体、斜体、列表、表格、标题、链接、代码块）
+  3. 导出的 DOCX 包含嵌入的图片，离线可查看
+**Plans**: TBD
+
+### Phase 11: Excel Enhancement
+**Goal**: Excel 导出的单元格支持富文本格式，提升可读性
+**Depends on**: Phase 8
+**Requirements**: XLSX-01
+**Success Criteria** (what must be TRUE):
+  1. 用户导出 Excel 时，周报内容单元格正确显示粗体、斜体等格式
+  2. 原有 Excel 导出功能保持不变（表格结构、列名等）
+**Plans**: TBD
+
+### Phase 12: Batch Export
+**Goal**: 团队领导可一键导出整个组的周报，打包为 ZIP 文件
+**Depends on**: Phase 9, Phase 10, Phase 11
+**Requirements**: BATCH-01
+**Success Criteria** (what must be TRUE):
+  1. 团队领导在管理页面看到批量导出按钮
+  2. 点击后可选择导出格式（PDF、DOCX、Excel）
+  3. 系统生成 ZIP 压缩包，包含所选时间范围内所有组员的周报
+  4. ZIP 文件中的每个周报文件名包含用户名和日期，便于识别
+**Plans**: TBD
 
 ## Progress
 
@@ -64,8 +100,13 @@ Plans:
 | 5. Code Refactoring | v1.0 | 3/3 | Complete | 2026-03-23 |
 | 6. Find Page Filtering | v1.1 | 1/2 | In Progress | - |
 | 7. Homepage Rendering | v1.1 | 0/2 | Ready to execute | - |
+| 8. Export Foundation | v1.2 | 0/? | Not started | - |
+| 9. PDF Export | v1.2 | 0/? | Not started | - |
+| 10. DOCX Export | v1.2 | 0/? | Not started | - |
+| 11. Excel Enhancement | v1.2 | 0/? | Not started | - |
+| 12. Batch Export | v1.2 | 0/? | Not started | - |
 
 ---
 
-*For milestone details, see `.planning/milestones/v1.0-ROADMAP.md`*
-*Current milestone: v1.1 UI Optimization — Phases 6-7*
+*For milestone details, see `.planning/milestones/`*
+*Current milestone: v1.2 增强富文本导出功能 — Phases 8-12*

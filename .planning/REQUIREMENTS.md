@@ -58,15 +58,15 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| DOCX-01 | — | Pending |
-| DOCX-02 | — | Pending |
-| PDF-01 | — | Pending |
-| PDF-02 | — | Pending |
-| PDF-03 | — | Pending |
-| XLSX-01 | — | Pending |
-| BATCH-01 | — | Pending |
+| DOCX-01 | Phase 10 | Pending |
+| DOCX-02 | Phase 10 | Pending |
+| PDF-01 | Phase 9 | Pending |
+| PDF-02 | Phase 9 | Pending |
+| PDF-03 | Phase 9 | Pending |
+| XLSX-01 | Phase 11 | Pending |
+| BATCH-01 | Phase 12 | Pending |
 
-*Traceability updated after roadmap creation.*
+*Traceability updated: 2026-03-26*
 
 ---
 

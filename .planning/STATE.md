@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 增强富文本导出功能
-status: Defining requirements
-last_updated: "2026-03-26T10:45:00.000Z"
+status: Roadmap created
+last_updated: "2026-03-26T12:00:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** 让团队领导能导出保留格式的周报，支持多种格式和批量导出
-**Current focus:** Defining requirements
+**Current focus:** Phase 8 - Export Foundation (基础设施搭建)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-26 — Milestone v1.2 started
+Phase: 8. Export Foundation
+Plan: TBD
+Status: Not started
+Last activity: 2026-03-26 — v1.2 roadmap created
 
 ## Performance Metrics
 
@@ -51,6 +51,16 @@ Last activity: 2026-03-26 — Milestone v1.2 started
 |-------|-------|--------|
 | 6. Find Page Filtering | 2 | Complete |
 | 7. Homepage Rendering | 2 | Complete |
+
+**By Phase (v1.2):**
+
+| Phase | Plans | Status |
+|-------|-------|--------|
+| 8. Export Foundation | TBD | Not started |
+| 9. PDF Export | TBD | Not started |
+| 10. DOCX Export | TBD | Not started |
+| 11. Excel Enhancement | TBD | Not started |
+| 12. Batch Export | TBD | Not started |
 
 ## Accumulated Context
 
@@ -78,18 +88,44 @@ v1.1 Decisions:
 - [Phase 07]: D-01: ALLOWED_TAGS includes CKEditor common output tags — Preserve formatting while blocking XSS
 - [Phase 07]: D-02: ALLOWED_ATTRIBUTES allows class/style on all tags — CKEditor compatibility for inline styling
 
+v1.2 Decisions:
+
+- [Roadmap]: 5 phases for 7 requirements (fine granularity)
+- [Roadmap]: Phase 8 = Export Foundation (infrastructure, no direct requirements)
+- [Roadmap]: Phase 9 = PDF Export (PDF-01, PDF-02, PDF-03)
+- [Roadmap]: Phase 10 = DOCX Export (DOCX-01, DOCX-02)
+- [Roadmap]: Phase 11 = Excel Enhancement (XLSX-01)
+- [Roadmap]: Phase 12 = Batch Export (BATCH-01)
+- [Research]: WeasyPrint for PDF — pure Python, active maintenance, best CSS support
+- [Research]: python-docx for DOCX — industry standard, supports all formatting elements
+- [Research]: htmldocx as HTML-DOCX bridge — quick integration but unmaintained since 2021
+- [Research]: ImageResolver centralized — reuse across PDF/DOCX, avoid duplication
+- [Research]: No background task queue — current scale (10-50 users) doesn't need it
+
 ### Pending Todos
 
-- [ ] Define v1.2 requirements
-- [ ] Create v1.2 roadmap
-- [ ] Execute phases
+- [x] Define v1.2 requirements
+- [x] Create v1.2 roadmap
+- [ ] Execute Phase 6 Plan 2 (v1.1 remaining)
+- [ ] Execute Phase 7 (v1.1 remaining)
+- [ ] Execute Phase 8 (v1.2 start)
 
 ### Blockers/Concerns
 
 None.
 
+### Research Flags
+
+Phases likely needing deeper research during planning:
+
+| Phase | Flag | Notes |
+|-------|------|-------|
+| Phase 10 (DOCX) | htmldocx unmaintained | 可能需要自定义 HTML 解析器作为后备 |
+| Phase 10 (DOCX) | Image embedding undocumented | htmldocx 图片处理文档不明确，需早期原型验证 |
+| Phase 11 (Excel) | CellRichText API complexity | HTML 到富文本转换可能比预期复杂 |
+
 ## Session Continuity
 
-Last session: 2026-03-26T10:45:00.000Z
-Milestone: v1.2 started
-Next action: Define requirements
+Last session: 2026-03-26T12:00:00.000Z
+Milestone: v1.2 roadmap created
+Next action: Execute Phase 6 Plan 2 (v1.1) or start Phase 8 (v1.2)

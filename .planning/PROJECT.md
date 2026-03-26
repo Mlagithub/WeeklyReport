@@ -43,11 +43,12 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 - ✓ **FIND-01**: 查找页面默认选中当前用户 — v1.1 Phase 6
 - ✓ **FIND-02**: 查找页面默认日期范围为最近 7 天 — v1.1 Phase 6
 - ✓ **FIND-03**: 保留现有过滤工具功能 — v1.1 Phase 6
+- ✓ **RENDER-01**: 主页最近提交正确渲染富文本格式 — v1.1 Phase 7
+- ✓ **RENDER-02**: 渲染时保持 XSS 防护 — v1.1 Phase 7
 
 ### Active
 
-- [ ] **RENDER-01**: 主页最近提交列表正确渲染富文本格式
-- [ ] **RENDER-02**: 渲染时保持 XSS 防护
+*All v1.1 requirements completed. Ready for next milestone.*
 
 ### Out of Scope
 
@@ -64,9 +65,9 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 - 部署方式：Gunicorn + systemd 服务
 
 **代码规模：**
-- 2,476 行 Python 代码
+- 2,500+ 行 Python 代码
 - 6 个模块（config, extensions, models, forms, routes, app）
-- 67 个测试用例
+- 87 个测试用例
 
 **已解决问题：**
 1. Flask 开发服务器 IO 过载 → Gunicorn + systemd

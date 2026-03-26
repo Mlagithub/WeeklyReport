@@ -83,8 +83,8 @@ class PdfExporter(ExporterBase):
         def url_fetcher(url: str) -> dict:
             return self._resolve_image_url(url)
 
-        # Generate PDF
-        html = HTML(string=html_content, url_fetcher=url_fetcher)
+        # Generate PDF - use fake base_url to ensure url_fetcher is called for relative URLs
+        html = HTML(string=html_content, base_url='http://localhost/', url_fetcher=url_fetcher)
         output = BytesIO()
         html.write_pdf(output)
         output.seek(0)
@@ -193,11 +193,18 @@ class PdfExporter(ExporterBase):
 
         Args:
             url: Image URL from HTML src attribute
+                 (e.g., '/files/abc.jpg' or 'http://localhost/files/abc.jpg')
 
         Returns:
             Dict with 'string' (bytes) and 'mime_type' for images,
             or a 1x1 transparent placeholder for missing local images
         """
+        # Extract the path from various URL formats
+        if url.startswith('http://localhost/files/'):
+            url = url[16:]  # Remove 'http://localhost' prefix, keep '/files/...'
+        elif url.startswith('file:///files/'):
+            url = url[7:]  # Remove 'file://' prefix, keep '/files/...'
+
         if url.startswith('/files/'):
             # URL-decode the filename (handles Chinese characters)
             encoded_filename = url[7:]  # Remove '/files/' prefix
@@ -222,7 +229,6 @@ class PdfExporter(ExporterBase):
                 return {'string': image_data, 'mime_type': mime_type}
             else:
                 # Missing local image - return 1x1 transparent PNG placeholder
-                # This prevents breaking the PDF generation
                 transparent_png = b'\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x01\\x08\\x06\\x00\\x00\\x00\\x1f\\x15\\xc4\\x89\\x00\\x00\\x00\\rIDATx\\x9cc\\xf8\\x0f\\x00\\x00\\x01\\x00\\x01\\x00\\x00\\x00\\x00IEND\\xaeB\`\\x82'
                 return {'string': transparent_png, 'mime_type': 'image/png'}
 

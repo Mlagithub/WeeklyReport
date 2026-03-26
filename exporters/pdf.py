@@ -196,7 +196,7 @@ class PdfExporter(ExporterBase):
 
         Returns:
             Dict with 'string' (bytes) and 'mime_type' for images,
-            or delegates to default_url_fetcher for external URLs
+            or a 1x1 transparent placeholder for missing local images
         """
         if url.startswith('/files/'):
             # URL-decode the filename (handles Chinese characters)
@@ -220,6 +220,16 @@ class PdfExporter(ExporterBase):
                 mime_type = mime_types.get(ext, 'application/octet-stream')
 
                 return {'string': image_data, 'mime_type': mime_type}
+            else:
+                # Missing local image - return 1x1 transparent PNG placeholder
+                # This prevents breaking the PDF generation
+                transparent_png = b'\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x01\\x08\\x06\\x00\\x00\\x00\\x1f\\x15\\xc4\\x89\\x00\\x00\\x00\\rIDATx\\x9cc\\xf8\\x0f\\x00\\x00\\x01\\x00\\x01\\x00\\x00\\x00\\x00IEND\\xaeB\`\\x82'
+                return {'string': transparent_png, 'mime_type': 'image/png'}
 
-        # For external URLs or missing files, use default fetcher
-        return default_url_fetcher(url)
+        # For external URLs, use default fetcher
+        if url.startswith(('http://', 'https://')):
+            return default_url_fetcher(url)
+
+        # Unknown URL scheme - return placeholder
+        transparent_png = b'\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x01\\x08\\x06\\x00\\x00\\x00\\x1f\\x15\\xc4\\x89\\x00\\x00\\x00\\rIDATx\\x9cc\\xf8\\x0f\\x00\\x00\\x01\\x00\\x01\\x00\\x00\\x00\\x00IEND\\xaeB\`\\x82'
+        return {'string': transparent_png, 'mime_type': 'image/png'}

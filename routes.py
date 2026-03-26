@@ -467,19 +467,37 @@ def register_routes(app):
         """Handle CKEditor file upload.
 
         Per D-11: Use UUID for unique filenames to prevent file overwrites.
+        Handles Chinese filenames by preserving them (URL-encoded in the URL).
         """
         f = request.files.get('upload')
         if not f or not f.filename:
             return upload_fail(message='No file uploaded!')
-        extension = f.filename.rsplit('.', 1)[-1].lower()
+
+        # Extract extension
+        if '.' in f.filename:
+            original_name, extension = f.filename.rsplit('.', 1)
+            extension = extension.lower()
+        else:
+            extension = ''
+
         if extension not in ['jpg', 'gif', 'png', 'jpeg']:
             return upload_fail(message='Image only!')
+
         path = app.config['UPLOADED_PATH']
         os.makedirs(path, exist_ok=True)
+
         # Per D-11: Use UUID for unique filename
-        filename = f"{uuid.uuid4().hex}_{secure_filename(f.filename)}"
-        if not filename:
-            return upload_fail(message='Invalid filename!')
+        # For Chinese filenames, secure_filename strips all chars, so we preserve original
+        safe_name = secure_filename(f.filename)
+        if safe_name and safe_name != f'{extension}':
+            # Filename has valid ASCII chars, use secure version
+            filename = f"{uuid.uuid4().hex}_{safe_name}"
+        else:
+            # Chinese or special chars - preserve original name with UUID prefix
+            # Use URL encoding for the filename so it can be served correctly
+            from urllib.parse import quote
+            filename = f"{uuid.uuid4().hex}_{original_name}.{extension}"
+
         f.save(os.path.join(path, filename))
         url = url_for('uploaded_files', filename=filename)
         return upload_success(url=url)

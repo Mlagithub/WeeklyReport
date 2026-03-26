@@ -82,7 +82,7 @@ Plans:
 **Plans**: 3 plans (Wave 0: test scaffolding, Wave 1: DocxExporter, Wave 2: integration)
 
 Plans:
-- [ ] 10-00-PLAN.md — Wave 0: Test scaffolding for DocxExporter
+- [x] 10-00-PLAN.md — Wave 0: Test scaffolding for DocxExporter
 - [ ] 10-01-PLAN.md — Wave 1: Create DocxExporter with HTML-to-DOCX conversion and image embedding
 - [ ] 10-02-PLAN.md — Wave 2: Route and form integration
 
@@ -119,7 +119,7 @@ Plans:
 | 7. Homepage Rendering | v1.1 | 0/2 | Ready to execute | - |
 | 8. Export Foundation | v1.2 | 5/5 | Complete | 2026-03-26 |
 | 9. PDF Export | v1.2 | 0/3 | Ready to execute | - |
-| 10. DOCX Export | v1.2 | 0/3 | Ready to execute | - |
+| 10. DOCX Export | v1.2 | 1/3 | In Progress|  |
 | 11. Excel Enhancement | v1.2 | 0/? | Not started | - |
 | 12. Batch Export | v1.2 | 0/? | Not started | - |
 

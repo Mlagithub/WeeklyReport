@@ -59,19 +59,53 @@ class TestImageResolver:
 
     def test_resolve_url_files_prefix(self):
         """Verify /files/filename.jpg converts to absolute path."""
-        pytest.fail("ImageResolver not implemented - resolve_url('/files/test.jpg') should return absolute path")
+        from exporters.image_resolver import ImageResolver
+        resolver = ImageResolver('/var/www/uploads')
+        result = resolver.resolve_url('/files/test.jpg')
+        assert result == '/var/www/uploads/test.jpg'
 
     def test_resolve_url_external_returns_none(self):
         """Verify external URLs return None."""
-        pytest.fail("ImageResolver not implemented - resolve_url('http://example.com/img.jpg') should return None")
+        from exporters.image_resolver import ImageResolver
+        resolver = ImageResolver('/var/www/uploads')
+        assert resolver.resolve_url('http://example.com/img.jpg') is None
+        assert resolver.resolve_url('https://example.com/img.jpg') is None
 
     def test_get_image_bytes_returns_bytes(self):
         """Verify get_image_bytes(url) returns bytes or None."""
-        pytest.fail("ImageResolver not implemented - get_image_bytes() should return bytes or None")
+        import tempfile
+        import os
+        from exporters.image_resolver import ImageResolver
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create test image file
+            test_file = os.path.join(tmpdir, 'test.png')
+            test_content = b'\x89PNG\r\n\x1a\n'  # PNG header bytes
+            with open(test_file, 'wb') as f:
+                f.write(test_content)
+
+            resolver = ImageResolver(tmpdir)
+            result = resolver.get_image_bytes('/files/test.png')
+            assert result == test_content
+
+            # Non-existent file returns None
+            assert resolver.get_image_bytes('/files/missing.png') is None
 
     def test_image_exists_returns_bool(self):
         """Verify image_exists(url) returns boolean."""
-        pytest.fail("ImageResolver not implemented - image_exists() should return True/False")
+        import tempfile
+        import os
+        from exporters.image_resolver import ImageResolver
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create test file
+            test_file = os.path.join(tmpdir, 'exists.jpg')
+            with open(test_file, 'wb') as f:
+                f.write(b'test')
+
+            resolver = ImageResolver(tmpdir)
+            assert resolver.image_exists('/files/exists.jpg') is True
+            assert resolver.image_exists('/files/missing.jpg') is False
 
 
 class TestDependencies:

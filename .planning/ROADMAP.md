@@ -113,7 +113,7 @@ Plans:
 
 Plans:
 - [x] 12-00-PLAN.md — Wave 0: Test scaffolding for batch export
-- [ ] 12-01-PLAN.md — Wave 1: Create batch_export route with ZIP generation
+- [x] 12-01-PLAN.md — Wave 1: Create batch_export route with ZIP generation
 - [ ] 12-02-PLAN.md — Wave 2: Add UI button to manage_records.html
 
 ## Progress
@@ -131,7 +131,7 @@ Plans:
 | 9. PDF Export | v1.2 | 3/3 | Complete | 2026-03-26 |
 | 10. DOCX Export | v1.2 | 3/3 | Complete | 2026-03-26 |
 | 11. Excel Enhancement | v1.2 | 3/3 | Complete | 2026-03-26 |
-| 12. Batch Export | v1.2 | 1/3 | In Progress|  |
+| 12. Batch Export | v1.2 | 2/3 | In Progress|  |
 
 ---
 

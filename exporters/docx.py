@@ -11,6 +11,7 @@ from io import BytesIO
 from typing import List, Dict, Any, Optional, Tuple
 import os
 from datetime import datetime
+from urllib.parse import unquote
 
 from .base import ExporterBase
 from .image_resolver import ImageResolver
@@ -85,9 +86,12 @@ class DocxExporter(ExporterBase):
         # Process each record
         for record in records:
             if record.content:
-                # Add date paragraph
+                # Get user names for this record
+                user_names = ', '.join(u.username for u in record.user) if record.user else '未知用户'
                 date_str = record.date.strftime('%Y-%m-%d')
-                doc.add_paragraph(f'Date: {date_str}')
+
+                # Add user and date paragraph
+                doc.add_paragraph(f'{user_names} — {date_str}', style='Intense Quote')
 
                 # Convert HTML to DOCX
                 self._convert_html_to_document(doc, record.content)

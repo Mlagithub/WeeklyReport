@@ -13,6 +13,7 @@ CKEditor Image Flow:
 
 import os
 from typing import Optional
+from urllib.parse import unquote
 
 
 class ImageResolver:
@@ -48,7 +49,7 @@ class ImageResolver:
 
         Args:
             url: Image URL from HTML src attribute
-                 (e.g., '/files/abc123_photo.jpg')
+                 (e.g., '/files/abc123_photo.jpg' or URL-encoded '/files/%E4%B8%AD%E6%96%87.png')
 
         Returns:
             Absolute filesystem path if local image, None if external/invalid
@@ -65,7 +66,9 @@ class ImageResolver:
 
         # Handle /files/ prefix for local uploads
         if url.startswith('/files/'):
-            filename = url[7:]  # Remove '/files/' prefix (7 characters)
+            encoded_filename = url[7:]  # Remove '/files/' prefix (7 characters)
+            # URL-decode to handle Chinese characters and special chars
+            filename = unquote(encoded_filename)
             return os.path.join(self.uploads_path, filename)
 
         # External URLs return None (not embedded)

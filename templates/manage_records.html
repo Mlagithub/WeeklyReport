@@ -144,8 +144,12 @@
         <form action="{{ url_for('download_records') }}" method="post" class="d-inline-block" id="downloadForm">
             <input type="hidden" name="user" value="">
             <input type="hidden" name="time_range" value="">
+            <select name="format" class="form-select form-select-sm d-inline-block w-auto">
+                <option value="xlsx">Excel</option>
+                <option value="pdf">PDF</option>
+            </select>
             <button type="submit" class="btn btn-success">
-                {{ render_icon('download') }} 下载 Excel
+                {{ render_icon('download') }} 下载
             </button>
         </form>
     </div>

@@ -502,3 +502,142 @@ class TestDocxExporter:
                 run._element.xpath('.//w:drawing') for run in paragraph.runs
             )
             assert has_drawing, "Paragraph should contain drawing element after image added"
+
+
+class TestExcelExporter:
+    """Test ExcelExporter class behavior.
+
+    Tests for Excel export with rich text functionality to be implemented in Phase 11 Plan 01.
+    These tests are designed to FAIL initially and will pass once ExcelExporter is implemented.
+    """
+
+    def test_file_extension(self):
+        """Verify ExcelExporter.file_extension returns 'xlsx'."""
+        from exporters.excel import ExcelExporter
+        exporter = ExcelExporter()
+        assert exporter.file_extension == 'xlsx'
+
+    def test_mime_type(self):
+        """Verify ExcelExporter.mime_type returns correct XLSX MIME type."""
+        from exporters.excel import ExcelExporter
+        exporter = ExcelExporter()
+        expected_mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        assert exporter.mime_type == expected_mime
+
+    def test_export_returns_bytesio(self):
+        """Verify export() returns BytesIO with valid XLSX content (ZIP magic bytes)."""
+        from exporters.excel import ExcelExporter
+        from unittest.mock import MagicMock
+
+        # Create mock records
+        record = MagicMock()
+        record.content = '<p>Test content</p>'
+        record.date.strftime = lambda fmt: '2026-03-26'
+
+        exporter = ExcelExporter()
+        result = exporter.export([record], title='Test Report')
+
+        assert isinstance(result, BytesIO)
+        # XLSX files are ZIP archives with PK magic bytes
+        result.seek(0)
+        header = result.read(2)
+        assert header == b'PK'
+
+    def test_html_to_rich_text_bold(self):
+        """Verify _html_to_rich_text converts <strong> to CellRichText with bold InlineFont."""
+        from exporters.excel import ExcelExporter
+        from openpyxl.cell.rich_text import CellRichText, TextBlock
+
+        exporter = ExcelExporter()
+        result = exporter._html_to_rich_text('<strong>Bold text</strong>')
+
+        assert isinstance(result, CellRichText)
+        # Should have at least one TextBlock with bold font
+        assert len(result) >= 1
+        # Check that the first text block has bold font
+        first_block = result[0]
+        assert isinstance(first_block, TextBlock)
+        assert first_block.font.b is True
+
+    def test_html_to_rich_text_italic(self):
+        """Verify _html_to_rich_text converts <em> to CellRichText with italic InlineFont."""
+        from exporters.excel import ExcelExporter
+        from openpyxl.cell.rich_text import CellRichText, TextBlock
+
+        exporter = ExcelExporter()
+        result = exporter._html_to_rich_text('<em>Italic text</em>')
+
+        assert isinstance(result, CellRichText)
+        assert len(result) >= 1
+        first_block = result[0]
+        assert isinstance(first_block, TextBlock)
+        assert first_block.font.i is True
+
+    def test_html_to_rich_text_underline(self):
+        """Verify _html_to_rich_text converts <u> to CellRichText with underline='single'."""
+        from exporters.excel import ExcelExporter
+        from openpyxl.cell.rich_text import CellRichText, TextBlock
+
+        exporter = ExcelExporter()
+        result = exporter._html_to_rich_text('<u>Underline text</u>')
+
+        assert isinstance(result, CellRichText)
+        assert len(result) >= 1
+        first_block = result[0]
+        assert isinstance(first_block, TextBlock)
+        # Note: underline must be 'single' string, not boolean True
+        assert first_block.font.u == 'single'
+
+    def test_html_to_rich_text_nested(self):
+        """Verify _html_to_rich_text handles nested formatting like <strong>Bold <em>and italic</em></strong>."""
+        from exporters.excel import ExcelExporter
+        from openpyxl.cell.rich_text import CellRichText, TextBlock
+
+        exporter = ExcelExporter()
+        result = exporter._html_to_rich_text('<strong>Bold <em>and italic</em></strong>')
+
+        assert isinstance(result, CellRichText)
+        # Should have multiple text blocks for nested formatting
+        assert len(result) >= 2
+        # First block should be bold only
+        first_block = result[0]
+        assert isinstance(first_block, TextBlock)
+        assert first_block.font.b is True
+        assert first_block.font.i is False
+        # Second block should be bold+italic
+        second_block = result[1]
+        assert isinstance(second_block, TextBlock)
+        assert second_block.font.b is True
+        assert second_block.font.i is True
+
+    def test_rich_text_in_cell(self):
+        """Verify exported cell value is CellRichText instance when HTML formatting present."""
+        from exporters.excel import ExcelExporter
+        from unittest.mock import MagicMock
+        from openpyxl.cell.rich_text import CellRichText
+
+        # Create mock record with rich text
+        record = MagicMock()
+        record.content = '<p><strong>Bold</strong> and <em>italic</em></p>'
+        record.date.strftime = lambda fmt: '2026-03-26'
+
+        exporter = ExcelExporter()
+        result = exporter.export([record], title='Test Report')
+
+        # Re-open to check cell content
+        from openpyxl import load_workbook
+        result.seek(0)
+        wb = load_workbook(result)
+        ws = wb.active
+
+        # Find a cell with rich text content (skip header row)
+        found_rich_text = False
+        for row in ws.iter_rows(min_row=2):
+            for cell in row:
+                if isinstance(cell.value, CellRichText):
+                    found_rich_text = True
+                    break
+            if found_rich_text:
+                break
+
+        assert found_rich_text, "At least one cell should contain CellRichText"

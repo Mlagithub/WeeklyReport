@@ -19,19 +19,29 @@ class TestExporterBase:
 
     def test_export_method_exists(self):
         """Verify ExporterBase has export(records, **options) method."""
-        pytest.fail("ExporterBase not implemented - export() method should exist")
+        from exporters.base import ExporterBase
+        assert hasattr(ExporterBase, 'export')
+        assert callable(getattr(ExporterBase, 'export'))
 
     def test_file_extension_property(self):
         """Verify file_extension property exists and is abstract."""
-        pytest.fail("ExporterBase not implemented - file_extension property should be abstract")
+        from exporters.base import ExporterBase
+        assert hasattr(ExporterBase, 'file_extension')
+        # Verify it's abstract by checking __isabstractmethod__
+        assert getattr(ExporterBase.file_extension, 'fget').__isabstractmethod__
 
     def test_mime_type_property(self):
         """Verify mime_type property exists and is abstract."""
-        pytest.fail("ExporterBase not implemented - mime_type property should be abstract")
+        from exporters.base import ExporterBase
+        assert hasattr(ExporterBase, 'mime_type')
+        # Verify it's abstract by checking __isabstractmethod__
+        assert getattr(ExporterBase.mime_type, 'fget').__isabstractmethod__
 
     def test_cannot_instantiate_base(self):
         """Verify ExporterBase cannot be instantiated directly."""
-        pytest.fail("ExporterBase not implemented - should raise TypeError when instantiated directly")
+        from exporters.base import ExporterBase
+        with pytest.raises(TypeError):
+            ExporterBase()
 
 
 class TestExporterFactory:

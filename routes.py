@@ -311,6 +311,23 @@ def register_routes(app):
                 download_name=filename
             )
 
+        if format == 'docx':
+            records = query.all()
+            exporter = ExporterFactory.get_exporter('docx')
+            output = exporter.export(records, title='周报')
+
+            if start_date and end_date:
+                filename = f"周报_{start_date.strftime('%Y%m%d')}-{end_date.strftime('%Y%m%d')}.docx"
+            else:
+                filename = f"周报_{datetime.now().strftime('%Y%m%d')}.docx"
+
+            return send_file(
+                output,
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                as_attachment=True,
+                download_name=filename
+            )
+
         # Excel export (default)
         all_weeks = set()
         user_weekly_data = {}

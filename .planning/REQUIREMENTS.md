@@ -14,8 +14,8 @@
 
 ### DOCX Export
 
-- [ ] **DOCX-01**: 用户可将周报导出为 DOCX 格式（支持表格、列表、标题、链接、代码块）
-- [ ] **DOCX-02**: 导出的 DOCX 文档中图片嵌入（离线可查看）
+- [x] **DOCX-01**: 用户可将周报导出为 DOCX 格式（支持表格、列表、标题、链接、代码块）
+- [x] **DOCX-02**: 导出的 DOCX 文档中图片嵌入（离线可查看）
 
 ### PDF Export
 
@@ -58,8 +58,8 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| DOCX-01 | Phase 10 | Pending |
-| DOCX-02 | Phase 10 | Pending |
+| DOCX-01 | Phase 10 | Complete |
+| DOCX-02 | Phase 10 | Complete |
 | PDF-01 | Phase 9 | Complete |
 | PDF-02 | Phase 9 | Complete |
 | PDF-03 | Phase 9 | Complete |

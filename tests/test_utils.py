@@ -168,3 +168,103 @@ class TestHtmlToText:
         assert 'Introduction' in result
         assert '- Item 1' in result
         assert 'Conclusion' in result
+
+
+class TestSanitizeHtml:
+    """Tests for the sanitize_html Jinja2 filter (RENDER-01, RENDER-02)."""
+
+    def test_filter_exists(self):
+        """Test that sanitize_html filter is registered."""
+        from app import app
+        # Check filter is registered
+        assert 'sanitize_html' in app.jinja_env.filters
+
+    def test_preserves_bold_text(self):
+        """Test that bold tags are preserved (RENDER-01)."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        result = filter_func('<b>bold text</b>')
+        assert '<b>' in result
+        assert 'bold text' in result
+
+    def test_preserves_italic_text(self):
+        """Test that italic tags are preserved (RENDER-01)."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        result = filter_func('<i>italic text</i>')
+        assert '<i>' in result
+
+    def test_preserves_strong_and_em(self):
+        """Test that strong and em tags are preserved (RENDER-01)."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        result = filter_func('<strong>strong</strong> and <em>emphasized</em>')
+        assert '<strong>' in result
+        assert '<em>' in result
+
+    def test_preserves_lists(self):
+        """Test that ul/ol/li tags are preserved (RENDER-01)."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        result = filter_func('<ul><li>item 1</li><li>item 2</li></ul>')
+        assert '<ul>' in result
+        assert '<li>' in result
+
+    def test_preserves_paragraphs(self):
+        """Test that paragraph tags are preserved (RENDER-01)."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        result = filter_func('<p>paragraph</p>')
+        assert '<p>' in result
+
+    def test_preserves_safe_anchor(self):
+        """Test that safe anchor tags with href are preserved."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        result = filter_func('<a href="https://example.com">link</a>')
+        assert '<a' in result
+        assert 'href="https://example.com"' in result
+
+    def test_removes_script_tags(self):
+        """Test that script tags are removed (RENDER-02)."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        result = filter_func('<script>alert("xss")</script><b>safe</b>')
+        assert '<script>' not in result
+        assert 'alert' not in result or '&lt;script&gt;' in result
+        assert '<b>safe</b>' in result
+
+    def test_removes_onclick_attribute(self):
+        """Test that onclick attributes are removed (RENDER-02)."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        result = filter_func('<a onclick="evil()">link</a>')
+        assert 'onclick' not in result
+
+    def test_removes_javascript_url(self):
+        """Test that javascript: URLs are removed (RENDER-02)."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        result = filter_func('<a href="javascript:alert(1)">link</a>')
+        assert 'javascript:' not in result
+
+    def test_removes_onerror_attribute(self):
+        """Test that onerror attributes are removed (RENDER-02)."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        result = filter_func('<img src="x" onerror="alert(1)">')
+        assert 'onerror' not in result
+
+    def test_empty_input_returns_empty(self):
+        """Test that empty input returns empty string."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        assert filter_func('') == ''
+        assert filter_func(None) == ''
+
+    def test_preserves_line_breaks(self):
+        """Test that br tags are preserved (RENDER-01)."""
+        from app import app
+        filter_func = app.jinja_env.filters['sanitize_html']
+        result = filter_func('line1<br>line2')
+        assert '<br>' in result or '<br/>' in result

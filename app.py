@@ -9,6 +9,7 @@ from sqlalchemy import event, inspect, text
 from sqlalchemy.pool import Pool
 import logging
 from logging.handlers import RotatingFileHandler
+import bleach
 
 # Import from new modules
 from config import Config, DevelopmentConfig, ProductionConfig
@@ -24,6 +25,29 @@ from forms import (
 )
 from routes import register_routes
 from flask_security import SQLAlchemyUserDatastore
+
+
+# =============================================================================
+# HTML Sanitization Configuration (RENDER-01, RENDER-02)
+# =============================================================================
+
+# Allowed HTML tags and attributes for sanitize_html filter
+ALLOWED_TAGS = {
+    'p', 'br', 'b', 'i', 'strong', 'em', 'u',
+    'ul', 'ol', 'li', 'a', 'img',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+    'blockquote', 'pre', 'code',
+    'table', 'thead', 'tbody', 'tr', 'td', 'th',
+    'span', 'div'
+}
+
+ALLOWED_ATTRIBUTES = {
+    '*': ['class', 'style'],
+    'a': ['href', 'title', 'target', 'rel'],
+    'img': ['src', 'alt', 'title', 'width', 'height'],
+}
+
+ALLOWED_PROTOCOLS = {'http', 'https', 'mailto'}
 
 
 # =============================================================================
@@ -156,6 +180,35 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 
 # Create the app instance for WSGI compatibility
 app = create_app()
+
+
+# =============================================================================
+# Custom Jinja2 Filters
+# =============================================================================
+
+@app.template_filter('sanitize_html')
+def sanitize_html(text):
+    """Sanitize HTML content for safe rendering.
+
+    Allows common CKEditor formatting tags while blocking XSS.
+    Used for RENDER-01 (rich text) and RENDER-02 (XSS prevention).
+
+    Args:
+        text: HTML string to sanitize.
+
+    Returns:
+        Sanitized HTML string, safe for |safe filter.
+    """
+    if not text:
+        return ''
+    return bleach.clean(
+        text,
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRIBUTES,
+        protocols=ALLOWED_PROTOCOLS,
+        strip=False
+    )
+
 
 # Create user_datastore for Flask-Security (used by tests)
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)

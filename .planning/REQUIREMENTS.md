@@ -29,7 +29,7 @@
 
 ### Batch Export
 
-- [ ] **BATCH-01**: 团队领导可批量导出整个组的周报（ZIP 压缩包）
+- [x] **BATCH-01**: 团队领导可批量导出整个组的周报（ZIP 压缩包）
 
 ---
 
@@ -64,7 +64,7 @@
 | PDF-02 | Phase 9 | Complete |
 | PDF-03 | Phase 9 | Complete |
 | XLSX-01 | Phase 11 | Complete |
-| BATCH-01 | Phase 12 | Pending |
+| BATCH-01 | Phase 12 | Complete |
 
 *Traceability updated: 2026-03-26*
 

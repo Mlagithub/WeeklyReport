@@ -332,15 +332,15 @@ class TestRecordCRUD:
             f"Expected current user '{test_user['username']}' to be selected by default in user dropdown"
 
     def test_manage_records_default_time_filter(self, auth_client):
-        """Test that time_range dropdown defaults to last_7_days when no URL param (FIND-02)."""
+        """Test that time_range dropdown defaults to this_week when no URL param (FIND-02)."""
         response = auth_client.get('/manage_records')
         assert response.status_code == 200
-        # Check that 'last_7_days' is selected by default in time_range dropdown
+        # Check that 'this_week' is selected by default in time_range dropdown
         import re
-        # Pattern matches: <option value="last_7_days" selected> or similar
-        pattern = r'<option[^>]*value="last_7_days"[^>]*selected[^>]*>'
+        # Pattern matches: <option value="this_week" selected> or similar
+        pattern = r'<option[^>]*value="this_week"[^>]*selected[^>]*>'
         assert re.search(pattern, response.text), \
-            "Expected 'last_7_days' to be selected by default in time_range dropdown"
+            "Expected 'this_week' to be selected by default in time_range dropdown"
 
     def test_manage_records_can_clear_filters(self, auth_client):
         """Test that user can still select empty value to clear filters (FIND-03)."""

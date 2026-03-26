@@ -348,7 +348,7 @@ def register_routes(app):
         if 'user' not in filter_args:
             filter_args['user'] = current_user.username
         if 'time_range' not in filter_args:
-            filter_args['time_range'] = 'last_7_days'
+            filter_args['time_range'] = 'this_week'
 
         query, _, _, current_filter_usernames = build_record_query(filter_args)
         query = query.order_by(Record.date.desc())

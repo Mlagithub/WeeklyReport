@@ -163,8 +163,38 @@ class DocxExporter(ExporterBase):
             image_bytes = self.image_resolver.get_image_bytes(url)
 
             if image_bytes:
-                # Find and replace placeholder with image
-                self._add_image_to_document(doc, None, url, image_bytes)
+                # Find paragraph containing the placeholder
+                found = False
+                for paragraph in doc.paragraphs:
+                    if placeholder in paragraph.text:
+                        # Clear the paragraph and add image
+                        self._replace_paragraph_with_image(paragraph, image_bytes)
+                        found = True
+                        break
+
+                # If placeholder not found, append image at end
+                if not found:
+                    self._add_image_to_document(doc, None, url, image_bytes)
+
+    def _replace_paragraph_with_image(self, paragraph, image_bytes: bytes) -> None:
+        """Replace paragraph content with an image.
+
+        Args:
+            paragraph: python-docx Paragraph object
+            image_bytes: Image data as bytes
+        """
+        from io import BytesIO as IOBytesIO
+
+        # Clear existing runs
+        for run in paragraph.runs:
+            run.text = ''
+
+        # Add image to the paragraph
+        image_stream = IOBytesIO(image_bytes)
+        try:
+            paragraph.add_run().add_picture(image_stream, width=Inches(6))
+        except Exception:
+            paragraph.add_run('[Image]')
 
     def _add_image_to_document(self, doc: Document, paragraph, url: str, image_bytes: bytes) -> None:
         """Add image bytes to document at appropriate location.

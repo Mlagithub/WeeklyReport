@@ -406,13 +406,13 @@ class TestDocxExporter:
         from exporters.docx import DocxExporter
         from unittest.mock import MagicMock
         from docx import Document
+        from PIL import Image
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create test image file (valid PNG header)
+            # Create test image file (valid 1x1 pixel PNG using PIL)
             test_image = os.path.join(tmpdir, 'test.png')
-            png_header = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde'
-            with open(test_image, 'wb') as f:
-                f.write(png_header)
+            img = Image.new('RGB', (1, 1), color='red')
+            img.save(test_image, 'PNG')
 
             # Create mock record with image
             record = MagicMock()
@@ -454,13 +454,21 @@ class TestDocxExporter:
         <p>Text after</p>
         '''
 
-        images = exporter._extract_images(html)
+        result = exporter._extract_images(html)
 
-        # Should return list of (element, url) tuples
+        # Should return tuple of (processed_html, images_list)
+        assert isinstance(result, tuple)
+        processed_html, images = result
+
+        # Check images list
         assert isinstance(images, list)
         assert len(images) == 2
         assert images[0][1] == '/files/image1.png'
         assert images[1][1] == '/files/image2.jpg'
+
+        # Check that placeholders were inserted in HTML
+        assert '[[IMAGE_PLACEHOLDER_0]]' in processed_html
+        assert '[[IMAGE_PLACEHOLDER_1]]' in processed_html
 
     def test_add_image_to_document_helper(self):
         """Verify _add_image_to_document embeds image bytes into document."""
@@ -468,13 +476,13 @@ class TestDocxExporter:
         import os
         from exporters.docx import DocxExporter
         from docx import Document
+        from PIL import Image
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            # Create test image
+            # Create test image using PIL
             test_image = os.path.join(tmpdir, 'embed_test.png')
-            png_data = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde'
-            with open(test_image, 'wb') as f:
-                f.write(png_data)
+            img = Image.new('RGB', (1, 1), color='blue')
+            img.save(test_image, 'PNG')
 
             exporter = DocxExporter(uploads_path=tmpdir)
             doc = Document()

@@ -67,7 +67,7 @@ Plans:
 **Plans**: 3 plans (Wave 0: test scaffolding, Wave 1: PdfExporter, Wave 2: integration)
 
 Plans:
-- [ ] 09-00-PLAN.md — Wave 0: Test scaffolding for PdfExporter
+- [x] 09-00-PLAN.md — Wave 0: Test scaffolding for PdfExporter
 - [ ] 09-01-PLAN.md — Wave 1: Create PdfExporter with image embedding and headers/footers
 - [ ] 09-02-PLAN.md — Wave 2: Route and form integration
 

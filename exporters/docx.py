@@ -257,18 +257,26 @@ class DocxExporter(ExporterBase):
                 doc.add_paragraph('[Image]')
 
     def _apply_chinese_font(self, doc: Document) -> None:
-        """Apply Microsoft YaHei font to all runs in document for Chinese support.
+        """Apply Chinese font support to document.
+
+        Sets the East Asian font at document style level for efficiency,
+        rather than iterating through every run.
 
         Args:
             doc: python-docx Document object
         """
         from docx.oxml.ns import qn
 
-        for paragraph in doc.paragraphs:
-            for run in paragraph.runs:
-                run.font.name = 'Microsoft YaHei'
-                # Also set East Asian font via rPr
-                r = run._element
-                rPr = r.get_or_add_rPr()
-                rFonts = rPr.get_or_add_rFonts()
-                rFonts.set(qn('w:eastAsia'), 'Microsoft YaHei')
+        # Set font at document level via Normal style for efficiency
+        # This is much faster than iterating every run
+        try:
+            style = doc.styles['Normal']
+            style.font.name = 'Microsoft YaHei'
+            # Set East Asian font
+            rPr = style.element.get_or_add_rPr()
+            rFonts = rPr.get_or_add_rFonts()
+            rFonts.set(qn('w:eastAsia'), 'Microsoft YaHei')
+        except Exception:
+            # If style modification fails, skip silently
+            # Word will use default fonts which usually work fine for Chinese
+            pass

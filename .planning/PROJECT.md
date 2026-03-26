@@ -11,7 +11,7 @@
 - 批量导出 — 团队领导可一键导出整个组的周报
 - 图片嵌入 — 图片嵌入文档，离线可查看
 
-**Status:** Planning
+**Status:** In Progress — Phase 8 (Export Foundation) complete
 
 ## What This Is
 

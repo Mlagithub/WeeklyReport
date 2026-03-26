@@ -97,7 +97,7 @@ Plans:
 
 Plans:
 - [x] 11-00-PLAN.md — Wave 0: Test scaffolding for ExcelExporter
-- [ ] 11-01-PLAN.md — Wave 1: Create ExcelExporter with HTML-to-CellRichText conversion
+- [x] 11-01-PLAN.md — Wave 1: Create ExcelExporter with HTML-to-CellRichText conversion
 - [ ] 11-02-PLAN.md — Wave 1: Register ExcelExporter and update routes
 
 ### Phase 12: Batch Export
@@ -125,7 +125,7 @@ Plans:
 | 8. Export Foundation | v1.2 | 5/5 | Complete | 2026-03-26 |
 | 9. PDF Export | v1.2 | 3/3 | Complete | 2026-03-26 |
 | 10. DOCX Export | v1.2 | 3/3 | Complete | 2026-03-26 |
-| 11. Excel Enhancement | v1.2 | 1/3 | In Progress|  |
+| 11. Excel Enhancement | v1.2 | 2/3 | In Progress|  |
 | 12. Batch Export | v1.2 | 0/? | Not started | - |
 
 ---

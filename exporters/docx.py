@@ -117,6 +117,9 @@ class DocxExporter(ExporterBase):
         # First, extract and embed images (htmldocx doesn't support images)
         html_processed, images = self._extract_images(html)
 
+        # Pre-process HTML to fix issues with htmldocx
+        html_processed = self._sanitize_html(html_processed)
+
         # Convert HTML to DOCX using htmldocx
         parser = HtmlToDocx()
         parser.add_html_to_document(html_processed, doc)
@@ -126,6 +129,30 @@ class DocxExporter(ExporterBase):
 
         # Embed extracted images
         self._embed_images(doc, images)
+
+    def _sanitize_html(self, html: str) -> str:
+        """Sanitize HTML to avoid htmldocx parsing issues.
+
+        htmldocx has bugs with:
+        - <a> tags without href attribute (KeyError: 'href')
+
+        Args:
+            html: HTML content string
+
+        Returns:
+            Sanitized HTML string
+        """
+        from bs4 import BeautifulSoup
+
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # Fix <a> tags without href - add a dummy href or convert to span
+        for a in soup.find_all('a'):
+            if not a.get('href'):
+                # Convert to span to avoid htmldocx KeyError
+                a.name = 'span'
+
+        return str(soup)
 
     def _extract_images(self, html: str) -> Tuple[str, list]:
         """Extract img tags from HTML and replace with placeholders.

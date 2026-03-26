@@ -46,7 +46,14 @@
   2. exporters/ 模块已创建，包含 ExporterBase 抽象基类
   3. ImageResolver 工具类可将 CKEditor 图片 URL 转换为文件系统路径
   4. ExporterFactory 可根据格式参数返回对应的导出器实例
-**Plans**: TBD
+**Plans**: 5 plans (Wave 0: test scaffolding, Wave 1: infrastructure)
+
+Plans:
+- [ ] 08-00-PLAN.md — Wave 0: Test scaffolding for exporters module
+- [ ] 08-01-PLAN.md — Wave 1: Update requirements.txt with export dependencies
+- [ ] 08-02-PLAN.md — Wave 1: Create ExporterBase abstract class
+- [ ] 08-03-PLAN.md — Wave 1: Create ExporterFactory
+- [ ] 08-04-PLAN.md — Wave 1: Create ImageResolver utility
 
 ### Phase 9: PDF Export
 **Goal**: 用户可将周报导出为保留完整格式的 PDF 文件
@@ -100,7 +107,7 @@
 | 5. Code Refactoring | v1.0 | 3/3 | Complete | 2026-03-23 |
 | 6. Find Page Filtering | v1.1 | 1/2 | In Progress | - |
 | 7. Homepage Rendering | v1.1 | 0/2 | Ready to execute | - |
-| 8. Export Foundation | v1.2 | 0/? | Not started | - |
+| 8. Export Foundation | v1.2 | 0/5 | Ready to execute | - |
 | 9. PDF Export | v1.2 | 0/? | Not started | - |
 | 10. DOCX Export | v1.2 | 0/? | Not started | - |
 | 11. Excel Enhancement | v1.2 | 0/? | Not started | - |

@@ -65,6 +65,10 @@ class RecordFilterForm(FlaskForm):
 
 class RecordDownloadForm(FlaskForm):
     """Form for downloading records."""
+    format = SelectField("格式", choices=[
+        ('xlsx', 'Excel'),
+        ('pdf', 'PDF'),
+    ], default='xlsx')
     download_submit = SubmitField("下载")
 
 

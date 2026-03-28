@@ -171,7 +171,7 @@ Plans:
 5. Polished text replaces editor content, user can continue editing before save
 6. Admin can configure default polish prompt in settings
 
-**Plans:** 1/2 plans executed
+**Plans:** 1/2 plans complete
 
 **UI hint:** yes
 

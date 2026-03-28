@@ -1,7 +1,7 @@
 """Tests for utility functions in utils.py."""
 
 from datetime import date
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from utils import DateRange, html_to_text
 

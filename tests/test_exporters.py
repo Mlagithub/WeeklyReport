@@ -9,9 +9,10 @@ Phase: 08-export-foundation
 Plan: 00 (Test Scaffolding)
 """
 
-import pytest
 from io import BytesIO
-from typing import List, Any
+from typing import Any, List
+
+import pytest
 
 
 class TestExporterBase:
@@ -21,21 +22,21 @@ class TestExporterBase:
         """Verify ExporterBase has export(records, **options) method."""
         from exporters.base import ExporterBase
         assert hasattr(ExporterBase, 'export')
-        assert callable(getattr(ExporterBase, 'export'))
+        assert callable(ExporterBase.export)
 
     def test_file_extension_property(self):
         """Verify file_extension property exists and is abstract."""
         from exporters.base import ExporterBase
         assert hasattr(ExporterBase, 'file_extension')
         # Verify it's abstract by checking __isabstractmethod__
-        assert getattr(ExporterBase.file_extension, 'fget').__isabstractmethod__
+        assert ExporterBase.file_extension.fget.__isabstractmethod__
 
     def test_mime_type_property(self):
         """Verify mime_type property exists and is abstract."""
         from exporters.base import ExporterBase
         assert hasattr(ExporterBase, 'mime_type')
         # Verify it's abstract by checking __isabstractmethod__
-        assert getattr(ExporterBase.mime_type, 'fget').__isabstractmethod__
+        assert ExporterBase.mime_type.fget.__isabstractmethod__
 
     def test_cannot_instantiate_base(self):
         """Verify ExporterBase cannot be instantiated directly."""
@@ -49,7 +50,7 @@ class TestExporterFactory:
 
     def test_register_exporter(self):
         """Verify register(format, exporter_class) class method exists."""
-        from exporters import ExporterFactory, ExporterBase
+        from exporters import ExporterBase, ExporterFactory
 
         # Create a concrete exporter for testing
         class MockExporter(ExporterBase):
@@ -74,7 +75,7 @@ class TestExporterFactory:
 
     def test_get_exporter_returns_instance(self):
         """Verify get_exporter(format) returns exporter instance."""
-        from exporters import ExporterFactory, ExporterBase
+        from exporters import ExporterBase, ExporterFactory
 
         # Create a concrete exporter for testing
         class TestExporter(ExporterBase):
@@ -119,7 +120,7 @@ class TestExporterFactory:
 
     def test_supported_formats_returns_list(self):
         """Verify supported_formats() returns list of format strings."""
-        from exporters import ExporterFactory, ExporterBase
+        from exporters import ExporterBase, ExporterFactory
 
         # Create a concrete exporter for testing
         class FormatExporter(ExporterBase):
@@ -164,8 +165,9 @@ class TestImageResolver:
 
     def test_get_image_bytes_returns_bytes(self):
         """Verify get_image_bytes(url) returns bytes or None."""
-        import tempfile
         import os
+        import tempfile
+
         from exporters.image_resolver import ImageResolver
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -184,8 +186,9 @@ class TestImageResolver:
 
     def test_image_exists_returns_bool(self):
         """Verify image_exists(url) returns boolean."""
-        import tempfile
         import os
+        import tempfile
+
         from exporters.image_resolver import ImageResolver
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -238,8 +241,9 @@ class TestPdfExporter:
 
     def test_export_returns_bytesio(self):
         """Verify export() returns BytesIO with PDF content."""
-        from exporters.pdf import PdfExporter
         from unittest.mock import MagicMock
+
+        from exporters.pdf import PdfExporter
 
         # Create mock records
         record = MagicMock()
@@ -257,10 +261,11 @@ class TestPdfExporter:
 
     def test_image_embedding(self):
         """Verify url_fetcher resolves /files/ URLs for image embedding."""
-        import tempfile
         import os
-        from exporters.pdf import PdfExporter
+        import tempfile
         from unittest.mock import MagicMock
+
+        from exporters.pdf import PdfExporter
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create test image file
@@ -270,7 +275,7 @@ class TestPdfExporter:
 
             # Create mock record with image
             record = MagicMock()
-            record.content = f'<img src="/files/test.png">'
+            record.content = '<img src="/files/test.png">'
             record.date.strftime = lambda fmt: '2026-03-26'
 
             exporter = PdfExporter(uploads_path=tmpdir)
@@ -282,8 +287,9 @@ class TestPdfExporter:
 
     def test_headers_footers(self):
         """Verify CSS Paged Media generates headers with title and footers with page numbers."""
-        from exporters.pdf import PdfExporter
         from unittest.mock import MagicMock
+
+        from exporters.pdf import PdfExporter
 
         record = MagicMock()
         record.content = '<p>Content</p>'
@@ -326,8 +332,9 @@ class TestDocxExporter:
 
     def test_export_returns_bytesio(self):
         """Verify export() returns BytesIO with valid DOCX content (ZIP magic bytes)."""
-        from exporters.docx import DocxExporter
         from unittest.mock import MagicMock
+
+        from exporters.docx import DocxExporter
 
         # Create mock records
         record = MagicMock()
@@ -345,9 +352,11 @@ class TestDocxExporter:
 
     def test_html_to_docx_conversion(self):
         """Verify HTML elements are converted to DOCX equivalents."""
-        from exporters.docx import DocxExporter
         from unittest.mock import MagicMock
+
         from docx import Document
+
+        from exporters.docx import DocxExporter
 
         # Create mock record with various HTML elements
         record = MagicMock()
@@ -401,12 +410,14 @@ class TestDocxExporter:
 
     def test_image_embedding(self):
         """Verify image embedding via _extract_images and _add_image_to_document methods."""
-        import tempfile
         import os
-        from exporters.docx import DocxExporter
+        import tempfile
         from unittest.mock import MagicMock
+
         from docx import Document
         from PIL import Image
+
+        from exporters.docx import DocxExporter
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create test image file (valid 1x1 pixel PNG using PIL)
@@ -472,11 +483,13 @@ class TestDocxExporter:
 
     def test_add_image_to_document_helper(self):
         """Verify _add_image_to_document embeds image bytes into document."""
-        import tempfile
         import os
-        from exporters.docx import DocxExporter
+        import tempfile
+
         from docx import Document
         from PIL import Image
+
+        from exporters.docx import DocxExporter
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create test image using PIL
@@ -526,8 +539,9 @@ class TestExcelExporter:
 
     def test_export_returns_bytesio(self):
         """Verify export() returns BytesIO with valid XLSX content (ZIP magic bytes)."""
-        from exporters.excel import ExcelExporter
         from unittest.mock import MagicMock
+
+        from exporters.excel import ExcelExporter
 
         # Create mock records
         record = MagicMock()
@@ -545,8 +559,9 @@ class TestExcelExporter:
 
     def test_html_to_rich_text_bold(self):
         """Verify _html_to_rich_text converts <strong> to CellRichText with bold InlineFont."""
-        from exporters.excel import ExcelExporter
         from openpyxl.cell.rich_text import CellRichText, TextBlock
+
+        from exporters.excel import ExcelExporter
 
         exporter = ExcelExporter()
         result = exporter._html_to_rich_text('<strong>Bold text</strong>')
@@ -561,8 +576,9 @@ class TestExcelExporter:
 
     def test_html_to_rich_text_italic(self):
         """Verify _html_to_rich_text converts <em> to CellRichText with italic InlineFont."""
-        from exporters.excel import ExcelExporter
         from openpyxl.cell.rich_text import CellRichText, TextBlock
+
+        from exporters.excel import ExcelExporter
 
         exporter = ExcelExporter()
         result = exporter._html_to_rich_text('<em>Italic text</em>')
@@ -575,8 +591,9 @@ class TestExcelExporter:
 
     def test_html_to_rich_text_underline(self):
         """Verify _html_to_rich_text converts <u> to CellRichText with underline='single'."""
-        from exporters.excel import ExcelExporter
         from openpyxl.cell.rich_text import CellRichText, TextBlock
+
+        from exporters.excel import ExcelExporter
 
         exporter = ExcelExporter()
         result = exporter._html_to_rich_text('<u>Underline text</u>')
@@ -590,8 +607,9 @@ class TestExcelExporter:
 
     def test_html_to_rich_text_nested(self):
         """Verify _html_to_rich_text handles nested formatting like <strong>Bold <em>and italic</em></strong>."""
-        from exporters.excel import ExcelExporter
         from openpyxl.cell.rich_text import CellRichText, TextBlock
+
+        from exporters.excel import ExcelExporter
 
         exporter = ExcelExporter()
         result = exporter._html_to_rich_text('<strong>Bold <em>and italic</em></strong>')
@@ -612,9 +630,11 @@ class TestExcelExporter:
 
     def test_rich_text_in_cell(self):
         """Verify exported cell value is CellRichText instance when HTML formatting present."""
-        from exporters.excel import ExcelExporter
         from unittest.mock import MagicMock
+
         from openpyxl.cell.rich_text import CellRichText
+
+        from exporters.excel import ExcelExporter
 
         # Create mock record with rich text
         record = MagicMock()

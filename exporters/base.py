@@ -6,7 +6,7 @@ All format-specific exporters (PDF, DOCX, Excel) inherit from ExporterBase.
 
 from abc import ABC, abstractmethod
 from io import BytesIO
-from typing import List, Dict, Any
+from typing import Any
 
 
 class ExporterBase(ABC):
@@ -16,7 +16,7 @@ class ExporterBase(ABC):
     Subclasses must implement _generate(), file_extension, and mime_type.
     """
 
-    def export(self, records: List[Any], **options) -> BytesIO:
+    def export(self, records: list[Any], **options) -> BytesIO:
         """Template method defining export flow.
 
         Args:
@@ -31,7 +31,7 @@ class ExporterBase(ABC):
         return output
 
     @abstractmethod
-    def _generate(self, data: List[Any], options: Dict) -> BytesIO:
+    def _generate(self, data: list[Any], options: dict) -> BytesIO:
         """Format-specific generation logic.
 
         Must be implemented by subclasses.
@@ -45,7 +45,7 @@ class ExporterBase(ABC):
         """
         pass
 
-    def _prepare_data(self, records: List[Any], options: Dict) -> List[Any]:
+    def _prepare_data(self, records: list[Any], options: dict) -> list[Any]:
         """Common data preparation hook.
 
         Override in subclasses for format-specific preprocessing.

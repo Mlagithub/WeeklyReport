@@ -14,7 +14,7 @@ Usage:
     # ExporterFactory.register('pdf', PdfExporter)
 """
 
-from typing import Dict, Type, List
+from typing import Dict, List, Type
 
 from .base import ExporterBase
 from .image_resolver import ImageResolver
@@ -31,10 +31,10 @@ class ExporterFactory:
         output = exporter.export(records, title='Report')
     """
 
-    _registry: Dict[str, Type[ExporterBase]] = {}
+    _registry: dict[str, type[ExporterBase]] = {}
 
     @classmethod
-    def register(cls, format: str, exporter_class: Type[ExporterBase]) -> None:
+    def register(cls, format: str, exporter_class: type[ExporterBase]) -> None:
         """Register an exporter class for a format.
 
         Args:
@@ -72,7 +72,7 @@ class ExporterFactory:
         return cls._registry[format_lower]()
 
     @classmethod
-    def supported_formats(cls) -> List[str]:
+    def supported_formats(cls) -> list[str]:
         """Return list of supported format identifiers.
 
         Returns:
@@ -86,9 +86,10 @@ __all__ = ['ExporterFactory', 'ExporterBase', 'ImageResolver']
 
 
 # Register exporters as they are implemented (Phases 9-11)
-from .pdf import PdfExporter
 from .docx import DocxExporter
 from .excel import ExcelExporter
+from .pdf import PdfExporter
+
 ExporterFactory.register('pdf', PdfExporter)
 ExporterFactory.register('docx', DocxExporter)
 ExporterFactory.register('xlsx', ExcelExporter)

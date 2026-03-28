@@ -1,9 +1,11 @@
 """Integration tests for authentication and CRUD routes."""
 
-import pytest
 from datetime import date
-from app import app, db, user_datastore, User, Record, Role
+
+import pytest
 from flask_security.utils import hash_password
+
+from app import Record, Role, User, app, db, user_datastore
 
 
 class TestAuthentication:

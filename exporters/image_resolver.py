@@ -12,7 +12,6 @@ CKEditor Image Flow:
 """
 
 import os
-from typing import Optional
 from urllib.parse import unquote
 
 
@@ -44,7 +43,7 @@ class ImageResolver:
         """
         self.uploads_path = uploads_path
 
-    def resolve_url(self, url: str) -> Optional[str]:
+    def resolve_url(self, url: str) -> str | None:
         """Convert /files/<filename> URL to absolute filesystem path.
 
         Args:
@@ -77,7 +76,7 @@ class ImageResolver:
 
         return None
 
-    def get_image_bytes(self, url: str) -> Optional[bytes]:
+    def get_image_bytes(self, url: str) -> bytes | None:
         """Read image file contents for embedding.
 
         Args:

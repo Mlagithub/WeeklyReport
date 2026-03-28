@@ -1,6 +1,7 @@
 import pytest
-from app import app, db, user_datastore
 from flask_security.utils import hash_password
+
+from app import app, db, user_datastore
 
 
 @pytest.fixture

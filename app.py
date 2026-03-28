@@ -1,31 +1,35 @@
-# -*- coding: utf-8 -*-
 """
 Flask application entry point.
 Uses modular structure with config, extensions, models, forms, and routes.
 """
+import logging
 import os
+from logging.handlers import RotatingFileHandler
+
+import bleach
 from flask import Flask
+from flask_security import SQLAlchemyUserDatastore
 from sqlalchemy import event, inspect, text
 from sqlalchemy.pool import Pool
-import logging
-from logging.handlers import RotatingFileHandler
-import bleach
 
 # Import from new modules
-from config import Config, DevelopmentConfig, ProductionConfig
-from extensions import db, security, admin, ckeditor, bootstrap
-from models import (
-    Record, Role, User, Group,
-    user_records, roles_users, users_groups,
-    UserModelView, with_db_transaction
-)
+from config import Config
+from extensions import admin, bootstrap, ckeditor, db, security
 from forms import (
-    MyLoginForm, MyRegisterForm, MyChangePasswordForm, MyForgotPasswordForm,
-    RecordFilterForm, RecordDownloadForm, RecordForm, ThemeForm
+    MyLoginForm,
+)
+from models import (
+    Group,
+    Record,
+    Role,
+    User,
+    UserModelView,
+    roles_users,
+    user_records,
+    users_groups,
+    with_db_transaction,
 )
 from routes import register_routes
-from flask_security import SQLAlchemyUserDatastore
-
 
 # =============================================================================
 # HTML Sanitization Configuration (RENDER-01, RENDER-02)
@@ -220,8 +224,7 @@ with app.app_context():
     verify_wal_mode()
 
 # Import helper functions from routes for backward compatibility
-from routes import can_edit_record, get_allowed_usernames, get_allowed_groups
-
+from routes import can_edit_record, get_allowed_groups, get_allowed_usernames
 
 # =============================================================================
 # Backward-Compatible Exports for Tests

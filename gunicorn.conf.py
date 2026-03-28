@@ -3,7 +3,6 @@
 # Per user decisions: D-01 (Gunicorn), D-02 (Sync), D-03 (2-4 workers), D-04 (0.0.0.0:5000), D-05 (30s timeout)
 
 import multiprocessing
-import os
 
 # Server socket - per D-04
 bind = "0.0.0.0:5000"

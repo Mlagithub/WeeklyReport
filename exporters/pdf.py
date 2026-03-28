@@ -4,12 +4,13 @@ This module provides the PdfExporter class for generating PDF documents
 from weekly report records with embedded images and professional headers/footers.
 """
 
-from weasyprint import HTML, default_url_fetcher
-from io import BytesIO
-from typing import List, Dict, Any, Optional
 import os
 from datetime import datetime
+from io import BytesIO
+from typing import Any
 from urllib.parse import unquote
+
+from weasyprint import HTML, default_url_fetcher
 
 from .base import ExporterBase
 from .image_resolver import ImageResolver
@@ -28,7 +29,7 @@ class PdfExporter(ExporterBase):
         _image_resolver: Lazy-loaded ImageResolver instance
     """
 
-    def __init__(self, uploads_path: Optional[str] = None):
+    def __init__(self, uploads_path: str | None = None):
         """Initialize with optional uploads path for dependency injection.
 
         Args:
@@ -36,7 +37,7 @@ class PdfExporter(ExporterBase):
                          initialized from Flask current_app.config when needed.
         """
         self._uploads_path = uploads_path
-        self._image_resolver: Optional[ImageResolver] = None
+        self._image_resolver: ImageResolver | None = None
 
     @property
     def uploads_path(self) -> str:
@@ -63,7 +64,7 @@ class PdfExporter(ExporterBase):
         """Return MIME type for send_file()."""
         return 'application/pdf'
 
-    def _generate(self, records: List[Any], options: Dict) -> BytesIO:
+    def _generate(self, records: list[Any], options: dict) -> BytesIO:
         """Generate PDF from records using WeasyPrint.
 
         Args:
@@ -90,7 +91,7 @@ class PdfExporter(ExporterBase):
         output.seek(0)
         return output
 
-    def _build_html(self, records: List[Any], title: str, include_date: bool) -> str:
+    def _build_html(self, records: list[Any], title: str, include_date: bool) -> str:
         """Build HTML document with CSS Paged Media stylesheet.
 
         Args:
@@ -229,7 +230,7 @@ class PdfExporter(ExporterBase):
                 return {'string': image_data, 'mime_type': mime_type}
             else:
                 # Missing local image - return 1x1 transparent PNG placeholder
-                transparent_png = b'\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x01\\x08\\x06\\x00\\x00\\x00\\x1f\\x15\\xc4\\x89\\x00\\x00\\x00\\rIDATx\\x9cc\\xf8\\x0f\\x00\\x00\\x01\\x00\\x01\\x00\\x00\\x00\\x00IEND\\xaeB\`\\x82'
+                transparent_png = b'\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x01\\x08\\x06\\x00\\x00\\x00\\x1f\\x15\\xc4\\x89\\x00\\x00\\x00\\rIDATx\\x9cc\\xf8\\x0f\\x00\\x00\\x01\\x00\\x01\\x00\\x00\\x00\\x00IEND\\xaeB\\`\\x82'
                 return {'string': transparent_png, 'mime_type': 'image/png'}
 
         # For external URLs, use default fetcher
@@ -237,5 +238,5 @@ class PdfExporter(ExporterBase):
             return default_url_fetcher(url)
 
         # Unknown URL scheme - return placeholder
-        transparent_png = b'\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x01\\x08\\x06\\x00\\x00\\x00\\x1f\\x15\\xc4\\x89\\x00\\x00\\x00\\rIDATx\\x9cc\\xf8\\x0f\\x00\\x00\\x01\\x00\\x01\\x00\\x00\\x00\\x00IEND\\xaeB\`\\x82'
+        transparent_png = b'\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR\\x00\\x00\\x00\\x01\\x00\\x00\\x00\\x01\\x08\\x06\\x00\\x00\\x00\\x1f\\x15\\xc4\\x89\\x00\\x00\\x00\\rIDATx\\x9cc\\xf8\\x0f\\x00\\x00\\x01\\x00\\x01\\x00\\x00\\x00\\x00IEND\\xaeB\\`\\x82'
         return {'string': transparent_png, 'mime_type': 'image/png'}

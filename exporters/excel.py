@@ -4,14 +4,15 @@ This module provides the ExcelExporter class for generating XLSX documents
 from weekly report records with rich text formatting preserved in cells.
 """
 
+from datetime import datetime, timedelta
+from io import BytesIO
+from typing import Any
+
+from bs4 import BeautifulSoup, NavigableString
 from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl.cell.rich_text import CellRichText, TextBlock
 from openpyxl.cell.text import InlineFont
-from io import BytesIO
-from typing import List, Dict, Any, Optional
-from bs4 import BeautifulSoup, NavigableString
-from datetime import datetime, timedelta
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 from .base import ExporterBase
 
@@ -28,7 +29,7 @@ class ExcelExporter(ExporterBase):
         _uploads_path: Path to uploads directory (for future image support)
     """
 
-    def __init__(self, uploads_path: Optional[str] = None):
+    def __init__(self, uploads_path: str | None = None):
         """Initialize with optional uploads path for dependency injection.
 
         Args:
@@ -47,7 +48,7 @@ class ExcelExporter(ExporterBase):
         """Return MIME type for send_file()."""
         return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
-    def _generate(self, records: List[Any], options: Dict) -> BytesIO:
+    def _generate(self, records: list[Any], options: dict) -> BytesIO:
         """Generate XLSX from records using openpyxl.
 
         Args:
@@ -58,7 +59,7 @@ class ExcelExporter(ExporterBase):
             BytesIO buffer containing XLSX
         """
         # Group records by user and week (same logic as RecordDownloader)
-        user_weekly_data: Dict[str, Dict[tuple, str]] = {}
+        user_weekly_data: dict[str, dict[tuple, str]] = {}
         all_weeks: set = set()
 
         for record in records:

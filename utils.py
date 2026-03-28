@@ -1,7 +1,7 @@
+from datetime import datetime, timedelta
+
 from flask import send_file
 
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
 
 class DateRange:
     TIME_RANGES = {
@@ -45,7 +45,7 @@ class DateRange:
         start_date = today.replace(day=1)
         end_date = today
         return start_date, end_date
-    
+
     @staticmethod
     def this_quarter():
         today = DateRange.get_today()
@@ -72,7 +72,7 @@ class DateRange:
         start_date = datetime(today.year, 1, 1).date()
         end_date = today
         return start_date, end_date
-    
+
     @staticmethod
     def get_range(time_range):
 
@@ -95,10 +95,12 @@ class DateRange:
 
 
 
-from openpyxl import Workbook
-from openpyxl.styles import Font, Color, Alignment, PatternFill, Border, Side
 from io import BytesIO
+
 from bs4 import BeautifulSoup
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+
 
 # 将 HTML 转换为纯文本的函数，改进 convert_list
 def html_to_text(html_content):
@@ -107,18 +109,18 @@ def html_to_text(html_content):
     soup = BeautifulSoup(html_content, 'html.parser')
 
     result = []
-    
+
     # 处理有序或无序列表，使用递归处理层级
     def convert_list(list_tag, level_prefix="", ordered=True):
         for idx, li in enumerate(list_tag.find_all('li', recursive=False), 1):
             # 确定当前前缀：有序列表用数字前缀，无序列表用符号前缀
             current_prefix = f"{level_prefix}{idx}." if ordered else f"{level_prefix}-"
-            
+
             # 提取当前 <li> 的直接文本（不包含嵌套的子元素）
             main_text = li.find(text=True, recursive=False)
             main_text = main_text.strip() if main_text else ''
             result.append(f"{current_prefix} {main_text}")
-            
+
             # 递归处理嵌套的有序或无序列表
             nested_ul = li.find('ul')
             nested_ol = li.find('ol')
@@ -126,7 +128,7 @@ def html_to_text(html_content):
                 convert_list(nested_ul, level_prefix + "    ", ordered=False)  # 传入当前缩进和无序标记
             elif nested_ol:
                 convert_list(nested_ol, level_prefix + "    ", ordered=True)  # 传入当前缩进和有序标记
-    
+
     # 处理段落和其他标签
     for element in soup.contents:
         if element.name == 'ol':
@@ -174,12 +176,12 @@ class RecordDownloader:
         # 填充数据
         for username, weekly_data in user_weekly_data.items():
             row = [username]
-            
+
             # 按列顺序填充每周的记录
             for week in all_weeks:
                 content = weekly_data.get(week, "")  # 如果没有记录则为空
                 row.append(html_to_text(content))
-            
+
             ws.append(row)
 
         # 设置第一行加粗
@@ -219,7 +221,7 @@ class RecordDownloader:
         for row in ws.iter_rows(min_row=1, max_col=ws.max_column, max_row=ws.max_row):
             for cell in row:
                 cell.border = thin_border
-                
+
 
         # 将工作簿保存到内存中
         output = BytesIO()

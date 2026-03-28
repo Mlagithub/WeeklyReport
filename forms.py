@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 WTForms form classes for the weekly report application.
 
@@ -6,12 +5,14 @@ This module contains all form definitions extracted from app.py.
 Forms import from extensions and models as needed.
 """
 
-from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, SelectMultipleField, SubmitField, DateField, HiddenField, PasswordField
-from wtforms.validators import DataRequired, EqualTo, Length
-from flask_security.forms import LoginForm, ChangePasswordForm
-from utils import DateRange
 from datetime import date
+
+from flask_security.forms import ChangePasswordForm, LoginForm
+from flask_wtf import FlaskForm
+from wtforms import DateField, HiddenField, PasswordField, SelectField, SelectMultipleField, StringField, SubmitField
+from wtforms.validators import DataRequired, EqualTo, Length
+
+from utils import DateRange
 
 
 class MyLoginForm(LoginForm):

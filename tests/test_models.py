@@ -4,9 +4,20 @@ Unit tests for User model permission methods and authorization functions.
 import pytest
 from flask import g
 from flask_security.core import AnonymousUser
-from app import app, db, user_datastore, User, Role, Group, Record
-from app import can_edit_record, get_allowed_usernames, get_allowed_groups
 from flask_security.utils import hash_password
+
+from app import (
+    Group,
+    Record,
+    Role,
+    User,
+    app,
+    can_edit_record,
+    db,
+    get_allowed_groups,
+    get_allowed_usernames,
+    user_datastore,
+)
 
 
 class TestUserPermissions:

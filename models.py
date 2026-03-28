@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Database models and association tables.
 
@@ -8,18 +7,17 @@ Per D-10: Record.date has index=True for query optimization.
 """
 
 from datetime import datetime
-
-from extensions import db
-from flask_security.models.sqla import FsUserMixin, FsRoleMixin
-from flask_admin.contrib.sqla import ModelView
-from flask_security import current_user
-from flask import redirect, url_for, request, flash, g
-from flask_security.utils import hash_password
-from sqlalchemy.orm import joinedload
-from sqlalchemy.exc import SQLAlchemyError
-from flask import current_app
 from functools import wraps
 
+from flask import current_app, flash, g, redirect, request, url_for
+from flask_admin.contrib.sqla import ModelView
+from flask_security import current_user
+from flask_security.models.sqla import FsRoleMixin, FsUserMixin
+from flask_security.utils import hash_password
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import joinedload
+
+from extensions import db
 
 # =============================================================================
 # Association Tables
@@ -205,7 +203,7 @@ class UserModelView(ModelView):
             # Record view uses pagination and lazy loading
             self.column_filters = ['date', 'content']
             self.page_size = 20
-        super(UserModelView, self).__init__(model, session, **kwargs)
+        super().__init__(model, session, **kwargs)
 
     def is_accessible(self):
         """Check if current user can access admin panel."""

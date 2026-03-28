@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Route handlers for the weekly report application.
 
@@ -7,24 +6,22 @@ Uses the register_routes pattern per D-01 (no Blueprints).
 Per D-11: Upload files use UUID for unique filenames.
 """
 
-from flask import render_template, redirect, flash, url_for, request, send_from_directory, abort, session, g, current_app, send_file
-from flask_security import login_required, login_user, logout_user, current_user
-from flask_security.utils import hash_password, verify_password
-from werkzeug.utils import secure_filename
-from sqlalchemy import func, case, and_
-from sqlalchemy.orm import joinedload
-import uuid
 import os
+import uuid
 from datetime import datetime
-from io import BytesIO
-from zipfile import ZipFile
 
-from extensions import db, security, admin, ckeditor
-from models import User, Record, Role, Group, user_records, roles_users, users_groups, with_db_transaction
-from forms import RecordFilterForm, RecordDownloadForm, ThemeForm, MyLoginForm, MyRegisterForm, MyChangePasswordForm, MyForgotPasswordForm
-from utils import DateRange
+from flask import abort, flash, redirect, render_template, request, send_file, send_from_directory, session, url_for
+from flask_security import current_user, login_required, login_user, logout_user
+from flask_security.utils import hash_password, verify_password
+from sqlalchemy import and_, case, func
+from sqlalchemy.orm import joinedload
+from werkzeug.utils import secure_filename
+
 from exporters import ExporterFactory
-
+from extensions import db
+from forms import MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, ThemeForm
+from models import Group, Record, Role, User, user_records, with_db_transaction
+from utils import DateRange
 
 # =============================================================================
 # Helper Functions
@@ -116,6 +113,7 @@ def register_routes(app):
     Per D-01, we use simple registration without Blueprints.
     """
     from flask_ckeditor import CKEditorField, upload_fail, upload_success
+
     from forms import RecordForm
 
     # Patch RecordForm.body to use CKEditorField
@@ -155,7 +153,8 @@ def register_routes(app):
     @with_db_transaction
     def register():
         from flask_security import SQLAlchemyUserDatastore
-        from models import User, Role
+
+        from models import User
         user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
         form = MyRegisterForm()
@@ -181,7 +180,8 @@ def register_routes(app):
     @app.route('/login', methods=('GET', 'POST'))
     def login():
         from flask_security import SQLAlchemyUserDatastore
-        from models import User, Role
+
+        from models import User
         user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
         form = MyLoginForm()
@@ -282,7 +282,7 @@ def register_routes(app):
         if record and can_edit_record(record, current_user):
             db.session.delete(record)
             db.session.commit()
-            flash(f'数据己删除')
+            flash('数据己删除')
         elif not record:
             abort(404)
         else:
@@ -485,7 +485,6 @@ def register_routes(app):
         else:
             # Chinese or special chars - preserve original name with UUID prefix
             # Use URL encoding for the filename so it can be served correctly
-            from urllib.parse import quote
             filename = f"{uuid.uuid4().hex}_{original_name}.{extension}"
 
         f.save(os.path.join(path, filename))

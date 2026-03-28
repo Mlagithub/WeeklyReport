@@ -4,14 +4,12 @@ This module provides the DocxExporter class for generating DOCX documents
 from weekly report records with embedded images and Chinese font support.
 """
 
-from docx import Document
-from docx.shared import Inches, Pt
-from htmldocx import HtmlToDocx
 from io import BytesIO
-from typing import List, Dict, Any, Optional, Tuple
-import os
-from datetime import datetime
-from urllib.parse import unquote
+from typing import Any
+
+from docx import Document
+from docx.shared import Inches
+from htmldocx import HtmlToDocx
 
 from .base import ExporterBase
 from .image_resolver import ImageResolver
@@ -30,7 +28,7 @@ class DocxExporter(ExporterBase):
         _image_resolver: Lazy-loaded ImageResolver instance
     """
 
-    def __init__(self, uploads_path: Optional[str] = None):
+    def __init__(self, uploads_path: str | None = None):
         """Initialize with optional uploads path for dependency injection.
 
         Args:
@@ -38,7 +36,7 @@ class DocxExporter(ExporterBase):
                          initialized from Flask current_app.config when needed.
         """
         self._uploads_path = uploads_path
-        self._image_resolver: Optional[ImageResolver] = None
+        self._image_resolver: ImageResolver | None = None
 
     @property
     def uploads_path(self) -> str:
@@ -65,7 +63,7 @@ class DocxExporter(ExporterBase):
         """Return MIME type for send_file()."""
         return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 
-    def _generate(self, records: List[Any], options: Dict) -> BytesIO:
+    def _generate(self, records: list[Any], options: dict) -> BytesIO:
         """Generate DOCX from records using python-docx.
 
         Args:
@@ -154,7 +152,7 @@ class DocxExporter(ExporterBase):
 
         return str(soup)
 
-    def _extract_images(self, html: str) -> Tuple[str, list]:
+    def _extract_images(self, html: str) -> tuple[str, list]:
         """Extract img tags from HTML and replace with placeholders.
 
         htmldocx does NOT support images, so we extract them first,

@@ -19,7 +19,7 @@ class TestDateRange:
         assert isinstance(end, date)
         assert start <= end
 
-    @patch("utils.datetime")
+    @patch("_root_utils.datetime")
     def test_this_week_start_is_monday(self, mock_datetime):
         """Test that this_week start is Monday of the current week."""
         # Mock Wednesday, March 25, 2026
@@ -102,7 +102,8 @@ class TestDateRange:
         delta = (end - start).days
         assert delta == n
 
-    class TestHtmlToText:
+
+class TestHtmlToText:
     """Tests for the html_to_text function."""
 
     def test_empty_input(self):

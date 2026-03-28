@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% from 'bootstrap5/form.html' import render_form, render_field %}
+{% from 'bootstrap5/utils.html' import render_icon %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Template list card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">{{ render_icon('file-text') }} AI 模板管理</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">管理AI生成周报的提示词模板。模板支持占位符自动填充。</p>
+                {% if templates %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">名称</th>
+                                <th scope="col">时间范围</th>
+                                <th scope="col">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for template in templates %}
+                            <tr>
+                                <td>{{ template.name }}</td>
+                                <td>
+                                    {% if template.time_range == 'weekly' %}
+                                    <span class="badge bg-primary">周报</span>
+                                    {% elif template.time_range == 'monthly' %}
+                                    <span class="badge bg-success">月报</span>
+                                    {% elif template.time_range == 'quarterly' %}
+                                    <span class="badge bg-warning text-dark">季度报</span>
+                                    {% elif template.time_range == 'yearly' %}
+                                    <span class="badge bg-danger">年报</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('edit_template', template_id=template.id) }}" class="btn btn-outline-primary btn-sm me-1">
+                                        {{ render_icon('pencil') }} 编辑
+                                    </a>
+                                    <form action="{{ url_for('delete_template', template_id=template.id) }}" method="post" class="d-inline" onsubmit="return confirm('确定要删除此模板吗？');">
+                                        {{ form.hidden_tag() }}
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            {{ render_icon('trash') }} 删除
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <div class="mb-2"><i class="bi bi-file-earmark empty-state-icon"></i></div>
+                    <p>暂无模板</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Create/Edit form card -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">
+                    {% if editing %}
+                    {{ render_icon('pencil') }} 编辑模板
+                    {% else %}
+                    {{ render_icon('plus-circle') }} 创建新模板
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('ai_templates') }}">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.name.label.text }}</label>
+                        {{ form.name(class="form-control", placeholder=form.name.render_kw.placeholder) }}
+                        {% if form.name.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.name.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.time_range.label.text }}</label>
+                        {{ form.time_range(class="form-select") }}
+                        {% if form.time_range.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.time_range.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.content.label.text }}</label>
+                        <div class="text-muted small mb-1">
+                            <strong>可用占位符:</strong> {time_range} {user_name} {records} {record_count} {date_range}
+                        </div>
+                        {{ form.content(class="form-control", rows=8, placeholder="请根据以下记录生成{time_range}工作总结...") }}
+                        {% if form.content.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.content.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            {{ render_icon('check-lg') }} {{ form.submit.label.text }}
+                        </button>
+                        {% if editing %}
+                        <a href="{{ url_for('ai_templates') }}" class="btn btn-outline-secondary">
+                            {{ render_icon('x-lg') }} 取消编辑
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

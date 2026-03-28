@@ -204,7 +204,7 @@ def fetch_filtered_records(
     for r in records:
         # Find the user_id for this record via user_records
         user_id = None
-        for ur in r.users:
+        for ur in r.user:  # Record.user is the backref from User.records
             if ur.id in user_ids:
                 user_id = ur.id
                 break

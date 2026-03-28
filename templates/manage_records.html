@@ -230,8 +230,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const copySummaryBtn = document.getElementById('copySummaryBtn');
 
         summaryModal.addEventListener('show.bs.modal', function() {
-            console.log('Modal show event triggered');
-
             // Reset modal state
             summaryLoading.classList.remove('d-none');
             summaryContent.classList.add('d-none');
@@ -244,8 +242,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const groups = urlParams.getAll('groups');
 
             const csrfToken = getCsrfToken();
-            console.log('CSRF Token:', csrfToken);
-            console.log('Request params:', { timeRange, user, groups });
 
             // Call API
             fetch('/filtered-summary', {

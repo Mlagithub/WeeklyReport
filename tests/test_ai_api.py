@@ -14,6 +14,7 @@ from unittest.mock import patch, MagicMock
 from requests.exceptions import ConnectionError, Timeout
 
 from app import app
+from ai_utils import call_ai_api, log_ai_call
 
 
 class TestAIAPICall:
@@ -24,51 +25,137 @@ class TestAIAPICall:
 
         Expected behavior:
         - POST request to API endpoint with proper headers
-        - Return tuple (success: bool, content: str)
+        - Return tuple (success: bool, content: str | None, error: str | None)
         - Content should be the AI-generated text from response
         """
-        # Stub - will verify call_ai_api function exists in ai_utils.py
-        pass
+        with client.application.app_context():
+            # Mock AIConfig.get_config to return a valid config
+            mock_config = MagicMock()
+            mock_config.api_url = "https://api.example.com/v1"
+            mock_config.api_key_encrypted = "encrypted_key"
+            mock_config.model_name = "gpt-4"
+
+            mock_response = MagicMock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "choices": [{"message": {"content": "AI generated response"}}]
+            }
+
+            with patch("models.AIConfig.get_config", return_value=mock_config):
+                with patch("ai_utils.decrypt_api_key", return_value="test_api_key"):
+                    with patch("requests.post", return_value=mock_response):
+                        success, content, error = call_ai_api(
+                            prompt="Test prompt", user_id=1, function_type="summary"
+                        )
+
+            assert success is True
+            assert content == "AI generated response"
+            assert error is None
 
     def test_call_ai_api_network_error(self, client):
         """call_ai_api should return friendly Chinese message on network failure.
 
         Expected behavior:
         - Catch ConnectionError from requests
-        - Return (False, "网络连接失败，请检查API URL")
+        - Return (False, None, "网络连接失败，请检查API URL")
         """
-        # Stub - will verify error handling after implementation
-        pass
+        with client.application.app_context():
+            mock_config = MagicMock()
+            mock_config.api_url = "https://api.example.com/v1"
+            mock_config.api_key_encrypted = "encrypted_key"
+            mock_config.model_name = "gpt-4"
+
+            with patch("models.AIConfig.get_config", return_value=mock_config):
+                with patch("ai_utils.decrypt_api_key", return_value="test_api_key"):
+                    with patch("requests.post", side_effect=ConnectionError()):
+                        success, content, error = call_ai_api(
+                            prompt="Test prompt", user_id=1, function_type="summary"
+                        )
+
+            assert success is False
+            assert content is None
+            assert error == "网络连接失败，请检查API URL"
 
     def test_call_ai_api_auth_error(self, client):
         """call_ai_api should return friendly Chinese message on authentication failure.
 
         Expected behavior:
         - Handle 401 status code
-        - Return (False, "API Key无效")
+        - Return (False, None, "API Key无效")
         """
-        # Stub - will verify 401 handling after implementation
-        pass
+        with client.application.app_context():
+            mock_config = MagicMock()
+            mock_config.api_url = "https://api.example.com/v1"
+            mock_config.api_key_encrypted = "encrypted_key"
+            mock_config.model_name = "gpt-4"
+
+            mock_response = MagicMock()
+            mock_response.status_code = 401
+
+            with patch("models.AIConfig.get_config", return_value=mock_config):
+                with patch("ai_utils.decrypt_api_key", return_value="test_api_key"):
+                    with patch("requests.post", return_value=mock_response):
+                        success, content, error = call_ai_api(
+                            prompt="Test prompt", user_id=1, function_type="summary"
+                        )
+
+            assert success is False
+            assert content is None
+            assert error == "API Key无效"
 
     def test_call_ai_api_rate_limit(self, client):
         """call_ai_api should return friendly Chinese message on rate limit.
 
         Expected behavior:
         - Handle 429 status code
-        - Return (False, "请求过于频繁，请稍后再试")
+        - Return (False, None, "请求过于频繁，请稍后再试")
         """
-        # Stub - will verify 429 handling after implementation
-        pass
+        with client.application.app_context():
+            mock_config = MagicMock()
+            mock_config.api_url = "https://api.example.com/v1"
+            mock_config.api_key_encrypted = "encrypted_key"
+            mock_config.model_name = "gpt-4"
+
+            mock_response = MagicMock()
+            mock_response.status_code = 429
+
+            with patch("models.AIConfig.get_config", return_value=mock_config):
+                with patch("ai_utils.decrypt_api_key", return_value="test_api_key"):
+                    with patch("requests.post", return_value=mock_response):
+                        success, content, error = call_ai_api(
+                            prompt="Test prompt", user_id=1, function_type="summary"
+                        )
+
+            assert success is False
+            assert content is None
+            assert error == "请求过于频繁，请稍后再试"
 
     def test_call_ai_api_model_error(self, client):
         """call_ai_api should return friendly Chinese message on invalid model.
 
         Expected behavior:
         - Handle 404 status code for invalid model/endpoint
-        - Return (False, "模型名称无效或不可用")
+        - Return (False, None, "模型名称无效或不可用")
         """
-        # Stub - will verify 404 handling after implementation
-        pass
+        with client.application.app_context():
+            mock_config = MagicMock()
+            mock_config.api_url = "https://api.example.com/v1"
+            mock_config.api_key_encrypted = "encrypted_key"
+            mock_config.model_name = "gpt-4"
+
+            mock_response = MagicMock()
+            mock_response.status_code = 404
+
+            with patch("models.AIConfig.get_config", return_value=mock_config):
+                with patch("ai_utils.decrypt_api_key", return_value="test_api_key"):
+                    with patch("requests.post", return_value=mock_response):
+                        success, content, error = call_ai_api(
+                            prompt="Test prompt", user_id=1, function_type="summary"
+                        )
+
+            assert success is False
+            assert content is None
+            assert error == "模型名称无效或不可用"
 
     def test_call_ai_api_timeout(self, client):
         """call_ai_api should handle timeout gracefully.
@@ -76,20 +163,41 @@ class TestAIAPICall:
         Expected behavior:
         - Use 30-second timeout for API calls
         - Catch Timeout exception
-        - Return (False, "请求超时")
+        - Return (False, None, "请求超时")
         """
-        # Stub - will verify timeout handling after implementation
-        pass
+        with client.application.app_context():
+            mock_config = MagicMock()
+            mock_config.api_url = "https://api.example.com/v1"
+            mock_config.api_key_encrypted = "encrypted_key"
+            mock_config.model_name = "gpt-4"
+
+            with patch("models.AIConfig.get_config", return_value=mock_config):
+                with patch("ai_utils.decrypt_api_key", return_value="test_api_key"):
+                    with patch("requests.post", side_effect=Timeout()):
+                        success, content, error = call_ai_api(
+                            prompt="Test prompt", user_id=1, function_type="summary"
+                        )
+
+            assert success is False
+            assert content is None
+            assert error == "请求超时"
 
     def test_call_ai_api_missing_config(self, client):
         """call_ai_api should handle missing AI configuration gracefully.
 
         Expected behavior:
         - Check for AIConfig record before making API call
-        - Return (False, "AI服务未配置") if no config exists
+        - Return (False, None, "AI服务未配置") if no config exists
         """
-        # Stub - will verify missing config handling after implementation
-        pass
+        with client.application.app_context():
+            with patch("models.AIConfig.get_config", return_value=None):
+                success, content, error = call_ai_api(
+                    prompt="Test prompt", user_id=1, function_type="summary"
+                )
+
+            assert success is False
+            assert content is None
+            assert error == "AI服务未配置"
 
 
 class TestAIResponseProcessing:
@@ -99,7 +207,7 @@ class TestAIResponseProcessing:
         """process_ai_response should strip leading/trailing whitespace.
 
         Expected behavior:
-        - Input: "  Hello World  \\n"
+        - Input: "  Hello World  \n"
         - Output: "Hello World"
         """
         # Stub - will verify whitespace handling after implementation
@@ -141,7 +249,7 @@ class TestAIResponseProcessing:
         """process_ai_response should properly handle code blocks.
 
         Expected behavior:
-        - Input: "```python\\nprint('hello')\\n```"
+        - Input: "```python\nprint('hello')\n```"
         - Output: properly formatted code block in HTML
         """
         # Stub - will verify code block handling after implementation
@@ -158,8 +266,22 @@ class TestAIAuditLogging:
         - Log entry contains: timestamp, user_id, function_type, input_length, status
         - Uses current_app.logger.info
         """
-        # Stub - will verify logging format after implementation
-        pass
+        with client.application.app_context():
+            with patch("ai_utils.current_app") as mock_app:
+                mock_app.logger.info = MagicMock()
+                log_ai_call(
+                    user_id=1,
+                    function_type="summary",
+                    input_length=100,
+                    status="success"
+                )
+                # Verify log was called with metadata
+                mock_app.logger.info.assert_called_once()
+                call_args = mock_app.logger.info.call_args[0][0]
+                assert "summary" in call_args
+                assert "1" in call_args
+                assert "100" in call_args
+                assert "success" in call_args
 
     def test_log_ai_call_does_not_log_content(self, client):
         """log_ai_call should NOT log full prompt or response content.
@@ -169,26 +291,59 @@ class TestAIAuditLogging:
         - Log entry does NOT contain full response text
         - Only logs metadata (lengths, status, user)
         """
-        # Stub - will verify content exclusion after implementation
-        pass
+        with client.application.app_context():
+            with patch("ai_utils.current_app") as mock_app:
+                mock_app.logger.info = MagicMock()
+                log_ai_call(
+                    user_id=1,
+                    function_type="summary",
+                    input_length=100,
+                    status="success"
+                )
+                # Verify log format doesn't include content
+                call_args = mock_app.logger.info.call_args[0][0]
+                # Should not have any "content=" or "prompt=" pattern
+                assert "content=" not in call_args
+                assert "prompt=" not in call_args
 
     def test_log_ai_call_logs_error_on_failure(self, client):
         """log_ai_call should log error message when API call fails.
 
         Expected behavior:
         - On failure, log entry contains error message
-        - Uses current_app.logger.error for failures
+        - Uses current_app.logger.warning for failures
         - Still respects content exclusion (no full prompt/response)
         """
-        # Stub - will verify error logging after implementation
-        pass
+        with client.application.app_context():
+            with patch("ai_utils.current_app") as mock_app:
+                mock_app.logger.warning = MagicMock()
+                log_ai_call(
+                    user_id=1,
+                    function_type="summary",
+                    input_length=100,
+                    status="failure",
+                    error_message="API Key无效"
+                )
+                mock_app.logger.warning.assert_called_once()
+                call_args = mock_app.logger.warning.call_args[0][0]
+                assert "failure" in call_args
+                assert "API Key无效" in call_args
 
     def test_log_ai_call_logs_function_type(self, client):
         """log_ai_call should distinguish between different AI functions.
 
         Expected behavior:
-        - function_type parameter distinguishes: 'summary', 'polish', 'test'
+        - function_type parameter distinguishes: 'summary', 'polish', 'filtered_summary'
         - Log entry clearly shows which AI function was called
         """
-        # Stub - will verify function_type logging after implementation
-        pass
+        with client.application.app_context():
+            with patch("ai_utils.current_app") as mock_app:
+                mock_app.logger.info = MagicMock()
+                log_ai_call(
+                    user_id=1,
+                    function_type="polish",
+                    input_length=50,
+                    status="success"
+                )
+                call_args = mock_app.logger.info.call_args[0][0]
+                assert "polish" in call_args

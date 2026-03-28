@@ -7,11 +7,13 @@ Per API-01: OpenAI-compatible POST /chat/completions
 Per API-02: Chinese error messages
 Per API-03: 30-second timeout
 Per SEC-02: Audit logging without full content
+Per API-04: Response processing (whitespace, Markdown to HTML)
 """
 
 import os
 import logging
 
+import markdown
 import requests
 from cryptography.fernet import Fernet
 from flask import has_app_context, current_app
@@ -91,6 +93,35 @@ def mask_api_key(api_key: str) -> str:
     if len(api_key) <= 4:
         return "****"
     return "*" * (len(api_key) - 4) + api_key[-4:]
+
+
+def process_ai_response(content: str) -> str:
+    """Process AI response for display.
+
+    Per API-04: Handle whitespace and Markdown conversion.
+
+    Args:
+        content: Raw AI response content
+
+    Returns:
+        str: Processed content ready for display (HTML format)
+    """
+    # Handle None or empty content
+    if not content:
+        return ""
+
+    # Strip leading and trailing whitespace
+    content = content.strip()
+
+    if not content:
+        return ""
+
+    # Convert Markdown to HTML using markdown library with extensions
+    # 'extra' extension supports tables, code blocks, fenced code
+    # 'nl2br' converts newlines to <br> tags
+    html = markdown.markdown(content, extensions=['extra', 'nl2br'])
+
+    return html
 
 
 def test_ai_connection(api_url: str, api_key: str, timeout: int = 30):

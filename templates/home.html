@@ -164,6 +164,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const templateSelect = document.getElementById('summary-template');
     const customPromptInput = document.getElementById('summary-custom-prompt');
 
+    // Get CSRF token from meta tag or cookie
+    function getCsrfToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta) return meta.getAttribute('content');
+        // Try to get from cookie
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'csrf_token') return value;
+        }
+        return '';
+    }
+
     function setLoading(isLoading) {
         // UI-01: Show/hide loading indicator
         // UI-02: Disable buttons during loading
@@ -197,7 +210,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch('/generate-summary', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
             body: JSON.stringify(data)
         })
         .then(response => response.json())

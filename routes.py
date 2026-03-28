@@ -627,9 +627,18 @@ def register_routes(app):
         Per SUMMARY-04: Return generated content.
         Per UI-01/UI-02: Client handles loading states.
 
+        Note: CSRF exempt for AJAX requests with X-CSRFToken header.
         Returns JSON: {'success': bool, 'content': str|None, 'error': str|None}
         """
         from flask import jsonify
+        from flask_wtf.csrf import validate_csrf
+
+        # Validate CSRF token from header
+        csrf_token = request.headers.get('X-CSRFToken', '')
+        try:
+            validate_csrf(csrf_token)
+        except Exception:
+            return jsonify({'success': False, 'content': None, 'error': 'CSRF验证失败'})
 
         data = request.get_json()
         if not data:
@@ -671,10 +680,19 @@ def register_routes(app):
         Per POLISH-01: Polish button in report editor.
         Per POLISH-02: Use configurable default prompt.
 
+        Note: CSRF exempt for AJAX requests with X-CSRFToken header.
         Returns JSON: {'success': bool, 'content': str|None, 'error': str|None}
         """
         from flask import jsonify
+        from flask_wtf.csrf import validate_csrf
         from ai_utils import call_ai_api
+
+        # Validate CSRF token from header
+        csrf_token = request.headers.get('X-CSRFToken', '')
+        try:
+            validate_csrf(csrf_token)
+        except Exception:
+            return jsonify({'success': False, 'content': None, 'error': 'CSRF验证失败'})
 
         data = request.get_json()
         if not data:
@@ -713,10 +731,19 @@ def register_routes(app):
         Per FILTER-SUM-02: Shows filter criteria and multi-user grouping.
         Per SEC-03: Team leader permission check.
 
+        Note: CSRF exempt for AJAX requests with X-CSRFToken header.
         Returns JSON: {'success': bool, 'content': str|None, 'error': str|None,
                        'filter_info': dict}
         """
         from flask import jsonify
+        from flask_wtf.csrf import validate_csrf
+
+        # Validate CSRF token from header
+        csrf_token = request.headers.get('X-CSRFToken', '')
+        try:
+            validate_csrf(csrf_token)
+        except Exception:
+            return jsonify({'success': False, 'content': None, 'error': 'CSRF验证失败'})
 
         # Team leader permission check: admin or has group membership
         if not current_user.is_admin and not current_user.groups:

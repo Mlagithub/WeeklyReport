@@ -151,4 +151,84 @@
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateBtn = document.getElementById('generate-summary-btn');
+    const loadingSpan = document.getElementById('summary-loading');
+    const resultDiv = document.getElementById('summary-result');
+    const contentDiv = document.getElementById('summary-content');
+    const errorDiv = document.getElementById('summary-error');
+    const copyBtn = document.getElementById('copy-summary-btn');
+    const regenerateBtn = document.getElementById('regenerate-summary-btn');
+    const timeRangeSelect = document.getElementById('summary-time-range');
+    const templateSelect = document.getElementById('summary-template');
+    const customPromptInput = document.getElementById('summary-custom-prompt');
+
+    function setLoading(isLoading) {
+        // UI-01: Show/hide loading indicator
+        // UI-02: Disable buttons during loading
+        loadingSpan.style.display = isLoading ? 'inline' : 'none';
+        generateBtn.disabled = isLoading;
+        regenerateBtn.disabled = isLoading;
+        copyBtn.disabled = isLoading;
+    }
+
+    function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        resultDiv.style.display = 'none';
+    }
+
+    function showResult(content) {
+        contentDiv.innerHTML = content;
+        resultDiv.style.display = 'block';
+        errorDiv.style.display = 'none';
+    }
+
+    function generateSummary() {
+        setLoading(true);
+        errorDiv.style.display = 'none';
+
+        const data = {
+            time_range: timeRangeSelect.value,
+            template_id: templateSelect.value,
+            custom_prompt: customPromptInput.value
+        };
+
+        fetch('/generate-summary', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            setLoading(false);
+            if (result.success) {
+                showResult(result.content);
+            } else {
+                showError(result.error || '生成失败，请稍后重试');
+            }
+        })
+        .catch(error => {
+            setLoading(false);
+            showError('网络错误，请稍后重试');
+        });
+    }
+
+    generateBtn.addEventListener('click', generateSummary);
+    regenerateBtn.addEventListener('click', generateSummary);
+
+    copyBtn.addEventListener('click', function() {
+        // Copy content as plain text
+        const text = contentDiv.textContent || contentDiv.innerText;
+        navigator.clipboard.writeText(text).then(function() {
+            copyBtn.textContent = '已复制';
+            setTimeout(() => {
+                copyBtn.innerHTML = '{{ render_icon("clipboard") }} 复制';
+            }, 2000);
+        });
+    });
+});
+</script>
+
 {% endblock %}

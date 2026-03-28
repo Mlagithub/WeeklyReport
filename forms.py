@@ -10,7 +10,7 @@ from datetime import date
 from flask_security.forms import ChangePasswordForm, LoginForm
 from flask_wtf import FlaskForm
 from wtforms import DateField, HiddenField, PasswordField, SelectField, SelectMultipleField, StringField, SubmitField
-from wtforms.validators import DataRequired, EqualTo, Length
+from wtforms.validators import DataRequired, EqualTo, Length, Regexp
 
 from utils import DateRange
 
@@ -132,3 +132,32 @@ class ThemeForm(FlaskForm):
     ]
     theme_name = SelectField("", choices=choices, default="lumen")
     submit = SubmitField("更改主题")
+
+
+class AIConfigForm(FlaskForm):
+    """Form for AI service configuration.
+
+    Per CONFIG-01: AI service configuration storage.
+    Per UI-SPEC.md: Field labels, placeholders, validation messages in Chinese.
+    """
+
+    api_url = StringField(
+        "API URL",
+        validators=[
+            DataRequired(message="API URL不能为空"),
+            Regexp(r'^https?://.+', message="API URL格式无效，必须以http://或https://开头")
+        ],
+        render_kw={"placeholder": "https://api.openai.com/v1"}
+    )
+    api_key = PasswordField(
+        "API Key",
+        validators=[DataRequired(message="API Key不能为空")],
+        description="保存后仅显示最后4位字符"
+    )
+    model_name = StringField(
+        "模型名称",
+        validators=[DataRequired(message="模型名称不能为空")],
+        render_kw={"placeholder": "gpt-4o-mini"}
+    )
+    test_submit = SubmitField("测试连接", render_kw={"class": "btn btn-outline-secondary mb-3"})
+    submit = SubmitField("保存配置", render_kw={"class": "btn btn-primary"})

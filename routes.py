@@ -154,12 +154,16 @@ def register_routes(app):
 
         recent_records = base_query.order_by(Record.date.desc()).limit(5).all()
 
+        # Get templates for summary dropdown (SUMMARY-02)
+        summary_templates = AITemplate.query.order_by(AITemplate.time_range).all()
+
         return render_template(
             "home.html",
             this_week_count=this_week_count,
             this_month_count=this_month_count,
             total_count=total_count,
             recent_records=recent_records,
+            summary_templates=summary_templates,  # Added for AI Summary card
         )
 
     @app.route("/register", methods=["GET", "POST"])

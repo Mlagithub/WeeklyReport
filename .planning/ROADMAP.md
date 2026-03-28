@@ -143,10 +143,10 @@ Plans:
 5. Loading indicator shows during generation, buttons are disabled to prevent duplicate clicks
 6. User can regenerate with same parameters or edit before copying
 
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
-- [ ] 17-00-PLAN.md — Wave 0: Test infrastructure for summary generation (SUMMARY-01, SUMMARY-02, SUMMARY-03, SUMMARY-04)
+- [x] 17-00-PLAN.md — Wave 0: Test infrastructure for summary generation (SUMMARY-01, SUMMARY-02, SUMMARY-03, SUMMARY-04)
 - [ ] 17-01-PLAN.md — Wave 1: SummaryGenerationForm + summary_utils.py (SUMMARY-01, SUMMARY-02, SUMMARY-03, SUMMARY-04)
 - [ ] 17-02-PLAN.md — Wave 2: Route + UI + JavaScript interactions (SUMMARY-01, SUMMARY-02, SUMMARY-03, SUMMARY-04, UI-01, UI-02)
 - [ ] 17-03-PLAN.md — Wave 3: Human verification checkpoint (UI-01, UI-02)
@@ -217,7 +217,7 @@ Plans:
 | 14. AI Configuration & Security | v1.3 | 5/5 | Complete    | 2026-03-28 |
 | 15. API Integration Layer | v1.3 | 3/3 | Complete    | 2026-03-28 |
 | 16. Template Management | v1.3 | 3/3 | Complete    | 2026-03-28 |
-| 17. Personal Summary Generation | v1.3 | 0/4 | Not started | - |
+| 17. Personal Summary Generation | v1.3 | 1/4 | In Progress|  |
 | 18. Filtered Summary & Text Polish | v1.3 | 0/4 | Not started | - |
 
 ---

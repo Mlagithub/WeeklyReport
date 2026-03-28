@@ -233,6 +233,37 @@ class AIConfig(db.Model):
             return "****"
 
 
+class AITemplate(db.Model):
+    """AI prompt template model for report generation.
+
+    Per TEMPLATE-01: Template storage with name and content.
+    Per TEMPLATE-02: Placeholder support for {time_range}, {user_name}, {records}, {record_count}, {date_range}.
+    """
+
+    __tablename__ = "ai_template"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    time_range = db.Column(db.String(20), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    @staticmethod
+    def get_by_time_range(time_range):
+        """Get all templates for a specific time range.
+
+        Args:
+            time_range: One of "weekly", "monthly", "quarterly", "yearly"
+
+        Returns:
+            List of AITemplate objects matching the time range.
+        """
+        return AITemplate.query.filter_by(time_range=time_range).all()
+
+    def __repr__(self):
+        return f"<AITemplate {self.name}>"
+
+
 # =============================================================================
 # Flask-Admin View
 # =============================================================================

@@ -206,3 +206,34 @@ class TemplateForm(FlaskForm):
                 if str(existing.id) == self.template_id.data:
                     return
             raise ValidationError("模板名称已存在")
+
+
+class SummaryGenerationForm(FlaskForm):
+    """Form for personal summary generation.
+
+    Per SUMMARY-01: Time range selection.
+    Per SUMMARY-02: Template selection (optional).
+    Per SUMMARY-03: Custom prompt input (optional).
+    """
+
+    time_range = SelectField(
+        "时间范围",
+        choices=[
+            ("this_week", "本周"),
+            ("this_month", "本月"),
+            ("this_quarter", "本季度"),
+            ("this_year", "本年"),
+        ],
+        default="this_week",
+        validators=[DataRequired(message="请选择时间范围")]
+    )
+    template_id = SelectField(
+        "模板",
+        choices=[],  # Populated dynamically from AITemplate
+        description="可选，选择预设模板或使用默认"
+    )
+    custom_prompt = TextAreaField(
+        "自定义提示词",
+        description="可选，输入额外指示指导AI生成风格"
+    )
+    submit = SubmitField("生成总结", render_kw={"class": "btn btn-primary"})

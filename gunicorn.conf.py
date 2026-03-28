@@ -3,6 +3,11 @@
 # Per user decisions: D-01 (Gunicorn), D-02 (Sync), D-03 (2-4 workers), D-04 (0.0.0.0:5000), D-05 (30s timeout)
 
 import multiprocessing
+import os
+
+# AI encryption key for API key storage (Phase 14)
+# Generate with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+os.environ.setdefault('AI_ENCRYPTION_KEY', 'T2KJA9na4ZwnwZMf8fo5ACYF8VFSTxlKkeFachxXT1g=')
 
 # Server socket - per D-04
 bind = "0.0.0.0:5000"

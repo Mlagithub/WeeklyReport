@@ -153,19 +153,6 @@
                 {{ render_icon('download') }} 下载
             </button>
         </form>
-        {% if not hide_groups %}
-        <form action="{{ url_for('batch_export') }}" method="post" class="d-inline-block" id="batchExportForm">
-            <input type="hidden" name="time_range" value="">
-            <select name="format" class="form-select form-select-sm d-inline-block w-auto">
-                <option value="pdf">PDF (ZIP)</option>
-                <option value="docx">Word (ZIP)</option>
-                <option value="xlsx">Excel (ZIP)</option>
-            </select>
-            <button type="submit" class="btn btn-primary">
-                {{ render_icon('archive') }} 批量导出全组周报
-            </button>
-        </form>
-        {% endif %}
     </div>
 </div>
 
@@ -183,11 +170,6 @@ document.addEventListener('DOMContentLoaded', function() {
         input.value = g;
         form.appendChild(input);
     });
-    // Batch export form time_range
-    const batchForm = document.getElementById('batchExportForm');
-    if (batchForm) {
-        batchForm.querySelector('input[name="time_range"]').value = urlParams.get('time_range') || 'this_week';
-    }
 });
 </script>
 

@@ -2,6 +2,7 @@ import pytest
 from flask_security.utils import hash_password
 
 from app import app, db, user_datastore
+from models import Role
 
 
 @pytest.fixture
@@ -35,4 +36,27 @@ def test_user(client):
 def auth_client(client, test_user):
     """Authenticated test client."""
     client.post("/login", data={"username": test_user["username"], "password": test_user["password"]})
+    yield client
+
+
+@pytest.fixture
+def admin_user(client):
+    """Create an admin user for testing admin-only features."""
+    with client.application.app_context():
+        admin_role = Role(name="admin", permissions=["view_all", "edit_database"])
+        db.session.add(admin_role)
+        user = user_datastore.create_user(
+            email="admin@example.com",
+            username="adminuser",
+            password=hash_password("AdminPass123"),
+            roles=[admin_role],
+        )
+        db.session.commit()
+        return {"username": "adminuser", "password": "AdminPass123", "id": user.id}
+
+
+@pytest.fixture
+def admin_client(client, admin_user):
+    """Authenticated admin client."""
+    client.post("/login", data={"username": admin_user["username"], "password": admin_user["password"]})
     yield client

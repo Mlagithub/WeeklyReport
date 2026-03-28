@@ -154,7 +154,6 @@ def register_routes(app):
     def register():
         from flask_security import SQLAlchemyUserDatastore
 
-        from models import User
         user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
         form = MyRegisterForm()
@@ -167,7 +166,7 @@ def register_routes(app):
             # Generate unique email
             email = f"{username}_{uuid.uuid4().hex[:8]}@local"
             # Create user
-            user = user_datastore.create_user(
+            user_datastore.create_user(
                 email=email,
                 username=username,
                 password=hash_password(form.password.data)
@@ -181,7 +180,6 @@ def register_routes(app):
     def login():
         from flask_security import SQLAlchemyUserDatastore
 
-        from models import User
         user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
         form = MyLoginForm()
@@ -363,9 +361,9 @@ def register_routes(app):
         record_form = RecordFilterForm()
 
         uchoices = [(current_user.username, current_user.username)]
-        for g in User.managed_group(current_user):
-            record_form.groups.choices.append((g.name, g.description))
-            for u in g.users:
+        for group in User.managed_group(current_user):
+            record_form.groups.choices.append((group.name, group.description))
+            for u in group.users:
                 uchoices.append((u.username, u.username))
         record_form.user.choices = sorted(list(set(uchoices)))
 

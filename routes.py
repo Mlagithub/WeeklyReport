@@ -21,7 +21,7 @@ from exporters import ExporterFactory
 from extensions import db
 from forms import MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, ThemeForm, AIConfigForm
 from models import Group, Record, Role, User, user_records, with_db_transaction, AIConfig
-from ai_utils import encrypt_api_key
+from ai_utils import encrypt_api_key, test_ai_connection
 from utils import DateRange
 
 # =============================================================================
@@ -460,6 +460,20 @@ def register_routes(app):
 
         if form.validate_on_submit():
             # Check which button was clicked
+            if form.test_submit.data:  # Test connection button clicked
+                # Use form values for testing (not saved yet)
+                success, message = test_ai_connection(
+                    form.api_url.data,
+                    form.api_key.data
+                )
+                if success:
+                    flash(message, "success")
+                else:
+                    flash(message, "danger")
+                # Stay on page to show result
+                config = AIConfig.get_config()
+                return render_template("config.html", ai_form=form, ai_config=config, form=form)
+
             if form.submit.data:  # Save button clicked
                 encrypted_key = encrypt_api_key(form.api_key.data)
                 if config:

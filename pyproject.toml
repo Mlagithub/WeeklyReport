@@ -1,0 +1,27 @@
+# Project configuration for linting and formatting
+# Replaces separate .flake8, setup.cfg files per modern Python standards
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+]
+ignore = ["E501"]  # Line length handled by formatter
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "models", "routes", "forms", "utils", "extensions", "config", "exporters"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["F401", "F811"]  # Allow unused imports and redefinitions in tests
+
+[tool.black]
+line-length = 120
+target-version = ["py312"]

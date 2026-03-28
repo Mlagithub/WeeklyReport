@@ -18,6 +18,7 @@ htmldocx==0.0.6
 pytest==8.3.5
 pytest-cov==5.0.0
 python-docx==1.2.0
+cryptography==46.0.6
 
 # Code quality tools
 ruff==0.15.8

@@ -105,6 +105,12 @@ def create_app(config_class=None):
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security.init_app(app, user_datastore, login_form=MyLoginForm)
 
+    # Add CSRF token to templates for AJAX requests
+    from flask_wtf.csrf import generate_csrf
+    @app.context_processor
+    def csrf_token():
+        return {'csrf_token': generate_csrf}
+
     # Add admin views
     admin.add_view(UserModelView(User, db.session))
     admin.add_view(UserModelView(Role, db.session))

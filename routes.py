@@ -346,64 +346,6 @@ def register_routes(app):
             download_name=filename
         )
 
-    @app.route('/batch_export', methods=['POST'])
-    @login_required
-    def batch_export():
-        """Export all group members' reports as a ZIP file."""
-        from exporters.batch import create_batch_zip, group_records_by_user
-
-        # Permission check - only team leaders
-        permissions = User.all_permissions(current_user)
-        if 'view_group' not in permissions and 'view_all' not in permissions:
-            abort(403)
-
-        # Get parameters
-        format = request.form.get('format', 'pdf')
-        time_range = request.form.get('time_range', 'this_week')
-
-        # Get allowed usernames from managed groups
-        groups = User.managed_group(current_user)
-        allowed_usernames = set()
-        for group in groups:
-            for user in group.users:
-                allowed_usernames.add(user.username)
-
-        if not allowed_usernames:
-            flash('没有可导出的组成员', 'warning')
-            return redirect(url_for('manage_records'))
-
-        # Build query with time range
-        start_date, end_date = DateRange.get_range(time_range) if time_range else (None, None)
-
-        query = Record.query.join(user_records).join(User).filter(
-            User.username.in_(allowed_usernames)
-        )
-        if start_date and end_date:
-            query = query.filter(Record.date >= start_date, Record.date <= end_date)
-
-        records = query.order_by(Record.date.desc()).all()
-
-        if not records:
-            flash('所选时间范围内没有周报记录', 'warning')
-            return redirect(url_for('manage_records'))
-
-        # Group records by user
-        records_by_user = group_records_by_user(records)
-
-        # Create ZIP
-        zip_buffer = create_batch_zip(records_by_user, format=format)
-
-        # Generate ZIP filename
-        date_str = datetime.now().strftime('%Y%m%d_%H%M%S')
-        zip_filename = f'group_reports_{date_str}.zip'
-
-        return send_file(
-            zip_buffer,
-            mimetype='application/zip',
-            as_attachment=True,
-            download_name=zip_filename
-        )
-
     @app.route('/manage_records', methods=('GET',))
     @login_required
     def manage_records():

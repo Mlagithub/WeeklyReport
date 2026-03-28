@@ -9,9 +9,10 @@ from datetime import date
 
 from flask_security.forms import ChangePasswordForm, LoginForm
 from flask_wtf import FlaskForm
-from wtforms import DateField, HiddenField, PasswordField, SelectField, SelectMultipleField, StringField, SubmitField
-from wtforms.validators import DataRequired, EqualTo, Length, Regexp
+from wtforms import DateField, HiddenField, PasswordField, SelectField, SelectMultipleField, StringField, SubmitField, TextAreaField
+from wtforms.validators import DataRequired, EqualTo, Length, Regexp, ValidationError
 
+from models import AITemplate
 from utils import DateRange
 
 
@@ -161,3 +162,47 @@ class AIConfigForm(FlaskForm):
     )
     test_submit = SubmitField("测试连接", render_kw={"class": "btn btn-outline-secondary mb-3"})
     submit = SubmitField("保存配置", render_kw={"class": "btn btn-primary"})
+
+
+class TemplateForm(FlaskForm):
+    """Form for AI prompt template CRUD operations.
+
+    Per TEMPLATE-01: Template creation and editing.
+    Per TEMPLATE-02: Placeholder support with validation hints.
+    """
+
+    name = StringField(
+        "模板名称",
+        validators=[DataRequired(message="模板名称不能为空")],
+        render_kw={"placeholder": "例如：周报总结模板"}
+    )
+    content = TextAreaField(
+        "模板内容",
+        validators=[DataRequired(message="模板内容不能为空")],
+        description="支持占位符：{time_range} {user_name} {records} {record_count} {date_range}"
+    )
+    time_range = SelectField(
+        "时间范围",
+        choices=[
+            ("weekly", "周报"),
+            ("monthly", "月报"),
+            ("quarterly", "季度报"),
+            ("yearly", "年报")
+        ],
+        validators=[DataRequired(message="请选择时间范围")]
+    )
+    template_id = HiddenField("模板ID")
+    submit = SubmitField("保存模板", render_kw={"class": "btn btn-primary"})
+
+    def validate_name(self, field):
+        """Validate that template name is unique.
+
+        Skips validation for existing templates (identified by template_id).
+        """
+        existing = AITemplate.query.filter_by(name=field.data).first()
+        if existing:
+            # If editing existing template, skip if name unchanged
+            if self.template_id.data:
+                if str(existing.id) == self.template_id.data:
+                    return
+            raise ValidationError("模板名称已存在")

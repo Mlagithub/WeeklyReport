@@ -239,7 +239,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get filter params from URL
             const timeRange = urlParams.get('time_range') || 'this_week';
             const user = urlParams.get('user') || '';
-            const groups = urlParams.getAll('groups').filter(g => g && g !== '0').map(Number);
+            // groups are group names (strings), not IDs
+            const groups = urlParams.getAll('groups').filter(g => g);
 
             const csrfToken = getCsrfToken();
 

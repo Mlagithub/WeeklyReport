@@ -784,16 +784,12 @@ def register_routes(app):
         # Get filter parameters
         time_range = data.get('time_range', 'this_week')
         user_filter = data.get('user', '')  # Single username or empty
-        group_ids = data.get('groups', [])  # List of group IDs
+        group_names_filter = data.get('groups', [])  # List of group names (strings)
 
-        # Filter out invalid group IDs (0, None, empty strings)
-        valid_group_ids = []
-        for gid in group_ids:
-            if gid and str(gid).isdigit() and int(gid) > 0:
-                valid_group_ids.append(int(gid))
-        group_ids = valid_group_ids
+        # Filter out empty group names
+        group_names_filter = [g for g in group_names_filter if g and isinstance(g, str)]
 
-        app.logger.info(f"AI Summary request: user={user_filter}, groups={group_ids}, time={time_range}")
+        app.logger.info(f"AI Summary request: user={user_filter}, groups={group_names_filter}, time={time_range}")
 
         # Build user_ids list based on ALL filters combined (union)
         user_ids = []
@@ -806,8 +802,8 @@ def register_routes(app):
                 user_ids.append(user.id)
 
         # Add users from group filter (union with user filter)
-        if group_ids:
-            groups = Group.query.filter(Group.id.in_(group_ids)).all()
+        if group_names_filter:
+            groups = Group.query.filter(Group.name.in_(group_names_filter)).all()
             for g in groups:
                 group_names.append(g.name)
                 for u in g.users:

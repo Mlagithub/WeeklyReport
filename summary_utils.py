@@ -186,8 +186,13 @@ def fetch_filtered_records(
     Returns:
         Dict mapping user_id to list of {'date': date, 'content': str}
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     if not user_ids:
         return {}
+
+    logger.info(f"fetch_filtered_records: user_ids={user_ids}, date_range={start_date} to {end_date}")
 
     records = (
         Record.query
@@ -198,6 +203,8 @@ def fetch_filtered_records(
         .order_by(Record.date)
         .all()
     )
+
+    logger.info(f"Query returned {len(records)} records")
 
     # Group by user
     result = {}
@@ -310,14 +317,19 @@ def generate_filtered_summary(
     Returns:
         tuple: (success: bool, content: str | None, error: str | None)
     """
+    import logging
+    logger = logging.getLogger(__name__)
+
     if not user_ids:
         return (False, None, "没有选中任何用户记录")
 
     # Get date range
     start_date, end_date = DateRange.get_range(time_range_key)
+    logger.info(f"generate_filtered_summary: user_ids={user_ids}, date_range={start_date} to {end_date}")
 
     # Fetch records
     records_by_user = fetch_filtered_records(user_ids, start_date, end_date)
+    logger.info(f"fetch_filtered_records returned: {len(records_by_user)} users with records, total records: {sum(len(r) for r in records_by_user.values())}")
 
     if not records_by_user or all(len(r) == 0 for r in records_by_user.values()):
         return (False, None, "筛选范围内没有记录数据")

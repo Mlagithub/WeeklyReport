@@ -65,10 +65,10 @@
 4. API Key is encrypted in database, not stored in plaintext
 5. Permission matrix for AI features is defined and enforced (admin config, user summary, team leader filtered summary)
 
-**Plans:** 5 plans in 4 waves
+**Plans:** 1/5 plans executed
 
 Plans:
-- [ ] 14-00-PLAN.md — Wave 0: Test infrastructure + cryptography dependency
+- [x] 14-00-PLAN.md — Wave 0: Test infrastructure + cryptography dependency
 - [ ] 14-01-PLAN.md — Wave 1: AIConfig model + ai_utils.py encryption (SEC-01, CONFIG-03)
 - [ ] 14-02-PLAN.md — Wave 1: AIConfigForm with validation (CONFIG-01)
 - [ ] 14-03-PLAN.md — Wave 2: Route + UI + permissions (CONFIG-01, SEC-03)
@@ -198,7 +198,7 @@ Plans:
 | 11. Excel Enhancement | v1.2 | 3/3 | Complete | 2026-03-26 |
 | 12. Batch Export | v1.2 | 3/3 | Complete | 2026-03-27 |
 | 13. Code Review | v1.2 | 5/5 | Complete | 2026-03-28 |
-| 14. AI Configuration & Security | v1.3 | 0/5 | Not started | - |
+| 14. AI Configuration & Security | v1.3 | 1/5 | In Progress|  |
 | 15. API Integration Layer | v1.3 | 0/5 | Not started | - |
 | 16. Template Management | v1.3 | 0/3 | Not started | - |
 | 17. Personal Summary Generation | v1.3 | 0/6 | Not started | - |

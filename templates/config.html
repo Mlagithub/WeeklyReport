@@ -17,7 +17,7 @@
             </div>
         </div>
         <!-- AI Config card - admin only -->
-        {% if current_user.is_admin %}
+        {% if current_user.is_admin and ai_form %}
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-light">
                 <h5 class="mb-0">{{ render_icon('robot') }} AI 配置</h5>

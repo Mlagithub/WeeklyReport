@@ -443,7 +443,15 @@ def register_routes(app):
         else:
             form.theme_name.data = session.get("theme", "lumen")
 
-        return render_template("config.html", form=form)
+        # Prepare AI form and config for admin users
+        ai_form = None
+        ai_config = None
+        if current_user.is_admin:
+            from forms import AIConfigForm
+            ai_form = AIConfigForm()
+            ai_config = AIConfig.get_config()
+
+        return render_template("config.html", form=form, ai_form=ai_form, ai_config=ai_config)
 
     @app.route("/ai-config", methods=["GET", "POST"])
     @login_required

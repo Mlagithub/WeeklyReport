@@ -11,7 +11,7 @@
 - 批量导出 — 团队领导可一键导出整个组的周报
 - 图片嵌入 — 图片嵌入文档，离线可查看
 
-**Status:** In Progress — Phase 8 (Export Foundation) complete
+**Status:** Complete — All v1.2 phases (8-13) finished. Code review complete.
 
 ## What This Is
 
@@ -48,6 +48,9 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 - ✓ **FIND-03**: 保留现有过滤工具功能 — v1.1 Phase 6
 - ✓ **RENDER-01**: 主页最近提交正确渲染富文本格式 — v1.1 Phase 7
 - ✓ **RENDER-02**: 渲染时保持 XSS 防护 — v1.1 Phase 7
+- ✓ **CODE-01**: 代码语法审查和修复 — v1.2 Phase 13
+- ✓ **CODE-02**: 代码风格统一 (PEP 8) — v1.2 Phase 13
+- ✓ **CODE-03**: 冗余代码清理 — v1.2 Phase 13
 
 ### Active
 
@@ -120,4 +123,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-03-26 — Milestone v1.2 started*
+*Last updated: 2026-03-28 — Phase 13 (Code Review) complete*

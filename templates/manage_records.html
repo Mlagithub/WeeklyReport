@@ -230,6 +230,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const copySummaryBtn = document.getElementById('copySummaryBtn');
 
         summaryModal.addEventListener('show.bs.modal', function() {
+            console.log('Modal show event triggered');
+
             // Reset modal state
             summaryLoading.classList.remove('d-none');
             summaryContent.classList.add('d-none');
@@ -240,6 +242,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const timeRange = urlParams.get('time_range') || 'this_week';
             const user = urlParams.get('user') || '';
             const groups = urlParams.getAll('groups');
+
+            const csrfToken = getCsrfToken();
+            console.log('CSRF Token:', csrfToken);
+            console.log('Request params:', { timeRange, user, groups });
 
             // Call API
             fetch('/filtered-summary', {
@@ -284,10 +290,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Copy functionality
         copySummaryBtn.addEventListener('click', function() {
             const content = summaryContent.querySelector('div').innerText;
+            const originalHtml = copySummaryBtn.innerHTML;
             navigator.clipboard.writeText(content).then(function() {
-                copySummaryBtn.innerHTML = '{{ render_icon("clipboard-check") }} 已复制';
+                copySummaryBtn.textContent = '已复制';
                 setTimeout(function() {
-                    copySummaryBtn.innerHTML = '{{ render_icon("clipboard") }} 复制';
+                    copySummaryBtn.innerHTML = originalHtml;
                 }, 2000);
             });
         });

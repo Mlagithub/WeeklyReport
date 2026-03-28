@@ -237,10 +237,11 @@ document.addEventListener('DOMContentLoaded', function() {
     copyBtn.addEventListener('click', function() {
         // Copy content as plain text
         const text = contentDiv.textContent || contentDiv.innerText;
+        const originalHtml = copyBtn.innerHTML;
         navigator.clipboard.writeText(text).then(function() {
             copyBtn.textContent = '已复制';
             setTimeout(() => {
-                copyBtn.innerHTML = '{{ render_icon("clipboard") }} 复制';
+                copyBtn.innerHTML = originalHtml;
             }, 2000);
         });
     });

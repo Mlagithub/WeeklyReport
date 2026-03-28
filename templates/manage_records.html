@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get filter params from URL
             const timeRange = urlParams.get('time_range') || 'this_week';
             const user = urlParams.get('user') || '';
-            const groups = urlParams.getAll('groups');
+            const groups = urlParams.getAll('groups').filter(g => g && g !== '0').map(Number);
 
             const csrfToken = getCsrfToken();
 
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({
                     time_range: timeRange,
                     user: user,
-                    groups: groups.map(Number)
+                    groups: groups
                 })
             })
             .then(response => response.json())

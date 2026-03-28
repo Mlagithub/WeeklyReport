@@ -116,11 +116,11 @@ Plans:
 3. Four default templates (weekly, monthly, quarterly, yearly) are initialized on first run
 4. Templates are stored in database and persist across sessions
 
-**Plans:** 0/3 plans
+**Plans:** 2/3 plans
 
 Plans:
-- [ ] 16-00-PLAN.md — Wave 0: Test infrastructure for template management
-- [ ] 16-01-PLAN.md — Wave 1: AITemplate model + TemplateForm with validation (TEMPLATE-01, TEMPLATE-02)
+- [x] 16-00-PLAN.md — Wave 0: Test infrastructure for template management
+- [x] 16-01-PLAN.md — Wave 1: AITemplate model + TemplateForm with validation (TEMPLATE-01, TEMPLATE-02)
 - [ ] 16-02-PLAN.md — Wave 2: Admin CRUD route + UI + default templates (TEMPLATE-01, TEMPLATE-03)
 
 **UI hint:** yes
@@ -210,7 +210,7 @@ Plans:
 | 13. Code Review | v1.2 | 5/5 | Complete | 2026-03-28 |
 | 14. AI Configuration & Security | v1.3 | 5/5 | Complete    | 2026-03-28 |
 | 15. API Integration Layer | v1.3 | 3/3 | Complete    | 2026-03-28 |
-| 16. Template Management | v1.3 | 0/3 | Not started | - |
+| 16. Template Management | v1.3 | 2/3 | In progress | 2026-03-28 |
 | 17. Personal Summary Generation | v1.3 | 0/6 | Not started | - |
 | 18. Filtered Summary & Text Polish | v1.3 | 0/4 | Not started | - |
 
@@ -240,4 +240,4 @@ Phase 18: Filtered Summary & Text Polish
 ---
 
 *For milestone details, see `.planning/milestones/`*
-*Last updated: 2026-03-28 — Phase 16 plans created*
+*Last updated: 2026-03-28 — Phase 16 plan 01 complete (AITemplate model + TemplateForm)*

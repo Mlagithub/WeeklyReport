@@ -377,8 +377,8 @@ AI调用期间显示加载指示器，用户知道系统正在工作。
 | CONFIG-01 | 14 | 14-02, 14-03 | Complete |
 | CONFIG-02 | 14 | 14-04 | Pending |
 | CONFIG-03 | 14 | 14-01 | Complete |
-| TEMPLATE-01 | 16 | TBD | Pending |
-| TEMPLATE-02 | 16 | TBD | Pending |
+| TEMPLATE-01 | 16 | 16-01 | Complete |
+| TEMPLATE-02 | 16 | 16-01 | Complete |
 | TEMPLATE-03 | 16 | TBD | Pending |
 | SUMMARY-01 | 17 | TBD | Pending |
 | SUMMARY-02 | 17 | TBD | Pending |
@@ -400,4 +400,4 @@ AI调用期间显示加载指示器，用户知道系统正在工作。
 
 ---
 
-*Last updated: 2026-03-28 — Phase 15 complete (API-01, API-02, API-03, API-04, SEC-02)*
+*Last updated: 2026-03-28 — Phase 16 plan 01 complete (TEMPLATE-01, TEMPLATE-02)*

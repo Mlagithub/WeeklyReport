@@ -19,8 +19,9 @@ from werkzeug.utils import secure_filename
 
 from exporters import ExporterFactory
 from extensions import db
-from forms import MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, ThemeForm
-from models import Group, Record, Role, User, user_records, with_db_transaction
+from forms import MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, ThemeForm, AIConfigForm
+from models import Group, Record, Role, User, user_records, with_db_transaction, AIConfig
+from ai_utils import encrypt_api_key
 from utils import DateRange
 
 # =============================================================================
@@ -438,6 +439,51 @@ def register_routes(app):
             form.theme_name.data = session.get("theme", "lumen")
 
         return render_template("config.html", form=form)
+
+    @app.route("/ai-config", methods=["GET", "POST"])
+    @login_required
+    @with_db_transaction
+    def ai_config():
+        """AI configuration route - admin only.
+
+        Per CONFIG-01: AI service configuration storage.
+        Per SEC-03: Admin-only access.
+        Per CONTEXT.md: Redirect non-admin to home with "需要管理员权限".
+        """
+        # Admin permission check per SEC-03
+        if not current_user.is_admin:
+            flash("需要管理员权限", "warning")
+            return redirect(url_for("home"))
+
+        form = AIConfigForm()
+        config = AIConfig.get_config()
+
+        if form.validate_on_submit():
+            # Check which button was clicked
+            if form.submit.data:  # Save button clicked
+                encrypted_key = encrypt_api_key(form.api_key.data)
+                if config:
+                    config.api_url = form.api_url.data
+                    config.api_key_encrypted = encrypted_key
+                    config.model_name = form.model_name.data
+                else:
+                    config = AIConfig(
+                        api_url=form.api_url.data,
+                        api_key_encrypted=encrypted_key,
+                        model_name=form.model_name.data
+                    )
+                    db.session.add(config)
+                db.session.commit()
+                flash("配置已保存", "success")
+                return redirect(url_for("ai_config"))
+
+        # Pre-populate form with existing config (except api_key - show masked)
+        if config and not form.is_submitted():
+            form.api_url.data = config.api_url
+            form.model_name.data = config.model_name
+            # api_key not pre-populated - user must re-enter to change
+
+        return render_template("config.html", ai_form=form, ai_config=config, form=form)
 
     @app.route("/files/<filename>")
     @login_required

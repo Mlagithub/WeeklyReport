@@ -388,16 +388,16 @@ AI调用期间显示加载指示器，用户知道系统正在工作。
 | FILTER-SUM-02 | 18 | TBD | Pending |
 | POLISH-01 | 18 | TBD | Pending |
 | POLISH-02 | 18 | TBD | Pending |
-| API-01 | 15 | TBD | Pending |
-| API-02 | 15 | TBD | Pending |
-| API-03 | 15 | TBD | Pending |
-| API-04 | 15 | TBD | Pending |
+| API-01 | 15 | 15-01 | Complete |
+| API-02 | 15 | 15-01 | Complete |
+| API-03 | 15 | 15-01 | Complete |
+| API-04 | 15 | 15-02 | Complete |
 | SEC-01 | 14 | 14-01 | Complete |
-| SEC-02 | 15 | TBD | Pending |
+| SEC-02 | 15 | 15-01 | Complete |
 | SEC-03 | 14 | 14-03 | Complete |
 | UI-01 | 17 | TBD | Pending |
 | UI-02 | 17 | TBD | Pending |
 
 ---
 
-*Last updated: 2026-03-28 — Phase 14 plans 14-01, 14-02, 14-03 complete (CONFIG-01, CONFIG-03, SEC-01, SEC-03)*
+*Last updated: 2026-03-28 — Phase 15 complete (API-01, API-02, API-03, API-04, SEC-02)*

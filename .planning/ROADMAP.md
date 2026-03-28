@@ -12,8 +12,8 @@
 ### v1.3 AI (Phases 14-18) — IN PROGRESS
 
 - [x] **Phase 14: AI Configuration & Security** — Admins can securely configure AI service
-- [ ] **Phase 15: API Integration Layer** — System can reliably call AI APIs with error handling
-- [ ] **Phase 16: Template Management** — Admins can manage summary templates with variables
+- [x] **Phase 15: API Integration Layer** — System can reliably call AI APIs with error handling
+- [x] **Phase 16: Template Management** — Admins can manage summary templates with variables
 - [ ] **Phase 17: Personal Summary Generation** — Users can generate personal work summaries on home page
 - [ ] **Phase 18: Filtered Summary & Text Polish** — Team leaders can summarize filtered results, users can polish text
 
@@ -143,7 +143,13 @@ Plans:
 5. Loading indicator shows during generation, buttons are disabled to prevent duplicate clicks
 6. User can regenerate with same parameters or edit before copying
 
-**Plans:** TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 17-00-PLAN.md — Wave 0: Test infrastructure for summary generation (SUMMARY-01, SUMMARY-02, SUMMARY-03, SUMMARY-04)
+- [ ] 17-01-PLAN.md — Wave 1: SummaryGenerationForm + summary_utils.py (SUMMARY-01, SUMMARY-02, SUMMARY-03, SUMMARY-04)
+- [ ] 17-02-PLAN.md — Wave 2: Route + UI + JavaScript interactions (SUMMARY-01, SUMMARY-02, SUMMARY-03, SUMMARY-04, UI-01, UI-02)
+- [ ] 17-03-PLAN.md — Wave 3: Human verification checkpoint (UI-01, UI-02)
 
 **UI hint:** yes
 
@@ -210,8 +216,8 @@ Plans:
 | 13. Code Review | v1.2 | 5/5 | Complete | 2026-03-28 |
 | 14. AI Configuration & Security | v1.3 | 5/5 | Complete    | 2026-03-28 |
 | 15. API Integration Layer | v1.3 | 3/3 | Complete    | 2026-03-28 |
-| 16. Template Management | v1.3 | 3/3 | Complete   | 2026-03-28 |
-| 17. Personal Summary Generation | v1.3 | 0/6 | Not started | - |
+| 16. Template Management | v1.3 | 3/3 | Complete    | 2026-03-28 |
+| 17. Personal Summary Generation | v1.3 | 0/4 | Not started | - |
 | 18. Filtered Summary & Text Polish | v1.3 | 0/4 | Not started | - |
 
 ---
@@ -240,4 +246,4 @@ Phase 18: Filtered Summary & Text Polish
 ---
 
 *For milestone details, see `.planning/milestones/`*
-*Last updated: 2026-03-28 — Phase 16 plan 01 complete (AITemplate model + TemplateForm)*
+*Last updated: 2026-03-28 — Phase 17 planning complete*

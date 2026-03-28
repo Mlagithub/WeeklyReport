@@ -19,8 +19,8 @@ from werkzeug.utils import secure_filename
 
 from exporters import ExporterFactory
 from extensions import db
-from forms import MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, ThemeForm, AIConfigForm
-from models import Group, Record, Role, User, user_records, with_db_transaction, AIConfig
+from forms import MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, ThemeForm, AIConfigForm, TemplateForm
+from models import Group, Record, Role, User, user_records, with_db_transaction, AIConfig, AITemplate
 from ai_utils import encrypt_api_key, test_ai_connection
 from utils import DateRange
 
@@ -498,6 +498,101 @@ def register_routes(app):
             # api_key not pre-populated - user must re-enter to change
 
         return render_template("config.html", ai_form=form, ai_config=config, form=form)
+
+    @app.route("/ai-templates", methods=["GET", "POST"])
+    @login_required
+    @with_db_transaction
+    def ai_templates():
+        """AI template management route - admin only.
+
+        Per TEMPLATE-01: CRUD operations for templates.
+        Per TEMPLATE-03: Initialize default templates on first access.
+        Per SEC-03: Admin-only access.
+        """
+        # Admin permission check per SEC-03
+        if not current_user.is_admin:
+            flash("需要管理员权限", "warning")
+            return redirect(url_for("home"))
+
+        # Initialize default templates on first access (TEMPLATE-03)
+        from utils.template_defaults import initialize_default_templates
+        initialize_default_templates()
+
+        form = TemplateForm()
+        templates = AITemplate.query.order_by(AITemplate.time_range).all()
+
+        if form.validate_on_submit():
+            # Check if editing existing template
+            template_id = form.template_id.data
+            if template_id:
+                template = db.session.get(AITemplate, int(template_id))
+                if template:
+                    template.name = form.name.data
+                    template.content = form.content.data
+                    template.time_range = form.time_range.data
+                    flash("模板已更新", "success")
+                else:
+                    flash("模板不存在", "warning")
+            else:
+                # Create new template
+                template = AITemplate(
+                    name=form.name.data,
+                    content=form.content.data,
+                    time_range=form.time_range.data
+                )
+                db.session.add(template)
+                flash("模板已创建", "success")
+            db.session.commit()
+            return redirect(url_for("ai_templates"))
+
+        return render_template("admin/ai_templates.html", form=form, templates=templates)
+
+    @app.route("/ai-templates/edit/<int:template_id>", methods=["GET"])
+    @login_required
+    def edit_template(template_id):
+        """Edit template route - admin only.
+
+        Per TEMPLATE-01: Edit existing template.
+        """
+        if not current_user.is_admin:
+            flash("需要管理员权限", "warning")
+            return redirect(url_for("home"))
+
+        template = db.session.get(AITemplate, template_id)
+        if not template:
+            flash("模板不存在", "warning")
+            return redirect(url_for("ai_templates"))
+
+        form = TemplateForm()
+        form.name.data = template.name
+        form.content.data = template.content
+        form.time_range.data = template.time_range
+        form.template_id.data = str(template.id)
+
+        templates = AITemplate.query.order_by(AITemplate.time_range).all()
+        return render_template("admin/ai_templates.html", form=form, templates=templates, editing=True)
+
+    @app.route("/ai-templates/delete/<int:template_id>", methods=["POST"])
+    @login_required
+    @with_db_transaction
+    def delete_template(template_id):
+        """Delete template route - admin only.
+
+        Per TEMPLATE-01: Delete existing template.
+        """
+        if not current_user.is_admin:
+            flash("需要管理员权限", "warning")
+            return redirect(url_for("home"))
+
+        template = db.session.get(AITemplate, template_id)
+        if template:
+            db.session.delete(template)
+            db.session.commit()
+            flash("模板已删除", "success")
+        else:
+            flash("模板不存在", "warning")
+
+        return redirect(url_for("ai_templates"))
 
     @app.route("/files/<filename>")
     @login_required

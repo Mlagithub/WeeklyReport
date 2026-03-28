@@ -54,6 +54,65 @@
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">{{ render_icon('robot') }} AI 工作总结</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="summary-time-range" class="form-label">时间范围</label>
+                        <select id="summary-time-range" class="form-select">
+                            <option value="this_week" selected>本周</option>
+                            <option value="this_month">本月</option>
+                            <option value="this_quarter">本季度</option>
+                            <option value="this_year">本年</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="summary-template" class="form-label">模板（可选）</label>
+                        <select id="summary-template" class="form-select">
+                            <option value="" selected>默认模板</option>
+                            {% for tmpl in summary_templates %}
+                            <option value="{{ tmpl.id }}">{{ tmpl.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="summary-custom-prompt" class="form-label">自定义提示词（可选）</label>
+                        <input type="text" id="summary-custom-prompt" class="form-control" placeholder="例如：简洁风格、突出重点项目...">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <button id="generate-summary-btn" class="btn btn-primary" type="button">
+                        {{ render_icon('sparkles') }} 生成总结
+                    </button>
+                    <span id="summary-loading" class="ms-2 text-muted" style="display: none;">
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                        正在生成...
+                    </span>
+                </div>
+                <div id="summary-result" style="display: none;">
+                    <div class="border rounded p-3 mb-3 bg-light">
+                        <div id="summary-content"></div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button id="copy-summary-btn" class="btn btn-outline-secondary btn-sm" type="button">
+                            {{ render_icon('clipboard') }} 复制
+                        </button>
+                        <button id="regenerate-summary-btn" class="btn btn-outline-secondary btn-sm" type="button">
+                            {{ render_icon('arrow-clockwise') }} 重新生成
+                        </button>
+                    </div>
+                </div>
+                <div id="summary-error" class="alert alert-danger" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-12">
         <div class="card shadow-sm">

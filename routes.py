@@ -493,8 +493,8 @@ def register_routes(app):
                 theme_form.theme_name.data = session.get("theme", "lumen")
                 return render_template("config.html", ai_form=form, ai_config=config, form=theme_form)
 
-            # Save API config
-            if save_type == "api":
+            # Save API config (only when submit button is clicked, not test_submit)
+            if save_type == "api" and "submit" in request.form:
                 api_key = request.form.get("api_key", "")
                 model_name = request.form.get("model_name", "")
                 api_url = request.form.get("api_url", "")

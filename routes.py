@@ -481,15 +481,18 @@ def register_routes(app):
 
             if form.submit.data:  # Save button clicked
                 encrypted_key = encrypt_api_key(form.api_key.data)
+                polish_prompt_value = form.polish_prompt.data or None
                 if config:
                     config.api_url = form.api_url.data
                     config.api_key_encrypted = encrypted_key
                     config.model_name = form.model_name.data
+                    config.polish_prompt = polish_prompt_value
                 else:
                     config = AIConfig(
                         api_url=form.api_url.data,
                         api_key_encrypted=encrypted_key,
-                        model_name=form.model_name.data
+                        model_name=form.model_name.data,
+                        polish_prompt=polish_prompt_value
                     )
                     db.session.add(config)
                 db.session.commit()
@@ -500,6 +503,7 @@ def register_routes(app):
         if config and not form.is_submitted():
             form.api_url.data = config.api_url
             form.model_name.data = config.model_name
+            form.polish_prompt.data = config.polish_prompt
             # api_key not pre-populated - user must re-enter to change
 
         return render_template("config.html", ai_form=form, ai_config=config, form=form)
@@ -638,6 +642,47 @@ def register_routes(app):
             time_range_key=time_range,
             template_id=template_id,
             custom_prompt=custom_prompt
+        )
+
+        return jsonify({
+            'success': success,
+            'content': content,
+            'error': error
+        })
+
+    @app.route("/polish-text", methods=["POST"])
+    @login_required
+    def polish_text():
+        """Polish text via AI.
+
+        Per POLISH-01: Polish button in report editor.
+        Per POLISH-02: Use configurable default prompt.
+
+        Returns JSON: {'success': bool, 'content': str|None, 'error': str|None}
+        """
+        from flask import jsonify
+        from ai_utils import call_ai_api
+
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'content': None, 'error': '请求格式错误'})
+
+        text = data.get('text', '')
+        if not text or not text.strip():
+            return jsonify({'success': False, 'content': None, 'error': '请输入需要润色的文本'})
+
+        # Get polish prompt from config or use default
+        config = AIConfig.get_config()
+        if config and config.polish_prompt:
+            prompt = f"{config.polish_prompt}\n\n{text}"
+        else:
+            prompt = f"{AIConfig.DEFAULT_POLISH_PROMPT}\n\n{text}"
+
+        # Call AI API
+        success, content, error = call_ai_api(
+            prompt=prompt,
+            user_id=current_user.id,
+            function_type="polish"
         )
 
         return jsonify({

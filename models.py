@@ -207,6 +207,9 @@ class AIConfig(db.Model):
     api_url = db.Column(db.String(255), nullable=False)
     api_key_encrypted = db.Column(db.Text, nullable=False)  # Encrypted storage per SEC-01
     model_name = db.Column(db.String(100), nullable=False)
+    polish_prompt = db.Column(db.Text, nullable=True)  # Per POLISH-02: Admin configurable polish prompt
+
+    DEFAULT_POLISH_PROMPT = "请对以下文本进行润色，使其更加专业、流畅、简洁。保持原有内容和意思不变，优化表达方式："
 
     @staticmethod
     def get_config():

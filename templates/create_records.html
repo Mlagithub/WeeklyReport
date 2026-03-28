@@ -32,7 +32,12 @@
                         <div id="editor"></div>
                         <div class="d-flex justify-content-between mt-2">
                             <span class="text-muted small" id="charCount">纯文本字数: 0</span>
-                            <span class="text-muted small" id="wordCount">含格式字符数: 0</span>
+                            <div>
+                                <button type="button" class="btn btn-outline-info btn-sm" id="polishBtn" disabled>
+                                    {{ render_icon('sparkles') }} AI润色
+                                </button>
+                                <span class="text-muted small ms-2" id="wordCount">含格式字符数: 0</span>
+                            </div>
                         </div>
                         {% if form.body.errors %}
                         <div class="text-danger small mt-1">
@@ -70,6 +75,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const text = data.replace(/<[^>]*>/g, '');
         document.getElementById('charCount').textContent = '纯文本字数: ' + text.length;
         document.getElementById('wordCount').textContent = '含格式字符数: ' + data.length;
+        // Enable polish button if there's content
+        const polishBtn = document.getElementById('polishBtn');
+        polishBtn.disabled = text.trim().length < 10;
     };
 
     const editor = CKEDITOR.instances.body;
@@ -94,10 +102,49 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
+    // Polish button functionality
+    const polishBtn = document.getElementById('polishBtn');
+    polishBtn.addEventListener('click', function() {
+        const editor = CKEDITOR.instances.body;
+        if (!editor) return;
+
+        const data = editor.getData();
+        const text = data.replace(/<[^>]*>/g, '').trim();
+        if (text.length < 10) {
+            alert('请先输入需要润色的文本（至少10个字符）');
+            return;
+        }
+
+        polishBtn.disabled = true;
+        polishBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>润色中...';
+
+        fetch('/polish-text', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({text: text})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.content) {
+                editor.setData(data.content);
+                updateCounts(editor);
+            } else {
+                alert('润色失败：' + (data.error || '未知错误'));
+            }
+        })
+        .catch(err => {
+            alert('请求失败：' + err.message);
+        })
+        .finally(() => {
+            polishBtn.disabled = false;
+            polishBtn.innerHTML = '{{ render_icon("sparkles") }} AI润色';
+        });
+    });
+
     const form = document.getElementById('recordForm');
     const submitBtn = document.getElementById('submitBtn');
-    
+
     form.addEventListener('submit', function() {
         submitBtn.disabled = true;
         submitBtn.querySelector('.submit-text').classList.add('d-none');

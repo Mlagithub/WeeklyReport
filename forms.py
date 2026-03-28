@@ -160,6 +160,11 @@ class AIConfigForm(FlaskForm):
         validators=[DataRequired(message="模型名称不能为空")],
         render_kw={"placeholder": "gpt-4o-mini"}
     )
+    polish_prompt = TextAreaField(
+        "润色提示词",
+        description="可选，设置默认润色提示词。留空使用系统默认。",
+        render_kw={"placeholder": "请对以下文本进行润色，使其更加专业、流畅、简洁..."}
+    )
     test_submit = SubmitField("测试连接", render_kw={"class": "btn btn-outline-secondary mb-3"})
     submit = SubmitField("保存配置", render_kw={"class": "btn btn-primary"})
 

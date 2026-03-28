@@ -85,10 +85,10 @@ class ExporterFactory:
 __all__ = ['ExporterFactory', 'ExporterBase', 'ImageResolver']
 
 
-# Register exporters as they are implemented (Phases 9-11)
-from .docx import DocxExporter
-from .excel import ExcelExporter
-from .pdf import PdfExporter
+# Register exporters as they are implemented (Phases 9-11)  # noqa: E402
+from .docx import DocxExporter  # noqa: E402
+from .excel import ExcelExporter  # noqa: E402
+from .pdf import PdfExporter  # noqa: E402
 
 ExporterFactory.register('pdf', PdfExporter)
 ExporterFactory.register('docx', DocxExporter)

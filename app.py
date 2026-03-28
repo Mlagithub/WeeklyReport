@@ -223,8 +223,8 @@ with app.app_context():
     ensure_record_columns()
     verify_wal_mode()
 
-# Import helper functions from routes for backward compatibility
-from routes import can_edit_record, get_allowed_groups, get_allowed_usernames
+# Import helper functions from routes for backward compatibility  # noqa: E402
+from routes import can_edit_record, get_allowed_groups, get_allowed_usernames  # noqa: E402
 
 # =============================================================================
 # Backward-Compatible Exports for Tests

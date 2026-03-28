@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
+from io import BytesIO
 
+from bs4 import BeautifulSoup
 from flask import send_file
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 
 class DateRange:
@@ -92,14 +96,6 @@ class DateRange:
         else:
             start_date, end_date = DateRange.this_year()  # 默认返回本年的数据
         return start_date, end_date
-
-
-
-from io import BytesIO
-
-from bs4 import BeautifulSoup
-from openpyxl import Workbook
-from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 
 # 将 HTML 转换为纯文本的函数，改进 convert_list

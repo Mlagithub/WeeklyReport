@@ -1,29 +1,28 @@
-# 周报管理系统稳定性修复
+# 周报管理系统
 
-## Current Milestone: v1.2 增强富文本导出功能
+## Current Milestone: v1.1 UI Optimization (In Progress)
 
-**Goal:** 让团队领导能导出保留格式的周报，支持多种格式和批量导出
+**Goal:** 改善用户界面体验，减少信息过载，增强富文本渲染
 
 **Target features:**
-- DOCX 导出 — Word 格式，支持图片、链接、列表、表格、代码片段
-- PDF 导出 — 只读格式，方便分享
-- Excel 增强 — 增强现有导出，支持富文本
-- 批量导出 — 团队领导可一键导出整个组的周报
-- 图片嵌入 — 图片嵌入文档，离线可查看
+- 查找页面默认过滤 — 减少信息过载
+- 主页富文本渲染 — 正确显示 CKEditor 格式
 
-**Status:** Complete — All v1.2 phases (8-13) finished. Code review complete.
+**Status:** In Progress — Phase 6 complete, Phase 7 pending
 
 ## What This Is
 
-Flask 周报管理系统，用于软件开发团队的周报提交、管理和导出。支持用户分组、权限控制、富文本编辑和 Excel 导出。
+Flask 周报管理系统，用于软件开发团队的周报提交、管理和多格式导出。支持用户分组、权限控制、富文本编辑和多格式导出（Excel、PDF、DOCX）。
 
-**v1.0 已解决：** 应用运行约一周后导致系统 IO 过载的问题已修复。生产环境部署了 Gunicorn + systemd，启用了 SQLite WAL 模式，添加了单元测试（62 tests，68% coverage），代码已模块化重构。
+**v1.2 已发布：** 增强富文本导出功能。PDF、DOCX、Excel 三种格式均支持富文本格式保留，团队领导可批量导出整组周报为 ZIP。
+
+**v1.0 已解决：** 应用运行约一周后导致系统 IO 过载的问题已修复。生产环境部署了 Gunicorn + systemd，启用了 SQLite WAL 模式，添加了单元测试（122 tests，88% coverage），代码已模块化重构并通过 linting 验证。
 
 ## Core Value
 
-**解决 IO 过载问题，确保系统长期稳定运行。**
+**让团队领导能导出保留格式的周报，支持多种格式和批量导出。**
 
-v1.0 已完成此目标。系统现在可以长期稳定运行。
+v1.2 已完成此目标。系统支持 PDF、DOCX、Excel 三种格式，均保留富文本格式。
 
 ## Requirements
 
@@ -41,24 +40,25 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 - ✓ **STAB-02**: 数据库会话管理 — v1.0
 - ✓ **STAB-03**: SQLite WAL 模式 — v1.0
 - ✓ **STAB-04**: 数据库错误处理和回滚 — v1.0
-- ✓ **TEST-01**: 单元测试 — v1.0
+- ✓ **TEST-01**: 单元测试 — v1.0 (122 tests, 88% coverage)
 - ✓ **REFAC-01**: 代码结构优化 — v1.0
 - ✓ **FIND-01**: 查找页面默认选中当前用户 — v1.1 Phase 6
 - ✓ **FIND-02**: 查找页面默认日期范围为本周 — v1.1 Phase 6
 - ✓ **FIND-03**: 保留现有过滤工具功能 — v1.1 Phase 6
 - ✓ **RENDER-01**: 主页最近提交正确渲染富文本格式 — v1.1 Phase 7
 - ✓ **RENDER-02**: 渲染时保持 XSS 防护 — v1.1 Phase 7
+- ✓ **EXPORT-01**: 用户可导出周报为 DOCX 格式 — v1.2 Phase 10
+- ✓ **EXPORT-02**: 用户可导出周报为 PDF 格式 — v1.2 Phase 9
+- ✓ **EXPORT-03**: Excel 导出支持富文本格式 — v1.2 Phase 11
+- ✓ **EXPORT-04**: 团队领导可批量导出整个组的周报 — v1.2 Phase 12
+- ✓ **EXPORT-05**: 导出时图片嵌入文档 — v1.2 Phases 9-11
 - ✓ **CODE-01**: 代码语法审查和修复 — v1.2 Phase 13
 - ✓ **CODE-02**: 代码风格统一 (PEP 8) — v1.2 Phase 13
 - ✓ **CODE-03**: 冗余代码清理 — v1.2 Phase 13
 
 ### Active
 
-- **EXPORT-01**: 用户可导出周报为 DOCX 格式（保留富文本格式）
-- **EXPORT-02**: 用户可导出周报为 PDF 格式（保留富文本格式）
-- **EXPORT-03**: Excel 导出支持富文本格式
-- **EXPORT-04**: 团队领导可批量导出整个组的周报
-- **EXPORT-05**: 导出时图片嵌入文档（离线可查看）
+(None — all v1.2 requirements validated)
 
 ### Out of Scope
 
@@ -69,21 +69,24 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 ## Context
 
 **技术环境：**
-- Python 3.10 + Flask 3.0.3
+- Python 3.12 + Flask 3.0.3
 - SQLite 数据库（WAL 模式）
 - Ubuntu 22.04 服务器
 - 部署方式：Gunicorn + systemd 服务
 
 **代码规模：**
-- 2,500+ 行 Python 代码
-- 6 个模块（config, extensions, models, forms, routes, app）
-- 87 个测试用例
+- 4,644 行 Python 代码
+- 8 个模块（app, routes, models, forms, utils, config, extensions, exporters/）
+- 122 个测试用例，88% coverage
+- 0 linting errors (ruff)
 
 **已解决问题：**
 1. Flask 开发服务器 IO 过载 → Gunicorn + systemd
 2. 数据库连接泄漏 → Flask-SQLAlchemy 3.x 自动清理
 3. 数据库锁定 → SQLite WAL 模式
 4. 硬编码密钥 → 环境变量配置
+5. 无多格式导出 → PDF/DOCX/Excel with rich text
+6. 代码质量问题 → ruff/black 配置，CC < 10
 
 ## Constraints
 
@@ -101,6 +104,12 @@ v1.0 已完成此目标。系统现在可以长期稳定运行。
 | pytest 测试框架 | Flask 测试支持好 | ✓ Phase 4 完成 |
 | 模块化 Flask 结构 | 可维护性 | ✓ Phase 5 完成 |
 | Jinja2 template-level defaults | 用户可清除过滤器 | ✓ Phase 6 完成 |
+| ExporterBase template method pattern | 统一导出接口 | ✓ Phase 8 完成 |
+| WeasyPrint for PDF | 纯 Python，CSS 支持好 | ✓ Phase 9 完成 |
+| python-docx + htmldocx for DOCX | 行业标准 | ✓ Phase 10 完成 |
+| openpyxl CellRichText for Excel | 原生富文本支持 | ✓ Phase 11 完成 |
+| ZIP 批量导出 | 简单、通用 | ✓ Phase 12 完成 |
+| ruff + black for linting | 快速、统一配置 | ✓ Phase 13 完成 |
 
 ---
 
@@ -123,4 +132,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-03-28 — Phase 13 (Code Review) complete*
+*Last updated: 2026-03-28 — v1.2 milestone complete*

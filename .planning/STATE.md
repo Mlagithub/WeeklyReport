@@ -1,89 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.2
-milestone_name: milestone
-status: verifying
-last_updated: "2026-03-28T05:52:33.713Z"
+milestone: v1.3
+milestone_name: AI
+status: planning
+last_updated: "2026-03-28T06:30:00.000Z"
 last_activity: 2026-03-28
 progress:
-  total_phases: 13
-  completed_phases: 13
-  total_plans: 37
-  completed_plans: 37
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-26)
+See: .planning/PROJECT.md (updated 2026-03-28)
 
 **Core value:** 让团队领导能导出保留格式的周报，支持多种格式和批量导出
-**Current focus:** Phase 13 — comprehensive-code-review
+**Current focus:** v1.3 AI milestone — defining requirements
 
 ## Current Position
 
-Phase: 13
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-03-28
-
-## Performance Metrics
-
-**Velocity:**
-
-- Total plans completed (v1.0): 11
-- Total plans completed (v1.1): 4
-- Total execution time: ~2 days (v1.0) + ~1 day (v1.1)
-
-**By Phase (v1.0):**
-
-| Phase | Plans | Status |
-|-------|-------|--------|
-| 1. Production WSGI Server | 3 | Complete |
-| 2. Session Management | 1 | Complete |
-| 3. SQLite Optimization | 1 | Complete |
-| 4. Unit Testing | 3 | Complete |
-| 5. Code Refactoring | 3 | Complete |
-
-**By Phase (v1.1):**
-
-| Phase | Plans | Status |
-|-------|-------|--------|
-| 6. Find Page Filtering | 2 | Complete |
-| 7. Homepage Rendering | 2 | Complete |
-
-**By Phase (v1.2):**
-
-| Phase | Plans | Status |
-|-------|-------|--------|
-| 8. Export Foundation | TBD | Not started |
-| 9. PDF Export | TBD | Not started |
-| 10. DOCX Export | TBD | Not started |
-| 11. Excel Enhancement | TBD | Not started |
-| 12. Batch Export | TBD | Not started |
-| Phase 08-export-foundation P00 | 5min | 1 tasks | 1 files |
-| Phase 08-export-foundation P01 | 3min | 2 tasks | 1 files |
-| Phase 08 P02 | 4min | 3 tasks | 2 files |
-| Phase 08 P03 | 2min | 2 tasks | 2 files |
-| Phase 09 P00 | 1min | 1 tasks | 1 files |
-| Phase 09 P02 | 2 min | 3 tasks | 3 files |
-| Phase 10 P00 | 3min | 1 tasks | 1 files |
-| Phase 10 P01 | 10min | 4 tasks | 3 files |
-| Phase 10 P02 | 2min | 3 tasks | 2 files |
-| Phase 11-excel-enhancement P00 | 2min | 1 tasks | 1 files |
-| Phase 11 P01 | 13min | 1 tasks | 3 files |
-| Phase 11 P02 | 3min | 2 tasks | 1 files |
-| Phase 12 P00 | 2min | 1 tasks | 1 files |
-| Phase 13 P01 | 100s | 2 tasks | 2 files |
-| Phase 13 P02 | 126s | 2 tasks | 20 files |
-| Phase 13 P03 | 5min | 3 tasks | 5 files |
-| Phase 13 P04 | 4min | 3 tasks | 3 files |
-| Phase 13 P05 | 207 | 4 tasks | 17 files |
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-28 — Milestone v1.3 started
 
 ## Accumulated Context
 
-### Decisions
+### Decisions (Previous Milestones)
 
 Key decisions from v1.0:
 
@@ -102,79 +49,32 @@ v1.1 Decisions:
 - [Roadmap]: 2 phases for 5 requirements (fine granularity)
 - [Roadmap]: Phase 6 = Find Page Filtering (FIND-01, FIND-02, FIND-03)
 - [Roadmap]: Phase 7 = Homepage Rendering (RENDER-01, RENDER-02)
-- [Phase 06]: D-01: 'last_7_days' as first TIME_RANGES entry for dropdown order
-- [Phase 06]: D-02: Jinja2 {% set %} pattern for default filter values in dropdowns
+- [Phase 06]: D-01: Jinja2 {% set %} pattern for default filter values in dropdowns
 - [Phase 07]: D-01: ALLOWED_TAGS includes CKEditor common output tags — Preserve formatting while blocking XSS
 - [Phase 07]: D-02: ALLOWED_ATTRIBUTES allows class/style on all tags — CKEditor compatibility for inline styling
 
 v1.2 Decisions:
 
 - [Roadmap]: 5 phases for 7 requirements (fine granularity)
-- [Roadmap]: Phase 8 = Export Foundation (infrastructure, no direct requirements)
-- [Roadmap]: Phase 9 = PDF Export (PDF-01, PDF-02, PDF-03)
-- [Roadmap]: Phase 10 = DOCX Export (DOCX-01, DOCX-02)
-- [Roadmap]: Phase 11 = Excel Enhancement (XLSX-01)
-- [Roadmap]: Phase 12 = Batch Export (BATCH-01)
 - [Research]: WeasyPrint for PDF — pure Python, active maintenance, best CSS support
 - [Research]: python-docx for DOCX — industry standard, supports all formatting elements
-- [Research]: htmldocx as HTML-DOCX bridge — quick integration but unmaintained since 2021
-- [Research]: ImageResolver centralized — reuse across PDF/DOCX, avoid duplication
-- [Research]: No background task queue — current scale (10-50 users) doesn't need it
 - [Phase 08]: ExporterBase template method pattern: export() calls _prepare_data() then _generate()
 - [Phase 08]: ExporterFactory uses registry pattern with on-demand instantiation
 - [Phase 10]: htmldocx for HTML-to-DOCX: standard library but requires custom image handling
-- [Phase 10]: Placeholder-based image embedding: extract images before htmldocx, replace placeholders after
-- [Phase 11-01]: load_workbook(rich_text=True) required to preserve CellRichText objects when loading XLSX files
-- [Phase 11-02]: Remove RecordDownloader import - no longer needed after ExcelExporter integration
-- [Phase 13]: D-01: Use ruff as unified linter (replaces flake8, isort, pydocstyle)
-- [Phase 13]: D-02: Set line-length=120 consistent with existing code style
-- [Phase 13]: D-03: Target Python 3.12 (current environment)
-- [Phase 13]: D-04: Enable import sorting with known-first-party modules
-- [Phase 13]: D-05: Allow test-specific conventions (F401, F811 for fixtures)
-- [Phase 13]: D-01: Auto-fix with ruff check . --fix resolves trivial issues efficiently
-- [Phase 13]: D-02: Remaining 21 issues require manual intervention or are intentional patterns
-- [Phase 13]: D-01: Fixed bytes literals by generating proper minimal PNG (68 bytes) instead of incorrect double-escaped format (186 bytes)
-- [Phase 13]: D-02: Used noqa comments for E402 errors where circular dependencies require late imports
-- [Phase 13]: D-03: Moved imports to top of file in utils.py for cleaner structure
-- [Phase 13]: D-05: Extract helper methods when CC approaches 10 (template method pattern)
-- [Phase 13]: D-06: Use static methods for helper functions that don't need instance state
-- [Phase 13]: D-07: Use set operations to reduce conditional branching in filter resolution
-- [Phase 13]: D-08: Removed unused typing imports - modern Python 3.12 uses lowercase types (dict, list) instead of typing module
+- [Phase 13]: ruff + black for linting — fast, unified configuration
 
 ### Pending Todos
 
-- [x] Define v1.2 requirements
-- [x] Create v1.2 roadmap
-- [ ] Execute Phase 6 Plan 2 (v1.1 remaining)
-- [ ] Execute Phase 7 (v1.1 remaining)
-- [ ] Execute Phase 8 (v1.2 start)
+- [x] Define v1.3 requirements
+- [ ] Create v1.3 roadmap
+- [ ] Execute v1.3 phases
 
 ### Blockers/Concerns
 
 None.
 
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260328-gi7 | Remove batch export from Phase 12 | 2026-03-28 | 14fbe90 | [260328-gi7-remove-batch-export-from-phase-12](./quick/260328-gi7-remove-batch-export-from-phase-12/) |
-
-### Roadmap Evolution
-
-- Phase 13 added: Comprehensive code review covering syntax, style, and redundancy; implement fixes
-
-### Research Flags
-
-Phases likely needing deeper research during planning:
-
-| Phase | Flag | Notes |
-|-------|------|-------|
-| Phase 10 (DOCX) | htmldocx unmaintained | 可能需要自定义 HTML 解析器作为后备 |
-| Phase 10 (DOCX) | Image embedding undocumented | htmldocx 图片处理文档不明确，需早期原型验证 |
-| Phase 11 (Excel) | CellRichText API complexity | HTML 到富文本转换可能比预期复杂 |
-
 ## Session Continuity
 
-Last session: 2026-03-28T05:36:18.361Z
-Last activity: 2026-03-28 - Completed quick task 260328-gi7: Remove batch export from Phase 12
-Next action: Resume v1.2 milestone verification or other work
+Last session: 2026-03-28
+Last activity: Milestone v1.3 AI started
+Next action: Define requirements

@@ -1,14 +1,18 @@
 # 周报管理系统
 
-## Current Milestone: v1.1 UI Optimization (In Progress)
+## Current Milestone: v1.3 AI (In Progress)
 
-**Goal:** 改善用户界面体验，减少信息过载，增强富文本渲染
+**Goal:** 集成AI能力，支持工作总结生成和周报文本润色
 
 **Target features:**
-- 查找页面默认过滤 — 减少信息过载
-- 主页富文本渲染 — 正确显示 CKEditor 格式
+- 一键生成工作总结 — 主页，支持周/月/季度/年范围
+- 筛选结果AI总结 — 查找页，组长和管理员可用
+- 周报文本润色 — 新建/编辑页，所有用户可用
+- AI服务配置 — 管理员配置API URL/Key/模型名称
+- 自定义提示词 — 用户生成总结时可输入自定义提示词指导AI
+- 管理员模板配置 — 管理员可配置预设总结模板供用户选择
 
-**Status:** In Progress — Phase 6 complete, Phase 7 pending
+**Status:** In Progress — Defining requirements
 
 ## What This Is
 
@@ -132,4 +136,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-*Last updated: 2026-03-28 — v1.2 milestone complete*
+*Last updated: 2026-03-28 — v1.3 milestone started*

@@ -65,9 +65,44 @@ def can_edit_record(record, user):
     return False
 
 
+def _resolve_filter_usernames(params, current_user):
+    """Resolve usernames from user and group filter parameters.
+
+    Args:
+        params: Request parameters (dict-like with get/getlist methods)
+        current_user: Flask-Security current_user object
+
+    Returns:
+        List of usernames to filter records by
+    """
+    allowed_usernames = set(get_allowed_usernames(current_user))
+    usernames = set()
+
+    # Add selected user if valid
+    selected_user = params.get('user')
+    if selected_user in allowed_usernames:
+        usernames.add(selected_user)
+
+    # Add users from selected groups
+    selected_groups = params.getlist('groups')
+    allowed_groups = {g.name for g in get_allowed_groups(current_user)}
+    valid_groups = [g for g in selected_groups if g in allowed_groups]
+
+    if valid_groups:
+        group_usernames = [
+            u.username for u in User.query.join(User.groups).filter(Group.name.in_(valid_groups)).all()
+            if u.username in allowed_usernames
+        ]
+        usernames.update(group_usernames)
+
+    # Return deduplicated list or fallback
+    return list(usernames) if usernames else list(allowed_usernames) or [current_user.username]
+
+
 def build_record_query(params):
     """Build a query for records based on filter parameters."""
     query = db.session.query(Record).options(joinedload(Record.user)).join(user_records).join(User)
+
     tr = params.get('time_range')
     start_date = None
     end_date = None
@@ -75,30 +110,9 @@ def build_record_query(params):
         start_date, end_date = DateRange.get_range(tr)
         query = query.filter(Record.date >= start_date, Record.date <= end_date)
 
-    usernames = []
-    selected_user = params.get('user')
-    allowed_usernames = set(get_allowed_usernames(current_user))
-    if selected_user and selected_user in allowed_usernames:
-        usernames.append(selected_user)
-
-    selected_groups = params.getlist('groups')
-    allowed_group_names = {g.name for g in get_allowed_groups(current_user)}
-    filtered_groups = [g for g in selected_groups if g in allowed_group_names]
-    if filtered_groups:
-        group_users = User.query.join(User.groups).filter(
-            Group.name.in_(filtered_groups)
-        ).all()
-        for u in group_users:
-            if u.username in allowed_usernames:
-                usernames.append(u.username)
-
-    if usernames:
-        usernames = list(set(usernames))
-    else:
-        # No filter criteria, show all records user is allowed to view
-        usernames = list(allowed_usernames) if allowed_usernames else [current_user.username]
-
+    usernames = _resolve_filter_usernames(params, current_user)
     query = query.filter(User.username.in_(usernames))
+
     return query, start_date, end_date, usernames
 
 

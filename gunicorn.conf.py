@@ -19,9 +19,9 @@ workers = min(multiprocessing.cpu_count() * 2 + 1, 4)
 worker_class = "sync"  # D-02: Sync mode for simplicity
 
 # Timeouts - per D-05
-timeout = 30
+timeout = 120  # Increased for AI API calls (Phase 17)
 keepalive = 2
-graceful_timeout = 30
+graceful_timeout = 120
 
 # Logging (paths will be created by systemd service setup)
 accesslog = "/var/log/weekly/gunicorn-access.log"

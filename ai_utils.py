@@ -180,7 +180,7 @@ def test_ai_connection(api_url: str, api_key: str, timeout: int = 30):
         return (False, "连接失败：未知错误")
 
 
-def call_ai_api(prompt: str, user_id: int, function_type: str, timeout: int = 30) -> tuple[bool, str | None, str | None]:
+def call_ai_api(prompt: str, user_id: int, function_type: str, timeout: int = 120) -> tuple[bool, str | None, str | None]:
     """Call OpenAI-compatible API for AI generation.
 
     Per API-01: OpenAI-compatible POST /chat/completions

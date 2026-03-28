@@ -484,8 +484,10 @@ def register_routes(app):
                 else:
                     flash(message, "danger")
                 # Stay on page to show result
-                config = AIConfig.get_config()
-                return render_template("config.html", ai_form=form, ai_config=config, form=form)
+                from forms import ThemeForm
+                theme_form = ThemeForm()
+                theme_form.theme_name.data = session.get("theme", "lumen")
+                return render_template("config.html", ai_form=form, ai_config=config, form=theme_form)
 
             if form.submit.data:  # Save button clicked
                 encrypted_key = encrypt_api_key(form.api_key.data)
@@ -514,7 +516,10 @@ def register_routes(app):
             form.polish_prompt.data = config.polish_prompt
             # api_key not pre-populated - user must re-enter to change
 
-        return render_template("config.html", ai_form=form, ai_config=config, form=form)
+        from forms import ThemeForm
+        theme_form = ThemeForm()
+        theme_form.theme_name.data = session.get("theme", "lumen")
+        return render_template("config.html", ai_form=form, ai_config=config, form=theme_form)
 
     @app.route("/ai-templates", methods=["GET", "POST"])
     @login_required

@@ -27,7 +27,44 @@
                 {% if ai_config %}
                 <p class="text-muted mb-3">当前API Key: <code>{{ ai_config.masked_key }}</code></p>
                 {% endif %}
-                {{ render_form(ai_form) }}
+                <form method="POST" action="{{ url_for('ai_config') }}">
+                    {{ ai_form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ ai_form.api_url.label }}
+                        {{ ai_form.api_url(class="form-control") }}
+                        {% if ai_form.api_url.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in ai_form.api_url.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ ai_form.api_key.label }}
+                        {{ ai_form.api_key(class="form-control") }}
+                        {% if ai_form.api_key.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in ai_form.api_key.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted">{{ ai_form.api_key.description }}</small>
+                    </div>
+                    <div class="mb-3">
+                        {{ ai_form.model_name.label }}
+                        {{ ai_form.model_name(class="form-control") }}
+                        {% if ai_form.model_name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in ai_form.model_name.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ ai_form.polish_prompt.label }}
+                        {{ ai_form.polish_prompt(class="form-control", rows="3") }}
+                        <small class="text-muted">{{ ai_form.polish_prompt.description }}</small>
+                    </div>
+                    {{ ai_form.test_submit }}
+                    {{ ai_form.submit }}
+                </form>
             </div>
         </div>
         {% endif %}

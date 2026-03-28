@@ -9,8 +9,5 @@ CKEDITOR.editorConfig = function( config ) {
 	// config.uiColor = '#AADC6E';
 
 	// Disable plugins that cause warnings but we don't use
-	config.removePlugins = 'exportpdf,uploadimage';
-
-	// Disable codesnippet if highlight.js is missing
-	// config.removePlugins = 'exportpdf,uploadimage,codesnippet';
+	config.removePlugins = 'exportpdf,uploadimage,codesnippet';
 };

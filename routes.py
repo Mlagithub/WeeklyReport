@@ -787,20 +787,25 @@ def register_routes(app):
         group_ids = data.get('groups', [])  # List of group IDs
 
         # Filter out invalid group IDs (0, None, empty strings)
-        group_ids = [gid for gid in group_ids if gid and isinstance(gid, (int, str)) and str(gid).isdigit() and int(gid) > 0]
-        group_ids = [int(gid) for gid in group_ids]
+        valid_group_ids = []
+        for gid in group_ids:
+            if gid and str(gid).isdigit() and int(gid) > 0:
+                valid_group_ids.append(int(gid))
+        group_ids = valid_group_ids
 
-        # Build user_ids list based on ALL filters combined
+        app.logger.info(f"AI Summary request: user={user_filter}, groups={group_ids}, time={time_range}")
+
+        # Build user_ids list based on ALL filters combined (union)
         user_ids = []
         group_names = []
 
-        # 1. If user specified, start with that user
+        # Add users from user filter
         if user_filter:
             user = User.query.filter_by(username=user_filter).first()
             if user:
-                user_ids = [user.id]
+                user_ids.append(user.id)
 
-        # 2. If groups specified, add users from those groups
+        # Add users from group filter (union with user filter)
         if group_ids:
             groups = Group.query.filter(Group.id.in_(group_ids)).all()
             for g in groups:
@@ -809,19 +814,26 @@ def register_routes(app):
                     if u.id not in user_ids:
                         user_ids.append(u.id)
 
-        # 3. If no specific filter, get all users the leader can see
-        if not user_filter and not group_ids:
+        # If no filters specified, get all visible users
+        if not user_ids:
             if current_user.is_admin:
-                # Admin can see all users
                 users = User.query.all()
                 user_ids = [u.id for u in users]
             else:
-                # Team leader sees users in their groups
                 for g in current_user.groups:
                     group_names.append(g.name)
                     for u in g.users:
                         if u.id not in user_ids:
                             user_ids.append(u.id)
+
+        app.logger.info(f"AI Summary user_ids: {user_ids}, groups: {group_names}")
+
+        if not user_ids:
+            return jsonify({
+                'success': False,
+                'content': None,
+                'error': '没有选中任何用户，请选择用户或组别'
+            })
 
         # Generate summary
         success, content, error = generate_filtered_summary(

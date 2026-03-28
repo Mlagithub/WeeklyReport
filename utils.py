@@ -155,81 +155,118 @@ class RecordDownloader:
 
     @staticmethod
     def download(user_weekly_data, all_weeks, filename):
-        # 创建工作簿
+        """Download weekly report as Excel file.
+
+        Args:
+            user_weekly_data: Dict of username -> week -> content
+            all_weeks: Set of (year, week) tuples
+            filename: Output filename
+
+        Returns:
+            Flask send_file response with XLSX attachment
+        """
         wb = Workbook()
         ws = wb.active
         ws.title = '软件开发组周报'
 
-        # 表头样式：深色背景 + 加粗字体
-        header_fill = PatternFill(start_color="808080", end_color="808080", fill_type="solid")  # 深灰色
-        header_font = Font(bold=True, color="FFFFFF")  # 白色字体
+        styles = RecordDownloader._setup_workbook_styles()
+        RecordDownloader._fill_data(ws, user_weekly_data, all_weeks, styles)
+        RecordDownloader._apply_formatting(ws, styles)
 
-        # 按年份和周排序，并转换为日期范围格式
-        all_weeks = sorted(all_weeks, key=lambda x: (x[0], x[1]), reverse=True)
-        headers = ['姓名'] + [get_week_date_range(year, week) for year, week in all_weeks]
-        ws.append(headers)
-
-        # 填充数据
-        for username, weekly_data in user_weekly_data.items():
-            row = [username]
-
-            # 按列顺序填充每周的记录
-            for week in all_weeks:
-                content = weekly_data.get(week, "")  # 如果没有记录则为空
-                row.append(html_to_text(content))
-
-            ws.append(row)
-
-        # 设置第一行加粗
-        for cell in ws['1']:  # '1' 列表示第一行
-            cell.font = header_font
-            cell.fill = header_fill
-            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-
-
-        # 数据行样式：隔行变色
-        light_fill = PatternFill(start_color="EAEAEA", end_color="EAEAEA", fill_type="solid")  # 浅灰色
-        for row_idx, row in enumerate(ws.iter_rows(min_row=2, max_col=ws.max_column, max_row=ws.max_row), start=2):
-            for cell in row:
-                if row_idx % 2 == 0:  # 偶数行设置背景色
-                    cell.fill = light_fill
-                cell.alignment = Alignment(horizontal="left", wrap_text=True) # 启用单元格内换行
-
-        # 设置第一列加粗
-        for cell in ws['A']:  # 'A' 列表示第一列
-            cell.font = Font(bold=True)
-            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-
-        # 设置所有列宽
-        for col in ws.columns:
-            max_length = 15
-            column = col[0].column_letter  # 获取列字母
-            ws.column_dimensions[column].width = max_length
-
-        # 设置边框样式
-        thin_border = Border(
-            left=Side(style="thin"),
-            right=Side(style="thin"),
-            top=Side(style="thin"),
-            bottom=Side(style="thin")
-        )
-
-        for row in ws.iter_rows(min_row=1, max_col=ws.max_column, max_row=ws.max_row):
-            for cell in row:
-                cell.border = thin_border
-
-
-        # 将工作簿保存到内存中
         output = BytesIO()
         wb.save(output)
         output.seek(0)
 
-        # 将 CSV 文件发送给客户端下载
         return send_file(
-            output,  # 转换为字节流
+            output,
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             as_attachment=True,
             download_name=filename
         )
+
+    @staticmethod
+    def _setup_workbook_styles() -> dict:
+        """Create and return style objects for workbook.
+
+        Returns:
+            Dict with header_fill, header_font, light_fill, thin_border
+        """
+        return {
+            'header_fill': PatternFill(start_color="808080", end_color="808080", fill_type="solid"),
+            'header_font': Font(bold=True, color="FFFFFF"),
+            'light_fill': PatternFill(start_color="EAEAEA", end_color="EAEAEA", fill_type="solid"),
+            'thin_border': Border(
+                left=Side(style="thin"),
+                right=Side(style="thin"),
+                top=Side(style="thin"),
+                bottom=Side(style="thin")
+            )
+        }
+
+    @staticmethod
+    def _fill_data(ws, user_weekly_data, all_weeks, styles: dict) -> None:
+        """Fill headers and data rows in worksheet.
+
+        Args:
+            ws: Worksheet to fill
+            user_weekly_data: Dict of username -> week -> content
+            all_weeks: Set of (year, week) tuples
+            styles: Style dict from _setup_workbook_styles
+        """
+        # Sort weeks and create headers
+        sorted_weeks = sorted(all_weeks, key=lambda x: (x[0], x[1]), reverse=True)
+        headers = ['姓名'] + [get_week_date_range(year, week) for year, week in sorted_weeks]
+        ws.append(headers)
+
+        # Fill data rows
+        for username, weekly_data in user_weekly_data.items():
+            row = [username]
+            for week in sorted_weeks:
+                content = weekly_data.get(week, "")
+                row.append(html_to_text(content))
+            ws.append(row)
+
+    @staticmethod
+    def _apply_formatting(ws, styles: dict) -> None:
+        """Apply all styling to worksheet.
+
+        Args:
+            ws: Worksheet to style
+            styles: Style dict from _setup_workbook_styles
+        """
+        header_fill = styles['header_fill']
+        header_font = styles['header_font']
+        light_fill = styles['light_fill']
+        thin_border = styles['thin_border']
+
+        # Style header row
+        for cell in ws['1']:
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+        # Style data rows with alternating colors
+        for row_idx, row in enumerate(
+            ws.iter_rows(min_row=2, max_col=ws.max_column, max_row=ws.max_row), start=2
+        ):
+            for cell in row:
+                if row_idx % 2 == 0:
+                    cell.fill = light_fill
+                cell.alignment = Alignment(horizontal="left", wrap_text=True)
+
+        # Style first column (names)
+        for cell in ws['A']:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+        # Set column widths
+        for col in ws.columns:
+            column = col[0].column_letter
+            ws.column_dimensions[column].width = 15
+
+        # Apply borders to all cells
+        for row in ws.iter_rows(min_row=1, max_col=ws.max_column, max_row=ws.max_row):
+            for cell in row:
+                cell.border = thin_border
 
 

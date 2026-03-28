@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: 增强富文本导出功能
-status: verifying
-last_updated: "2026-03-26T13:38:01.641Z"
-last_activity: 2026-03-26
+status: executing
+last_updated: "2026-03-28T05:08:55.453Z"
+last_activity: 2026-03-28
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 5
-  total_plans: 17
-  completed_plans: 17
+  total_plans: 22
+  completed_plans: 18
 ---
 
 # Project State
@@ -19,14 +19,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** 让团队领导能导出保留格式的周报，支持多种格式和批量导出
-**Current focus:** Phase 10 — docx-export
+**Current focus:** Phase 13 — comprehensive-code-review
 
 ## Current Position
 
-Phase: 10 (docx-export) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-03-26
+Phase: 13 (comprehensive-code-review) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-03-28
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Last activity: 2026-03-26
 | Phase 11 P01 | 13min | 1 tasks | 3 files |
 | Phase 11 P02 | 3min | 2 tasks | 1 files |
 | Phase 12 P00 | 2min | 1 tasks | 1 files |
+| Phase 13 P01 | 100s | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,11 @@ v1.2 Decisions:
 - [Phase 10]: Placeholder-based image embedding: extract images before htmldocx, replace placeholders after
 - [Phase 11-01]: load_workbook(rich_text=True) required to preserve CellRichText objects when loading XLSX files
 - [Phase 11-02]: Remove RecordDownloader import - no longer needed after ExcelExporter integration
+- [Phase 13]: D-01: Use ruff as unified linter (replaces flake8, isort, pydocstyle)
+- [Phase 13]: D-02: Set line-length=120 consistent with existing code style
+- [Phase 13]: D-03: Target Python 3.12 (current environment)
+- [Phase 13]: D-04: Enable import sorting with known-first-party modules
+- [Phase 13]: D-05: Allow test-specific conventions (F401, F811 for fixtures)
 
 ### Pending Todos
 
@@ -156,6 +162,6 @@ Phases likely needing deeper research during planning:
 
 ## Session Continuity
 
-Last session: 2026-03-28
+Last session: 2026-03-28T05:08:55.450Z
 Last activity: 2026-03-28 - Completed quick task 260328-gi7: Remove batch export from Phase 12
 Next action: Resume v1.2 milestone verification or other work

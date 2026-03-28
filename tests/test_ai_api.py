@@ -208,10 +208,12 @@ class TestAIResponseProcessing:
 
         Expected behavior:
         - Input: "  Hello World  \n"
-        - Output: "Hello World"
+        - Output: "<p>Hello World</p>"
         """
-        # Stub - will verify whitespace handling after implementation
-        pass
+        from ai_utils import process_ai_response
+
+        result = process_ai_response("  Hello World  \n")
+        assert result == "<p>Hello World</p>"
 
     def test_process_ai_response_converts_markdown_to_html(self, client):
         """process_ai_response should convert Markdown to HTML.
@@ -221,8 +223,10 @@ class TestAIResponseProcessing:
         - Output: "<p><strong>Bold</strong> and <em>italic</em></p>"
         - Uses markdown library with safe configuration
         """
-        # Stub - will verify markdown conversion after implementation
-        pass
+        from ai_utils import process_ai_response
+
+        result = process_ai_response("**Bold** and *italic*")
+        assert result == "<p><strong>Bold</strong> and <em>italic</em></p>"
 
     def test_process_ai_response_handles_plain_text(self, client):
         """process_ai_response should handle plain text without modification.
@@ -232,8 +236,10 @@ class TestAIResponseProcessing:
         - Output: "<p>Just plain text without formatting</p>"
         - Should still wrap in paragraph tag for consistency
         """
-        # Stub - will verify plain text handling after implementation
-        pass
+        from ai_utils import process_ai_response
+
+        result = process_ai_response("Just plain text without formatting")
+        assert result == "<p>Just plain text without formatting</p>"
 
     def test_process_ai_response_handles_empty_response(self, client):
         """process_ai_response should handle empty AI responses.
@@ -242,18 +248,23 @@ class TestAIResponseProcessing:
         - Input: "" or None
         - Output: "" (empty string, not None)
         """
-        # Stub - will verify empty response handling after implementation
-        pass
+        from ai_utils import process_ai_response
+
+        assert process_ai_response("") == ""
+        assert process_ai_response(None) == ""
 
     def test_process_ai_response_handles_code_blocks(self, client):
         """process_ai_response should properly handle code blocks.
 
         Expected behavior:
         - Input: "```python\nprint('hello')\n```"
-        - Output: properly formatted code block in HTML
+        - Output: properly formatted code block in HTML with 'extra' extension
         """
-        # Stub - will verify code block handling after implementation
-        pass
+        from ai_utils import process_ai_response
+
+        result = process_ai_response("```python\nprint('hello')\n```")
+        # The 'extra' extension handles fenced code blocks
+        assert "<code" in result or "<pre>" in result
 
 
 class TestAIAuditLogging:

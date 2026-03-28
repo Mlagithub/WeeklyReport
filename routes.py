@@ -19,9 +19,10 @@ from werkzeug.utils import secure_filename
 
 from exporters import ExporterFactory
 from extensions import db
-from forms import MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, ThemeForm, AIConfigForm, TemplateForm
+from forms import MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, ThemeForm, AIConfigForm, TemplateForm, SummaryGenerationForm
 from models import Group, Record, Role, User, user_records, with_db_transaction, AIConfig, AITemplate
 from ai_utils import encrypt_api_key, test_ai_connection
+from summary_utils import generate_summary
 from utils import DateRange
 
 # =============================================================================
@@ -593,6 +594,53 @@ def register_routes(app):
             flash("模板不存在", "warning")
 
         return redirect(url_for("ai_templates"))
+
+    @app.route("/generate-summary", methods=["POST"])
+    @login_required
+    def generate_summary_route():
+        """Generate personal summary via AJAX.
+
+        Per SUMMARY-01: Time range selection.
+        Per SUMMARY-02: Template selection.
+        Per SUMMARY-03: Custom prompt.
+        Per SUMMARY-04: Return generated content.
+        Per UI-01/UI-02: Client handles loading states.
+
+        Returns JSON: {'success': bool, 'content': str|None, 'error': str|None}
+        """
+        from flask import jsonify
+
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'content': None, 'error': '请求格式错误'})
+
+        time_range = data.get('time_range', 'this_week')
+        template_id = data.get('template_id')  # May be None or empty string
+        custom_prompt = data.get('custom_prompt')  # May be None or empty string
+
+        # Convert empty strings to None
+        if template_id == '' or template_id is None:
+            template_id = None
+        else:
+            template_id = int(template_id)
+
+        if custom_prompt == '' or custom_prompt is None:
+            custom_prompt = None
+
+        # Call generate_summary
+        success, content, error = generate_summary(
+            user_id=current_user.id,
+            user_name=current_user.username,
+            time_range_key=time_range,
+            template_id=template_id,
+            custom_prompt=custom_prompt
+        )
+
+        return jsonify({
+            'success': success,
+            'content': content,
+            'error': error
+        })
 
     @app.route("/files/<filename>")
     @login_required

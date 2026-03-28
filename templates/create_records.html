@@ -105,6 +105,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Polish button functionality
     const polishBtn = document.getElementById('polishBtn');
+    const originalPolishHtml = polishBtn.innerHTML;
+
+    // Get CSRF token from meta tag
+    function getCsrfToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta) return meta.getAttribute('content');
+        return '';
+    }
+
     polishBtn.addEventListener('click', function() {
         const editor = CKEDITOR.instances.body;
         if (!editor) return;
@@ -121,7 +130,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch('/polish-text', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
             body: JSON.stringify({text: text})
         })
         .then(response => response.json())
@@ -138,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .finally(() => {
             polishBtn.disabled = false;
-            polishBtn.innerHTML = '{{ render_icon("sparkles") }} AI润色';
+            polishBtn.innerHTML = originalPolishHtml;
         });
     });
 

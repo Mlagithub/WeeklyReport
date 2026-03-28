@@ -125,6 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Get user's custom polish prompt from localStorage
+        const userPolishPrompt = localStorage.getItem('ai_polish_prompt') || '';
+
         polishBtn.disabled = true;
         polishBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>润色中...';
 
@@ -134,7 +137,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCsrfToken()
             },
-            body: JSON.stringify({text: text})
+            body: JSON.stringify({
+                text: text,
+                custom_prompt: userPolishPrompt
+            })
         })
         .then(response => response.json())
         .then(data => {

@@ -471,22 +471,19 @@ def register_routes(app):
         form = AIConfigForm()
         config = AIConfig.get_config()
 
-        if form.validate_on_submit():
+        if request.method == "POST":
             save_type = request.form.get("save_type", "")
 
-            # Test connection button
-            if form.test_submit.data:
+            # Test connection button - handle separately without full validation
+            if "test_submit" in request.form:
+                api_url = request.form.get("api_url", "")
                 api_key = request.form.get("api_key", "")
                 if not api_key and config:
-                    # Use existing key if not provided
                     try:
                         api_key = decrypt_api_key(config.api_key_encrypted)
                     except Exception:
                         pass
-                success, message = test_ai_connection(
-                    form.api_url.data,
-                    api_key
-                )
+                success, message = test_ai_connection(api_url, api_key)
                 if success:
                     flash(message, "success")
                 else:
@@ -497,7 +494,7 @@ def register_routes(app):
                 return render_template("config.html", ai_form=form, ai_config=config, form=theme_form)
 
             # Save API config
-            if save_type == "api" and (form.submit.data or form.test_submit.data is False):
+            if save_type == "api":
                 api_key = request.form.get("api_key", "")
                 model_name = request.form.get("model_name", "")
                 api_url = request.form.get("api_url", "")
@@ -505,7 +502,6 @@ def register_routes(app):
                 if config:
                     config.api_url = api_url
                     config.model_name = model_name
-                    # Only update key if provided
                     if api_key:
                         config.api_key_encrypted = encrypt_api_key(api_key)
                 else:
@@ -531,7 +527,6 @@ def register_routes(app):
                 if config:
                     config.polish_prompt = polish_prompt
                 else:
-                    # Create config with just polish prompt
                     config = AIConfig(polish_prompt=polish_prompt)
                     db.session.add(config)
                 db.session.commit()
@@ -725,12 +720,18 @@ def register_routes(app):
         if not text or not text.strip():
             return jsonify({'success': False, 'content': None, 'error': '请输入需要润色的文本'})
 
-        # Get polish prompt from config or use default
-        config = AIConfig.get_config()
-        if config and config.polish_prompt:
-            prompt = f"{config.polish_prompt}\n\n{text}"
+        # Get custom prompt from user (localStorage) - highest priority
+        custom_prompt = data.get('custom_prompt', '')
+
+        # Get polish prompt: user's custom > admin config > default
+        if custom_prompt:
+            prompt = f"{custom_prompt}\n\n{text}"
         else:
-            prompt = f"{AIConfig.DEFAULT_POLISH_PROMPT}\n\n{text}"
+            config = AIConfig.get_config()
+            if config and config.polish_prompt:
+                prompt = f"{config.polish_prompt}\n\n{text}"
+            else:
+                prompt = f"{AIConfig.DEFAULT_POLISH_PROMPT}\n\n{text}"
 
         # Call AI API
         success, content, error = call_ai_api(
@@ -785,25 +786,27 @@ def register_routes(app):
         user_filter = data.get('user', '')  # Single username or empty
         group_ids = data.get('groups', [])  # List of group IDs
 
-        # Build user_ids list based on filters
+        # Build user_ids list based on ALL filters combined
         user_ids = []
         group_names = []
 
+        # 1. If user specified, start with that user
         if user_filter:
-            # Single user filter
             user = User.query.filter_by(username=user_filter).first()
             if user:
                 user_ids = [user.id]
-        elif group_ids:
-            # Group filter - get all users in selected groups
+
+        # 2. If groups specified, add users from those groups
+        if group_ids:
             groups = Group.query.filter(Group.id.in_(group_ids)).all()
             for g in groups:
                 group_names.append(g.name)
                 for u in g.users:
                     if u.id not in user_ids:
                         user_ids.append(u.id)
-        else:
-            # No specific filter - get all users the leader can see
+
+        # 3. If no specific filter, get all users the leader can see
+        if not user_filter and not group_ids:
             if current_user.is_admin:
                 # Admin can see all users
                 users = User.query.all()

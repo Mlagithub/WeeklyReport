@@ -202,10 +202,20 @@ document.addEventListener('DOMContentLoaded', function() {
         setLoading(true);
         errorDiv.style.display = 'none';
 
+        // Combine localStorage prompt with user input
+        const savedPrompt = localStorage.getItem('ai_summary_prompt') || '';
+        const userPrompt = customPromptInput.value;
+        let customPrompt = '';
+        if (savedPrompt && userPrompt) {
+            customPrompt = savedPrompt + '\n' + userPrompt;
+        } else {
+            customPrompt = savedPrompt || userPrompt;
+        }
+
         const data = {
             time_range: timeRangeSelect.value,
             template_id: templateSelect.value,
-            custom_prompt: customPromptInput.value
+            custom_prompt: customPrompt
         };
 
         fetch('/generate-summary', {

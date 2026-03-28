@@ -16,6 +16,31 @@
                 {{ render_form(form) }}
             </div>
         </div>
+
+        <!-- Personal Prompt Config - All Users -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">{{ render_icon('chat-square-text') }} 个人提示词配置</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">自定义AI功能的提示词，配置保存在浏览器本地。</p>
+                <form id="promptForm" autocomplete="off">
+                    <div class="mb-3">
+                        <label for="summary_prompt" class="form-label">AI 总结提示词</label>
+                        <textarea class="form-control" id="summary_prompt" name="summary_prompt" rows="3" placeholder="可选，输入额外指示指导AI生成总结的风格。留空使用默认提示词。"></textarea>
+                        <small class="text-muted">例如：简洁风格、突出重点项目、用表格形式呈现...</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="polish_prompt_user" class="form-label">AI 润色提示词</label>
+                        <textarea class="form-control" id="polish_prompt_user" name="polish_prompt_user" rows="3" placeholder="可选，输入润色指令。留空使用管理员配置或默认提示词。"></textarea>
+                        <small class="text-muted">例如：请对以下文本进行润色，使其更加专业、流畅...</small>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="savePromptBtn">保存配置</button>
+                    <button type="button" class="btn btn-outline-secondary ms-2" id="resetPromptBtn">重置为默认</button>
+                </form>
+            </div>
+        </div>
+
         <!-- AI Config card - admin only -->
         {% if current_user.is_admin and ai_form %}
         <div class="card shadow-sm mb-4">
@@ -23,7 +48,7 @@
                 <h5 class="mb-0">{{ render_icon('robot') }} AI 服务配置</h5>
             </div>
             <div class="card-body">
-                <p class="text-muted mb-4">配置AI服务参数，支持OpenAI兼容API。</p>
+                <p class="text-muted mb-4">配置AI服务参数，支持OpenAI兼容API。此配置对所有用户生效。</p>
                 {% if ai_config %}
                 <p class="text-muted mb-3">当前API Key: <code>{{ ai_config.masked_key }}</code></p>
                 {% endif %}
@@ -65,13 +90,13 @@
                 </form>
             </div>
         </div>
-        <!-- Polish Prompt card - admin only -->
+        <!-- Admin Polish Prompt - default for all users -->
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-light">
-                <h5 class="mb-0">{{ render_icon('pencil-square') }} 润色提示词配置</h5>
+                <h5 class="mb-0">{{ render_icon('pencil-square') }} 默认润色提示词</h5>
             </div>
             <div class="card-body">
-                <p class="text-muted mb-4">自定义AI润色功能的默认提示词。</p>
+                <p class="text-muted mb-4">设置全局默认润色提示词，用户可在个人配置中覆盖。</p>
                 <form method="POST" action="{{ url_for('ai_config') }}" autocomplete="off">
                     {{ ai_form.hidden_tag() }}
                     <input type="hidden" name="save_type" value="polish">
@@ -80,11 +105,12 @@
                         <textarea class="form-control" name="polish_prompt" id="polish_prompt" rows="5">{% if ai_config and ai_config.polish_prompt %}{{ ai_config.polish_prompt }}{% endif %}</textarea>
                         <small class="text-muted">{{ ai_form.polish_prompt.description }}</small>
                     </div>
-                    <button type="submit" name="submit_polish" class="btn btn-primary">保存润色配置</button>
+                    <button type="submit" name="submit_polish" class="btn btn-primary">保存默认配置</button>
                 </form>
             </div>
         </div>
         {% endif %}
+
         <!-- Account management card -->
         <div class="card shadow-sm">
             <div class="card-header bg-light">
@@ -103,5 +129,60 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const summaryPromptEl = document.getElementById('summary_prompt');
+    const polishPromptEl = document.getElementById('polish_prompt_user');
+    const saveBtn = document.getElementById('savePromptBtn');
+    const resetBtn = document.getElementById('resetPromptBtn');
+
+    // Load saved prompts from localStorage
+    function loadPrompts() {
+        const summaryPrompt = localStorage.getItem('ai_summary_prompt') || '';
+        const polishPrompt = localStorage.getItem('ai_polish_prompt') || '';
+        summaryPromptEl.value = summaryPrompt;
+        polishPromptEl.value = polishPrompt;
+    }
+
+    // Save prompts to localStorage
+    function savePrompts() {
+        localStorage.setItem('ai_summary_prompt', summaryPromptEl.value);
+        localStorage.setItem('ai_polish_prompt', polishPromptEl.value);
+
+        // Show success feedback
+        saveBtn.textContent = '已保存';
+        saveBtn.classList.remove('btn-primary');
+        saveBtn.classList.add('btn-success');
+        setTimeout(function() {
+            saveBtn.textContent = '保存配置';
+            saveBtn.classList.remove('btn-success');
+            saveBtn.classList.add('btn-primary');
+        }, 1500);
+    }
+
+    // Reset prompts
+    function resetPrompts() {
+        if (confirm('确定要重置为默认配置吗？这将清除您的个人提示词设置。')) {
+            localStorage.removeItem('ai_summary_prompt');
+            localStorage.removeItem('ai_polish_prompt');
+            summaryPromptEl.value = '';
+            polishPromptEl.value = '';
+
+            resetBtn.textContent = '已重置';
+            setTimeout(function() {
+                resetBtn.textContent = '重置为默认';
+            }, 1500);
+        }
+    }
+
+    // Initialize
+    loadPrompts();
+
+    // Event listeners
+    saveBtn.addEventListener('click', savePrompts);
+    resetBtn.addEventListener('click', resetPrompts);
+});
+</script>
 
 {% endblock %}

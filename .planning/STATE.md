@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: AI
 status: executing
-last_updated: "2026-03-28T08:05:57.615Z"
+last_updated: "2026-03-28T08:09:36.546Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 15
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -89,6 +89,8 @@ v1.3 Decisions:
 - [Roadmap]: Personal summary as Phase 17 — Primary user feature, needs API + templates
 - [Roadmap]: Filtered summary + Polish in Phase 18 — Secondary features, reuse summary patterns
 - [Roadmap]: UI requirements in Phase 17 — First user-facing feature needs UI patterns
+- [Phase 17-01]: utils/__init__.py exports from utils.py via importlib to resolve package/module conflict
+- [Phase 17-01]: Tests use user_datastore for Flask-Security user creation
 
 ### Pending Todos
 

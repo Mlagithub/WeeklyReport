@@ -786,6 +786,10 @@ def register_routes(app):
         user_filter = data.get('user', '')  # Single username or empty
         group_ids = data.get('groups', [])  # List of group IDs
 
+        # Filter out invalid group IDs (0, None, empty strings)
+        group_ids = [gid for gid in group_ids if gid and isinstance(gid, (int, str)) and str(gid).isdigit() and int(gid) > 0]
+        group_ids = [int(gid) for gid in group_ids]
+
         # Build user_ids list based on ALL filters combined
         user_ids = []
         group_names = []

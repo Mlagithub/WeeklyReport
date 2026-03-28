@@ -6,14 +6,38 @@
 
 **Key accomplishments:**
 
-- ExporterBase abstract class with template method pattern for unified export interface
-- ExporterFactory with registry-based format selection
-- ImageResolver for CKEditor image URL to filesystem path conversion
-- PdfExporter with WeasyPrint, CSS headers/footers, and image embedding
-- DocxExporter with HTML-to-DOCX conversion and embedded images
-- ExcelExporter with HTML-to-CellRichText for bold, italic, underline formatting
-- Batch export ZIP functionality for team leaders
-- Code quality: 54 linting errors → 0, 3 high-CC functions → CC < 10
-- pyproject.toml with ruff/black configuration for unified linting
+- ExporterBase/ExporterFactory/ImageResolver export architecture
+- PdfExporter with WeasyPrint, headers/footers, image embedding
+- DocxExporter with HTML-to-DOCX conversion
+- ExcelExporter with CellRichText for bold/italic/underline
+- Batch export ZIP for team leaders
+- Code quality: 54 linting errors → 0, all functions CC < 10
+
+---
+
+## v1.1 UI Optimization (Shipped: 2026-03-28)
+
+**Phases completed:** 2 phases, 4 plans, 6 tasks
+
+**Key accomplishments:**
+
+- 'last_7_days' time range in DateRange class
+- Default user/time filters in find page template
+- Server-side HTML sanitization with bleach
+- XSS protection for homepage rendering
+
+---
+
+## v1.0 FixIOBug (Shipped: 2026-03-24)
+
+**Phases completed:** 5 phases, 11 plans, 20 tasks
+
+**Key accomplishments:**
+
+- Gunicorn + systemd production deployment
+- SQLite WAL mode for concurrent access
+- @with_db_transaction decorator for session management
+- pytest test infrastructure (122 tests, 88% coverage)
+- Modular code structure (8 modules)
 
 ---

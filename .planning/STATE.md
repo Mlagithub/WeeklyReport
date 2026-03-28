@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.2
-milestone_name: 增强富文本导出功能
+milestone_name: milestone
 status: verifying
-last_updated: "2026-03-28T05:45:46.257Z"
+last_updated: "2026-03-28T05:52:33.713Z"
 last_activity: 2026-03-28
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 22
-  completed_plans: 22
+  total_phases: 13
+  completed_phases: 13
+  total_plans: 37
+  completed_plans: 37
 ---
 
 # Project State

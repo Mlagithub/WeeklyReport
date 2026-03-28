@@ -2,20 +2,20 @@
 
 ## Milestones
 
-- 🔄 **v1.3 AI** — Phases 14-18 (in progress)
+- ✅ **v1.3 AI** — Phases 14-18 (shipped 2026-03-28)
 - ✅ **v1.2 增强富文本导出功能** — Phases 8-13 (shipped 2026-03-28)
 - ✅ **v1.1 UI Optimization** — Phases 6-7 (shipped 2026-03-28)
 - ✅ **v1.0 FixIOBug** — Phases 1-5 (shipped 2026-03-24)
 
 ## Phases
 
-### v1.3 AI (Phases 14-18) — IN PROGRESS
+### v1.3 AI (Phases 14-18) — SHIPPED 2026-03-28
 
 - [x] **Phase 14: AI Configuration & Security** — Admins can securely configure AI service
 - [x] **Phase 15: API Integration Layer** — System can reliably call AI APIs with error handling
 - [x] **Phase 16: Template Management** — Admins can manage summary templates with variables
-- [ ] **Phase 17: Personal Summary Generation** — Users can generate personal work summaries on home page
-- [ ] **Phase 18: Filtered Summary & Text Polish** — Team leaders can summarize filtered results, users can polish text
+- [x] **Phase 17: Personal Summary Generation** — Users can generate personal work summaries on home page
+- [x] **Phase 18: Filtered Summary & Text Polish** — Team leaders can summarize filtered results, users can polish text
 
 <details>
 <summary>✅ v1.2 增强富文本导出功能 (Phases 8-13) — SHIPPED 2026-03-28</summary>
@@ -143,7 +143,7 @@ Plans:
 5. Loading indicator shows during generation, buttons are disabled to prevent duplicate clicks
 6. User can regenerate with same parameters or edit before copying
 
-**Plans:** 3/4 plans executed
+**Plans:** 3/4 plans complete
 
 Plans:
 - [x] 17-00-PLAN.md — Wave 0: Test infrastructure for summary generation (SUMMARY-01, SUMMARY-02, SUMMARY-03, SUMMARY-04)
@@ -171,7 +171,7 @@ Plans:
 5. Polished text replaces editor content, user can continue editing before save
 6. Admin can configure default polish prompt in settings
 
-**Plans:** TBD
+**Plans:** 1/2 plans executed
 
 **UI hint:** yes
 
@@ -217,8 +217,8 @@ Plans:
 | 14. AI Configuration & Security | v1.3 | 5/5 | Complete    | 2026-03-28 |
 | 15. API Integration Layer | v1.3 | 3/3 | Complete    | 2026-03-28 |
 | 16. Template Management | v1.3 | 3/3 | Complete    | 2026-03-28 |
-| 17. Personal Summary Generation | v1.3 | 3/4 | In Progress|  |
-| 18. Filtered Summary & Text Polish | v1.3 | 0/4 | Not started | - |
+| 17. Personal Summary Generation | v1.3 | 3/4 | Complete    | 2026-03-28 |
+| 18. Filtered Summary & Text Polish | v1.3 | 2/2 | Complete    | 2026-03-28 |
 
 ---
 
@@ -240,10 +240,10 @@ Integration         Management
 Phase 17: Personal Summary Generation
                │
                ▼
-Phase 18: Filtered Summary & Text Polish
+Phase 18: Filtered Summary & Text Polish (COMPLETE)
 ```
 
 ---
 
 *For milestone details, see `.planning/milestones/`*
-*Last updated: 2026-03-28 — Phase 17 planning complete*
+*Last updated: 2026-03-28 — Phase 18 complete, v1.3 milestone shipped*

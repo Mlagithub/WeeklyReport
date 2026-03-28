@@ -22,7 +22,7 @@ from extensions import db
 from forms import MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, ThemeForm, AIConfigForm, TemplateForm, SummaryGenerationForm
 from models import Group, Record, Role, User, user_records, with_db_transaction, AIConfig, AITemplate
 from ai_utils import encrypt_api_key, test_ai_connection
-from summary_utils import generate_summary
+from summary_utils import generate_summary, generate_filtered_summary
 from utils import DateRange
 
 # =============================================================================
@@ -689,6 +689,90 @@ def register_routes(app):
             'success': success,
             'content': content,
             'error': error
+        })
+
+    @app.route("/filtered-summary", methods=["POST"])
+    @login_required
+    def filtered_summary():
+        """Generate filtered summary for team leaders.
+
+        Per FILTER-SUM-01: Team leader can click AI Summary on filtered results.
+        Per FILTER-SUM-02: Shows filter criteria and multi-user grouping.
+        Per SEC-03: Team leader permission check.
+
+        Returns JSON: {'success': bool, 'content': str|None, 'error': str|None,
+                       'filter_info': dict}
+        """
+        from flask import jsonify
+
+        # Team leader permission check: admin or has group membership
+        if not current_user.is_admin and not current_user.groups:
+            return jsonify({
+                'success': False,
+                'content': None,
+                'error': '需要组长权限'
+            })
+
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'content': None, 'error': '请求格式错误'})
+
+        # Get filter parameters
+        time_range = data.get('time_range', 'this_week')
+        user_filter = data.get('user', '')  # Single username or empty
+        group_ids = data.get('groups', [])  # List of group IDs
+
+        # Build user_ids list based on filters
+        user_ids = []
+        group_names = []
+
+        if user_filter:
+            # Single user filter
+            user = User.query.filter_by(username=user_filter).first()
+            if user:
+                user_ids = [user.id]
+        elif group_ids:
+            # Group filter - get all users in selected groups
+            groups = Group.query.filter(Group.id.in_(group_ids)).all()
+            for g in groups:
+                group_names.append(g.name)
+                for u in g.users:
+                    if u.id not in user_ids:
+                        user_ids.append(u.id)
+        else:
+            # No specific filter - get all users the leader can see
+            if current_user.is_admin:
+                # Admin can see all users
+                users = User.query.all()
+                user_ids = [u.id for u in users]
+            else:
+                # Team leader sees users in their groups
+                for g in current_user.groups:
+                    group_names.append(g.name)
+                    for u in g.users:
+                        if u.id not in user_ids:
+                            user_ids.append(u.id)
+
+        # Generate summary
+        success, content, error = generate_filtered_summary(
+            user_id=current_user.id,
+            user_ids=user_ids,
+            time_range_key=time_range,
+            group_names=group_names if group_names else None
+        )
+
+        # Build filter info for display
+        filter_info = {
+            'time_range': DateRange.TIME_RANGES.get(time_range, time_range),
+            'user_count': len(user_ids),
+            'groups': group_names if group_names else []
+        }
+
+        return jsonify({
+            'success': success,
+            'content': content,
+            'error': error,
+            'filter_info': filter_info
         })
 
     @app.route("/files/<filename>")

@@ -29,7 +29,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    
+
                     {% if not hide_groups %}
                     <div class="col-md-3">
                         <label class="form-label">{{ record_form.groups.label.text }}</label>
@@ -46,7 +46,7 @@
                         </div>
                     </div>
                     {% endif %}
-                    
+
                     <div class="col-md-3">
                         <label class="form-label">{{ record_form.time_range.label.text }}</label>
                         {% set time_selected = request.args.get('time_range', 'this_week') %}
@@ -57,7 +57,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    
+
                     <div class="col-md-3 d-flex align-items-end">
                         <button type="submit" class="btn btn-primary w-100">
                             {{ render_icon('search') }} 筛选
@@ -69,6 +69,47 @@
         </div>
     </div>
 </div>
+
+<!-- AI Summary Button - Team Leader Only -->
+{% if current_user.is_admin or current_user.groups %}
+<div class="row mb-3">
+    <div class="col-12">
+        <button type="button" class="btn btn-info" id="aiSummaryBtn" data-bs-toggle="modal" data-bs-target="#summaryModal">
+            {{ render_icon('sparkles') }} AI 总结
+        </button>
+        <span class="text-muted small ms-2">基于筛选条件生成团队工作总结</span>
+    </div>
+</div>
+
+<!-- Summary Modal -->
+<div class="modal fade" id="summaryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ render_icon('robot') }} AI 工作总结</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="summaryFilterInfo" class="text-muted small mb-3"></div>
+                <div id="summaryLoading" class="text-center py-4">
+                    <span class="spinner-border spinner-border-lg"></span>
+                    <p class="mt-2">正在生成总结...</p>
+                </div>
+                <div id="summaryContent" class="d-none">
+                    <div class="border rounded p-3 bg-light"></div>
+                </div>
+                <div id="summaryError" class="alert alert-danger d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-outline-primary" id="copySummaryBtn" disabled>
+                    {{ render_icon('clipboard') }} 复制
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <div class="row mb-4">
     <div class="col-md-6 col-12">
@@ -170,6 +211,77 @@ document.addEventListener('DOMContentLoaded', function() {
         input.value = g;
         form.appendChild(input);
     });
+
+    // AI Summary functionality
+    const summaryModal = document.getElementById('summaryModal');
+    if (summaryModal) {
+        const aiSummaryBtn = document.getElementById('aiSummaryBtn');
+        const summaryLoading = document.getElementById('summaryLoading');
+        const summaryContent = document.getElementById('summaryContent');
+        const summaryError = document.getElementById('summaryError');
+        const summaryFilterInfo = document.getElementById('summaryFilterInfo');
+        const copySummaryBtn = document.getElementById('copySummaryBtn');
+
+        summaryModal.addEventListener('show.bs.modal', function() {
+            // Reset modal state
+            summaryLoading.classList.remove('d-none');
+            summaryContent.classList.add('d-none');
+            summaryError.classList.add('d-none');
+            copySummaryBtn.disabled = true;
+
+            // Get filter params from URL
+            const timeRange = urlParams.get('time_range') || 'this_week';
+            const user = urlParams.get('user') || '';
+            const groups = urlParams.getAll('groups');
+
+            // Call API
+            fetch('/filtered-summary', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    time_range: timeRange,
+                    user: user,
+                    groups: groups.map(Number)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                summaryLoading.classList.add('d-none');
+
+                if (data.success && data.content) {
+                    // Show filter info
+                    const info = data.filter_info;
+                    summaryFilterInfo.innerHTML =
+                        `时间范围: ${info.time_range} | 用户数: ${info.user_count}` +
+                        (info.groups.length ? ` | 组别: ${info.groups.join(', ')}` : '');
+
+                    // Show content
+                    summaryContent.querySelector('div').innerHTML = data.content;
+                    summaryContent.classList.remove('d-none');
+                    copySummaryBtn.disabled = false;
+                } else {
+                    summaryError.textContent = data.error || '生成失败';
+                    summaryError.classList.remove('d-none');
+                }
+            })
+            .catch(err => {
+                summaryLoading.classList.add('d-none');
+                summaryError.textContent = '请求失败: ' + err.message;
+                summaryError.classList.remove('d-none');
+            });
+        });
+
+        // Copy functionality
+        copySummaryBtn.addEventListener('click', function() {
+            const content = summaryContent.querySelector('div').innerText;
+            navigator.clipboard.writeText(content).then(function() {
+                copySummaryBtn.innerHTML = '{{ render_icon("clipboard-check") }} 已复制';
+                setTimeout(function() {
+                    copySummaryBtn.innerHTML = '{{ render_icon("clipboard") }} 复制';
+                }, 2000);
+            });
+        });
+    }
 });
 </script>
 

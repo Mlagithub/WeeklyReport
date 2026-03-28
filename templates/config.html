@@ -20,7 +20,7 @@
         {% if current_user.is_admin and ai_form %}
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-light">
-                <h5 class="mb-0">{{ render_icon('robot') }} AI 配置</h5>
+                <h5 class="mb-0">{{ render_icon('robot') }} AI 服务配置</h5>
             </div>
             <div class="card-body">
                 <p class="text-muted mb-4">配置AI服务参数，支持OpenAI兼容API。</p>
@@ -29,9 +29,10 @@
                 {% endif %}
                 <form method="POST" action="{{ url_for('ai_config') }}" autocomplete="off">
                     {{ ai_form.hidden_tag() }}
+                    <input type="hidden" name="save_type" value="api">
                     <div class="mb-3">
                         {{ ai_form.api_url.label }}
-                        {{ ai_form.api_url(class="form-control", autocomplete="off") }}
+                        {{ ai_form.api_url(class="form-control", autocomplete="off", value=ai_config.api_url if ai_config else '') }}
                         {% if ai_form.api_url.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in ai_form.api_url.errors %}{{ error }}{% endfor %}
@@ -40,7 +41,7 @@
                     </div>
                     <div class="mb-3">
                         {{ ai_form.api_key.label }}
-                        {{ ai_form.api_key(class="form-control", autocomplete="new-password") }}
+                        <input type="password" class="form-control" name="api_key" id="api_key" autocomplete="new-password" placeholder="留空则保持原值不变">
                         {% if ai_form.api_key.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in ai_form.api_key.errors %}{{ error }}{% endfor %}
@@ -50,20 +51,36 @@
                     </div>
                     <div class="mb-3">
                         {{ ai_form.model_name.label }}
-                        {{ ai_form.model_name(class="form-control", autocomplete="off") }}
+                        {{ ai_form.model_name(class="form-control", autocomplete="off", value=ai_config.model_name if ai_config else '') }}
                         {% if ai_form.model_name.errors %}
                         <div class="invalid-feedback d-block">
                             {% for error in ai_form.model_name.errors %}{{ error }}{% endfor %}
                         </div>
                         {% endif %}
                     </div>
+                    <div class="d-flex gap-2">
+                        {{ ai_form.test_submit }}
+                        <button type="submit" name="submit" class="btn btn-primary">保存API配置</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Polish Prompt card - admin only -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">{{ render_icon('pencil-square') }} 润色提示词配置</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">自定义AI润色功能的默认提示词。</p>
+                <form method="POST" action="{{ url_for('ai_config') }}" autocomplete="off">
+                    {{ ai_form.hidden_tag() }}
+                    <input type="hidden" name="save_type" value="polish">
                     <div class="mb-3">
                         {{ ai_form.polish_prompt.label }}
-                        {{ ai_form.polish_prompt(class="form-control", rows="3") }}
+                        <textarea class="form-control" name="polish_prompt" id="polish_prompt" rows="5">{% if ai_config and ai_config.polish_prompt %}{{ ai_config.polish_prompt }}{% endif %}</textarea>
                         <small class="text-muted">{{ ai_form.polish_prompt.description }}</small>
                     </div>
-                    {{ ai_form.test_submit }}
-                    {{ ai_form.submit }}
+                    <button type="submit" name="submit_polish" class="btn btn-primary">保存润色配置</button>
                 </form>
             </div>
         </div>

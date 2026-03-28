@@ -461,7 +461,7 @@ def register_routes(app):
 
         Per CONFIG-01: AI service configuration storage.
         Per SEC-03: Admin-only access.
-        Per CONTEXT.md: Redirect non-admin to home with "需要管理员权限".
+        Supports separate saving of API config and polish prompt.
         """
         # Admin permission check per SEC-03
         if not current_user.is_admin:
@@ -472,50 +472,73 @@ def register_routes(app):
         config = AIConfig.get_config()
 
         if form.validate_on_submit():
-            # Check which button was clicked
-            if form.test_submit.data:  # Test connection button clicked
-                # Use form values for testing (not saved yet)
+            save_type = request.form.get("save_type", "")
+
+            # Test connection button
+            if form.test_submit.data:
+                api_key = request.form.get("api_key", "")
+                if not api_key and config:
+                    # Use existing key if not provided
+                    try:
+                        api_key = decrypt_api_key(config.api_key_encrypted)
+                    except Exception:
+                        pass
                 success, message = test_ai_connection(
                     form.api_url.data,
-                    form.api_key.data
+                    api_key
                 )
                 if success:
                     flash(message, "success")
                 else:
                     flash(message, "danger")
-                # Stay on page to show result
                 from forms import ThemeForm
                 theme_form = ThemeForm()
                 theme_form.theme_name.data = session.get("theme", "lumen")
                 return render_template("config.html", ai_form=form, ai_config=config, form=theme_form)
 
-            if form.submit.data:  # Save button clicked
-                encrypted_key = encrypt_api_key(form.api_key.data)
-                polish_prompt_value = form.polish_prompt.data or None
+            # Save API config
+            if save_type == "api" and (form.submit.data or form.test_submit.data is False):
+                api_key = request.form.get("api_key", "")
+                model_name = request.form.get("model_name", "")
+                api_url = request.form.get("api_url", "")
+
                 if config:
-                    config.api_url = form.api_url.data
-                    config.api_key_encrypted = encrypted_key
-                    config.model_name = form.model_name.data
-                    config.polish_prompt = polish_prompt_value
+                    config.api_url = api_url
+                    config.model_name = model_name
+                    # Only update key if provided
+                    if api_key:
+                        config.api_key_encrypted = encrypt_api_key(api_key)
                 else:
+                    if not api_key:
+                        flash("首次配置请输入API Key", "warning")
+                        from forms import ThemeForm
+                        theme_form = ThemeForm()
+                        theme_form.theme_name.data = session.get("theme", "lumen")
+                        return render_template("config.html", ai_form=form, ai_config=config, form=theme_form)
                     config = AIConfig(
-                        api_url=form.api_url.data,
-                        api_key_encrypted=encrypted_key,
-                        model_name=form.model_name.data,
-                        polish_prompt=polish_prompt_value
+                        api_url=api_url,
+                        api_key_encrypted=encrypt_api_key(api_key),
+                        model_name=model_name,
                     )
                     db.session.add(config)
                 db.session.commit()
-                flash("配置已保存", "success")
+                flash("API配置已保存", "success")
                 return redirect(url_for("ai_config"))
 
-        # Pre-populate form with existing config (except api_key - show masked)
-        if config and not form.is_submitted():
-            form.api_url.data = config.api_url
-            form.model_name.data = config.model_name
-            form.polish_prompt.data = config.polish_prompt
-            # api_key not pre-populated - user must re-enter to change
+            # Save polish prompt
+            if save_type == "polish":
+                polish_prompt = request.form.get("polish_prompt", "") or None
+                if config:
+                    config.polish_prompt = polish_prompt
+                else:
+                    # Create config with just polish prompt
+                    config = AIConfig(polish_prompt=polish_prompt)
+                    db.session.add(config)
+                db.session.commit()
+                flash("润色配置已保存", "success")
+                return redirect(url_for("ai_config"))
 
+        # GET request - pre-populate form
         from forms import ThemeForm
         theme_form = ThemeForm()
         theme_form.theme_name.data = session.get("theme", "lumen")

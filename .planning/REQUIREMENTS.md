@@ -374,30 +374,30 @@ AI调用期间显示加载指示器，用户知道系统正在工作。
 
 | Requirement | Phase | Plan | Status |
 |-------------|-------|------|--------|
-| CONFIG-01 | TBD | TBD | Pending |
-| CONFIG-02 | TBD | TBD | Pending |
-| CONFIG-03 | TBD | TBD | Pending |
-| TEMPLATE-01 | TBD | TBD | Pending |
-| TEMPLATE-02 | TBD | TBD | Pending |
-| TEMPLATE-03 | TBD | TBD | Pending |
-| SUMMARY-01 | TBD | TBD | Pending |
-| SUMMARY-02 | TBD | TBD | Pending |
-| SUMMARY-03 | TBD | TBD | Pending |
-| SUMMARY-04 | TBD | TBD | Pending |
-| FILTER-SUM-01 | TBD | TBD | Pending |
-| FILTER-SUM-02 | TBD | TBD | Pending |
-| POLISH-01 | TBD | TBD | Pending |
-| POLISH-02 | TBD | TBD | Pending |
-| API-01 | TBD | TBD | Pending |
-| API-02 | TBD | TBD | Pending |
-| API-03 | TBD | TBD | Pending |
-| API-04 | TBD | TBD | Pending |
-| SEC-01 | TBD | TBD | Pending |
-| SEC-02 | TBD | TBD | Pending |
-| SEC-03 | TBD | TBD | Pending |
-| UI-01 | TBD | TBD | Pending |
-| UI-02 | TBD | TBD | Pending |
+| CONFIG-01 | 14 | 14-02, 14-03 | Complete |
+| CONFIG-02 | 14 | 14-04 | Pending |
+| CONFIG-03 | 14 | 14-01 | Complete |
+| TEMPLATE-01 | 16 | TBD | Pending |
+| TEMPLATE-02 | 16 | TBD | Pending |
+| TEMPLATE-03 | 16 | TBD | Pending |
+| SUMMARY-01 | 17 | TBD | Pending |
+| SUMMARY-02 | 17 | TBD | Pending |
+| SUMMARY-03 | 17 | TBD | Pending |
+| SUMMARY-04 | 17 | TBD | Pending |
+| FILTER-SUM-01 | 18 | TBD | Pending |
+| FILTER-SUM-02 | 18 | TBD | Pending |
+| POLISH-01 | 18 | TBD | Pending |
+| POLISH-02 | 18 | TBD | Pending |
+| API-01 | 15 | TBD | Pending |
+| API-02 | 15 | TBD | Pending |
+| API-03 | 15 | TBD | Pending |
+| API-04 | 15 | TBD | Pending |
+| SEC-01 | 14 | 14-01 | Complete |
+| SEC-02 | 15 | TBD | Pending |
+| SEC-03 | 14 | 14-03 | Complete |
+| UI-01 | 17 | TBD | Pending |
+| UI-02 | 17 | TBD | Pending |
 
 ---
 
-*Last updated: 2026-03-28 — v1.3 AI milestone requirements defined*
+*Last updated: 2026-03-28 — Phase 14 plans 14-01, 14-02, 14-03 complete (CONFIG-01, CONFIG-03, SEC-01, SEC-03)*

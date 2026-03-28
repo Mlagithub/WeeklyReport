@@ -4,7 +4,8 @@
 
 - **v1.2 增强富文本导出功能** — Phases 8-12 (current)
 - **v1.1 UI Optimization** — Phases 6-7 (in progress)
-- ✅ **v1.0 FixIOBug** — Phases 1-5 (shipped 2026-03-24)
+- **v1.3 Code Quality** — Phase 13 (planned)
+- **v1.0 FixIOBug** — Phases 1-5 (shipped 2026-03-24)
 
 ## Phases
 
@@ -21,6 +22,13 @@
 
 - [x] Phase 6: Find Page Filtering (1/2 plans) — 默认过滤减少信息过载
 - [ ] Phase 7: Homepage Rendering (0/2 plans) — 富文本渲染与 XSS 防护
+
+</details>
+
+<details>
+<summary>**v1.3 Code Quality (Phase 13) — Planned**</summary>
+
+- [ ] Phase 13: Comprehensive Code Review (0/5 plans) — Linting, complexity reduction, code cleanup
 
 </details>
 
@@ -116,6 +124,26 @@ Plans:
 - [x] 12-01-PLAN.md — Wave 1: Create batch_export route with ZIP generation
 - [ ] 12-02-PLAN.md — Wave 2: Add UI button to manage_records.html
 
+### Phase 13: Comprehensive Code Review
+**Goal**: Comprehensive code review covering syntax, style, and redundancy; implement fixes
+**Depends on**: Phase 12
+**Requirements**: None (quality improvement phase)
+**Success Criteria** (what must be TRUE):
+  1. Zero linting errors (ruff check returns clean)
+  2. All functions have cyclomatic complexity < 10
+  3. No invalid escape sequences or SyntaxWarnings
+  4. No variable shadowing issues
+  5. All imports properly organized
+  6. Test coverage maintained at ~88%
+**Plans**: 5 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Wave 1: Create pyproject.toml with ruff and black configuration
+- [ ] 13-02-PLAN.md — Wave 2: Auto-fix 40 linting issues with ruff --fix
+- [ ] 13-03-PLAN.md — Wave 3: Manual fixes (invalid escapes, variable shadowing, E402 imports)
+- [ ] 13-04-PLAN.md — Wave 4: Refactor high-complexity functions (CC < 10)
+- [ ] 13-05-PLAN.md — Wave 5: Final verification and quality metrics report
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -131,17 +159,8 @@ Plans:
 | 9. PDF Export | v1.2 | 3/3 | Complete | 2026-03-26 |
 | 10. DOCX Export | v1.2 | 3/3 | Complete | 2026-03-26 |
 | 11. Excel Enhancement | v1.2 | 3/3 | Complete | 2026-03-26 |
-| 12. Batch Export | v1.2 | 2/3 | In Progress|  |
-
-### Phase 13: Comprehensive code review covering syntax, style, and redundancy; implement fixes
-
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 12
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 13 to break down)
+| 12. Batch Export | v1.2 | 2/3 | In Progress | - |
+| 13. Comprehensive Code Review | v1.3 | 0/5 | Ready to execute | - |
 
 ---
 

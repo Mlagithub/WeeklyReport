@@ -212,6 +212,13 @@ document.addEventListener('DOMContentLoaded', function() {
         form.appendChild(input);
     });
 
+    // Get CSRF token from meta tag
+    function getCsrfToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta) return meta.getAttribute('content');
+        return '';
+    }
+
     // AI Summary functionality
     const summaryModal = document.getElementById('summaryModal');
     if (summaryModal) {
@@ -237,7 +244,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Call API
             fetch('/filtered-summary', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
                 body: JSON.stringify({
                     time_range: timeRange,
                     user: user,

@@ -9,18 +9,17 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 class DateRange:
     TIME_RANGES = {
-        'last_7_days': '最近 7 天',  # Added for FIND-02 default
-        'this_week': '本周',
-        'last_week': '上周',
-        'this_month': '本月',
-        'this_quarter': '本季度',
-        'this_year': '本年',
+        "last_7_days": "最近 7 天",  # Added for FIND-02 default
+        "this_week": "本周",
+        "last_week": "上周",
+        "this_month": "本月",
+        "this_quarter": "本季度",
+        "this_year": "本年",
     }
 
     @staticmethod
     def get_today():
         return datetime.today().date()
-
 
     @staticmethod
     def this_week():
@@ -69,7 +68,6 @@ class DateRange:
 
         return start_date, end_date
 
-
     @staticmethod
     def this_year():
         today = DateRange.get_today()
@@ -82,12 +80,12 @@ class DateRange:
 
         # 创建时间范围映射字典
         time_range_methods = {
-            'last_7_days': lambda: DateRange.last_n_days(7),  # Added for FIND-02
-            'this_week': DateRange.this_week,
-            'last_week': DateRange.last_week,
-            'this_month': DateRange.this_month,
-            'this_quarter': DateRange.this_quarter,
-            'this_year': DateRange.this_year,
+            "last_7_days": lambda: DateRange.last_n_days(7),  # Added for FIND-02
+            "this_week": DateRange.this_week,
+            "last_week": DateRange.last_week,
+            "this_month": DateRange.this_month,
+            "this_quarter": DateRange.this_quarter,
+            "this_year": DateRange.this_year,
         }
 
         # 计算日期范围
@@ -102,24 +100,24 @@ class DateRange:
 def html_to_text(html_content):
     if not html_content:
         return ""
-    soup = BeautifulSoup(html_content, 'html.parser')
+    soup = BeautifulSoup(html_content, "html.parser")
 
     result = []
 
     # 处理有序或无序列表，使用递归处理层级
     def convert_list(list_tag, level_prefix="", ordered=True):
-        for idx, li in enumerate(list_tag.find_all('li', recursive=False), 1):
+        for idx, li in enumerate(list_tag.find_all("li", recursive=False), 1):
             # 确定当前前缀：有序列表用数字前缀，无序列表用符号前缀
             current_prefix = f"{level_prefix}{idx}." if ordered else f"{level_prefix}-"
 
             # 提取当前 <li> 的直接文本（不包含嵌套的子元素）
             main_text = li.find(text=True, recursive=False)
-            main_text = main_text.strip() if main_text else ''
+            main_text = main_text.strip() if main_text else ""
             result.append(f"{current_prefix} {main_text}")
 
             # 递归处理嵌套的有序或无序列表
-            nested_ul = li.find('ul')
-            nested_ol = li.find('ol')
+            nested_ul = li.find("ul")
+            nested_ol = li.find("ol")
             if nested_ul:
                 convert_list(nested_ul, level_prefix + "    ", ordered=False)  # 传入当前缩进和无序标记
             elif nested_ol:
@@ -127,19 +125,18 @@ def html_to_text(html_content):
 
     # 处理段落和其他标签
     for element in soup.contents:
-        if element.name == 'ol':
+        if element.name == "ol":
             convert_list(element, ordered=True)  # 有序列表
-        elif element.name == 'ul':
+        elif element.name == "ul":
             convert_list(element, ordered=False)  # 无序列表
-        elif element.name == 'p' and element.get_text(strip=True):
+        elif element.name == "p" and element.get_text(strip=True):
             result.append(element.get_text(strip=True))
-        elif element.name == 'strong':
+        elif element.name == "strong":
             result.append(f"**{element.get_text(strip=True)}**")  # 加粗的文本
         else:
             result.append(element.get_text(strip=True))
 
     return "\n".join(result)
-
 
 
 # 辅助函数：获取周的起始日期和结束日期
@@ -152,7 +149,6 @@ def get_week_date_range(year, week):
 
 
 class RecordDownloader:
-
     @staticmethod
     def download(user_weekly_data, all_weeks, filename):
         """Download weekly report as Excel file.
@@ -167,7 +163,7 @@ class RecordDownloader:
         """
         wb = Workbook()
         ws = wb.active
-        ws.title = '软件开发组周报'
+        ws.title = "软件开发组周报"
 
         styles = RecordDownloader._setup_workbook_styles()
         RecordDownloader._fill_data(ws, user_weekly_data, all_weeks, styles)
@@ -179,9 +175,9 @@ class RecordDownloader:
 
         return send_file(
             output,
-            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             as_attachment=True,
-            download_name=filename
+            download_name=filename,
         )
 
     @staticmethod
@@ -192,15 +188,12 @@ class RecordDownloader:
             Dict with header_fill, header_font, light_fill, thin_border
         """
         return {
-            'header_fill': PatternFill(start_color="808080", end_color="808080", fill_type="solid"),
-            'header_font': Font(bold=True, color="FFFFFF"),
-            'light_fill': PatternFill(start_color="EAEAEA", end_color="EAEAEA", fill_type="solid"),
-            'thin_border': Border(
-                left=Side(style="thin"),
-                right=Side(style="thin"),
-                top=Side(style="thin"),
-                bottom=Side(style="thin")
-            )
+            "header_fill": PatternFill(start_color="808080", end_color="808080", fill_type="solid"),
+            "header_font": Font(bold=True, color="FFFFFF"),
+            "light_fill": PatternFill(start_color="EAEAEA", end_color="EAEAEA", fill_type="solid"),
+            "thin_border": Border(
+                left=Side(style="thin"), right=Side(style="thin"), top=Side(style="thin"), bottom=Side(style="thin")
+            ),
         }
 
     @staticmethod
@@ -215,7 +208,7 @@ class RecordDownloader:
         """
         # Sort weeks and create headers
         sorted_weeks = sorted(all_weeks, key=lambda x: (x[0], x[1]), reverse=True)
-        headers = ['姓名'] + [get_week_date_range(year, week) for year, week in sorted_weeks]
+        headers = ["姓名"] + [get_week_date_range(year, week) for year, week in sorted_weeks]
         ws.append(headers)
 
         # Fill data rows
@@ -234,28 +227,26 @@ class RecordDownloader:
             ws: Worksheet to style
             styles: Style dict from _setup_workbook_styles
         """
-        header_fill = styles['header_fill']
-        header_font = styles['header_font']
-        light_fill = styles['light_fill']
-        thin_border = styles['thin_border']
+        header_fill = styles["header_fill"]
+        header_font = styles["header_font"]
+        light_fill = styles["light_fill"]
+        thin_border = styles["thin_border"]
 
         # Style header row
-        for cell in ws['1']:
+        for cell in ws["1"]:
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
         # Style data rows with alternating colors
-        for row_idx, row in enumerate(
-            ws.iter_rows(min_row=2, max_col=ws.max_column, max_row=ws.max_row), start=2
-        ):
+        for row_idx, row in enumerate(ws.iter_rows(min_row=2, max_col=ws.max_column, max_row=ws.max_row), start=2):
             for cell in row:
                 if row_idx % 2 == 0:
                     cell.fill = light_fill
                 cell.alignment = Alignment(horizontal="left", wrap_text=True)
 
         # Style first column (names)
-        for cell in ws['A']:
+        for cell in ws["A"]:
             cell.font = Font(bold=True)
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
@@ -268,5 +259,3 @@ class RecordDownloader:
         for row in ws.iter_rows(min_row=1, max_col=ws.max_column, max_row=ws.max_row):
             for cell in row:
                 cell.border = thin_border
-
-

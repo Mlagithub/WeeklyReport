@@ -8,6 +8,6 @@ from flask_sqlalchemy import SQLAlchemy
 # These will be bound to the app via init_app() in app.py
 db = SQLAlchemy()
 security = Security()
-admin = Admin(name='软件开发组')
+admin = Admin(name="软件开发组")
 ckeditor = CKEditor()
 bootstrap = Bootstrap5()

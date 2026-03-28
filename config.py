@@ -6,18 +6,18 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
     """Base configuration with common settings."""
 
-    SECRET_KEY = os.environ.get('SECRET_KEY', '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I')
-    SECURITY_PASSWORD_SALT = os.environ.get('SECURITY_PASSWORD_SALT', '1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(basedir, 'instance', 'app.db'))
+    SECRET_KEY = os.environ.get("SECRET_KEY", "1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I")
+    SECURITY_PASSWORD_SALT = os.environ.get("SECURITY_PASSWORD_SALT", "1pvDt-8miZXlUfTnNfEzVVTuEOLIEzKxrHMIQICS_0I")
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///" + os.path.join(basedir, "instance", "app.db"))
     SQLALCHEMY_ENGINE_OPTIONS = {
-        'pool_pre_ping': True,
-        'pool_recycle': 3600,
-        'pool_size': 10,
-        'max_overflow': 20,
+        "pool_pre_ping": True,
+        "pool_recycle": 3600,
+        "pool_size": 10,
+        "max_overflow": 20,
     }
-    CKEDITOR_FILE_UPLOADER = 'upload'
+    CKEDITOR_FILE_UPLOADER = "upload"
     CKEDITOR_SERVER_LOCAL = True
-    UPLOADED_PATH = os.path.join(basedir, 'uploads')
+    UPLOADED_PATH = os.path.join(basedir, "uploads")
     BOOTSTRAP_SERVE_LOCAL = True
     SECURITY_REGISTERABLE = False
     SECURITY_RECOVERABLE = True
@@ -34,9 +34,11 @@ class Config:
 
 class DevelopmentConfig(Config):
     """Development configuration."""
+
     DEBUG = True
 
 
 class ProductionConfig(Config):
     """Production configuration - requires environment variables for secrets."""
+
     DEBUG = False

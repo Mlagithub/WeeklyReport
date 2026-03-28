@@ -44,7 +44,8 @@ class PdfExporter(ExporterBase):
         """Get uploads path, initializing from Flask config if needed."""
         if self._uploads_path is None:
             from flask import current_app
-            self._uploads_path = current_app.config['UPLOADED_PATH']
+
+            self._uploads_path = current_app.config["UPLOADED_PATH"]
         return self._uploads_path
 
     @property
@@ -57,12 +58,12 @@ class PdfExporter(ExporterBase):
     @property
     def file_extension(self) -> str:
         """Return file extension without dot."""
-        return 'pdf'
+        return "pdf"
 
     @property
     def mime_type(self) -> str:
         """Return MIME type for send_file()."""
-        return 'application/pdf'
+        return "application/pdf"
 
     def _generate(self, records: list[Any], options: dict) -> BytesIO:
         """Generate PDF from records using WeasyPrint.
@@ -74,8 +75,8 @@ class PdfExporter(ExporterBase):
         Returns:
             BytesIO buffer containing PDF
         """
-        title = options.get('title', 'Weekly Report')
-        include_date = options.get('include_date', True)
+        title = options.get("title", "Weekly Report")
+        include_date = options.get("include_date", True)
 
         # Build HTML content with CSS Paged Media
         html_content = self._build_html(records, title, include_date)
@@ -85,7 +86,7 @@ class PdfExporter(ExporterBase):
             return self._resolve_image_url(url)
 
         # Generate PDF - use fake base_url to ensure url_fetcher is called for relative URLs
-        html = HTML(string=html_content, base_url='http://localhost/', url_fetcher=url_fetcher)
+        html = HTML(string=html_content, base_url="http://localhost/", url_fetcher=url_fetcher)
         output = BytesIO()
         html.write_pdf(output)
         output.seek(0)
@@ -102,10 +103,10 @@ class PdfExporter(ExporterBase):
         Returns:
             Complete HTML document string
         """
-        date_str = datetime.now().strftime('%Y-%m-%d') if include_date else ''
+        date_str = datetime.now().strftime("%Y-%m-%d") if include_date else ""
 
         # CSS Paged Media stylesheet for headers/footers
-        css = '''
+        css = """
         <style>
         @page {
             size: A4;
@@ -154,23 +155,23 @@ class PdfExporter(ExporterBase):
         .date { color: #666; margin-bottom: 0.5em; }
         hr { border: none; border-top: 1px solid #ddd; margin: 1.5em 0; }
         </style>
-        '''
+        """
 
         # Build content sections
         content_sections = []
         for record in records:
             if record.content:
                 # Get user names for this record
-                user_names = ', '.join(u.username for u in record.user) if record.user else '未知用户'
-                content_sections.append(f'''
+                user_names = ", ".join(u.username for u in record.user) if record.user else "未知用户"
+                content_sections.append(f"""
                 <div class="record">
-                    <p class="date"><strong>{user_names}</strong> — <small>{record.date.strftime('%Y-%m-%d')}</small></p>
+                    <p class="date"><strong>{user_names}</strong> — <small>{record.date.strftime("%Y-%m-%d")}</small></p>
                     {record.content}
                 </div>
                 <hr>
-                ''')
+                """)
 
-        return f'''
+        return f"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -181,10 +182,10 @@ class PdfExporter(ExporterBase):
             <div id="header">{title}</div>
             <div id="footer-left">Generated: {date_str}</div>
 
-            {''.join(content_sections)}
+            {"".join(content_sections)}
         </body>
         </html>
-        '''
+        """
 
     def _resolve_image_url(self, url: str) -> dict:
         """Resolve /files/ URLs to local image data.
@@ -201,12 +202,12 @@ class PdfExporter(ExporterBase):
             or a 1x1 transparent placeholder for missing local images
         """
         # Extract the path from various URL formats
-        if url.startswith('http://localhost/files/'):
+        if url.startswith("http://localhost/files/"):
             url = url[16:]  # Remove 'http://localhost' prefix, keep '/files/...'
-        elif url.startswith('file:///files/'):
+        elif url.startswith("file:///files/"):
             url = url[7:]  # Remove 'file://' prefix, keep '/files/...'
 
-        if url.startswith('/files/'):
+        if url.startswith("/files/"):
             # URL-decode the filename (handles Chinese characters)
             encoded_filename = url[7:]  # Remove '/files/' prefix
             filename = unquote(encoded_filename)
@@ -214,29 +215,29 @@ class PdfExporter(ExporterBase):
             local_path = os.path.join(self.uploads_path, filename)
 
             if os.path.exists(local_path):
-                with open(local_path, 'rb') as f:
+                with open(local_path, "rb") as f:
                     image_data = f.read()
 
                 # Determine MIME type from extension
-                ext = filename.rsplit('.', 1)[-1].lower()
+                ext = filename.rsplit(".", 1)[-1].lower()
                 mime_types = {
-                    'jpg': 'image/jpeg',
-                    'jpeg': 'image/jpeg',
-                    'png': 'image/png',
-                    'gif': 'image/gif',
+                    "jpg": "image/jpeg",
+                    "jpeg": "image/jpeg",
+                    "png": "image/png",
+                    "gif": "image/gif",
                 }
-                mime_type = mime_types.get(ext, 'application/octet-stream')
+                mime_type = mime_types.get(ext, "application/octet-stream")
 
-                return {'string': image_data, 'mime_type': mime_type}
+                return {"string": image_data, "mime_type": mime_type}
             else:
                 # Missing local image - return 1x1 transparent PNG placeholder
-                transparent_png = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0bIDATx\x9cc`\x00\x02\x00\x00\x05\x00\x01z^\xab?\x00\x00\x00\x00IEND\xaeB`\x82'
-                return {'string': transparent_png, 'mime_type': 'image/png'}
+                transparent_png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0bIDATx\x9cc`\x00\x02\x00\x00\x05\x00\x01z^\xab?\x00\x00\x00\x00IEND\xaeB`\x82"
+                return {"string": transparent_png, "mime_type": "image/png"}
 
         # For external URLs, use default fetcher
-        if url.startswith(('http://', 'https://')):
+        if url.startswith(("http://", "https://")):
             return default_url_fetcher(url)
 
         # Unknown URL scheme - return placeholder
-        transparent_png = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0bIDATx\x9cc`\x00\x02\x00\x00\x05\x00\x01z^\xab?\x00\x00\x00\x00IEND\xaeB`\x82'
-        return {'string': transparent_png, 'mime_type': 'image/png'}
+        transparent_png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0bIDATx\x9cc`\x00\x02\x00\x00\x05\x00\x01z^\xab?\x00\x00\x00\x00IEND\xaeB`\x82"
+        return {"string": transparent_png, "mime_type": "image/png"}

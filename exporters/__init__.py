@@ -14,8 +14,6 @@ Usage:
     # ExporterFactory.register('pdf', PdfExporter)
 """
 
-from typing import Dict, List, Type
-
 from .base import ExporterBase
 from .image_resolver import ImageResolver
 
@@ -64,11 +62,8 @@ class ExporterFactory:
         """
         format_lower = format.lower()
         if format_lower not in cls._registry:
-            supported = ', '.join(cls.supported_formats()) or 'none'
-            raise ValueError(
-                f"Unsupported export format: {format}. "
-                f"Supported formats: {supported}"
-            )
+            supported = ", ".join(cls.supported_formats()) or "none"
+            raise ValueError(f"Unsupported export format: {format}. Supported formats: {supported}")
         return cls._registry[format_lower]()
 
     @classmethod
@@ -82,7 +77,7 @@ class ExporterFactory:
 
 
 # Export public API
-__all__ = ['ExporterFactory', 'ExporterBase', 'ImageResolver']
+__all__ = ["ExporterFactory", "ExporterBase", "ImageResolver"]
 
 
 # Register exporters as they are implemented (Phases 9-11)  # noqa: E402
@@ -90,6 +85,6 @@ from .docx import DocxExporter  # noqa: E402
 from .excel import ExcelExporter  # noqa: E402
 from .pdf import PdfExporter  # noqa: E402
 
-ExporterFactory.register('pdf', PdfExporter)
-ExporterFactory.register('docx', DocxExporter)
-ExporterFactory.register('xlsx', ExcelExporter)
+ExporterFactory.register("pdf", PdfExporter)
+ExporterFactory.register("docx", DocxExporter)
+ExporterFactory.register("xlsx", ExcelExporter)

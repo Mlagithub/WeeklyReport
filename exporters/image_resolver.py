@@ -64,14 +64,14 @@ class ImageResolver:
             return None
 
         # Handle /files/ prefix for local uploads
-        if url.startswith('/files/'):
+        if url.startswith("/files/"):
             encoded_filename = url[7:]  # Remove '/files/' prefix (7 characters)
             # URL-decode to handle Chinese characters and special chars
             filename = unquote(encoded_filename)
             return os.path.join(self.uploads_path, filename)
 
         # External URLs return None (not embedded)
-        if url.startswith(('http://', 'https://')):
+        if url.startswith(("http://", "https://")):
             return None
 
         return None
@@ -93,7 +93,7 @@ class ImageResolver:
         """
         local_path = self.resolve_url(url)
         if local_path and os.path.exists(local_path):
-            with open(local_path, 'rb') as f:
+            with open(local_path, "rb") as f:
                 return f.read()
         return None
 

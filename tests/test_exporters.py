@@ -10,7 +10,6 @@ Plan: 00 (Test Scaffolding)
 """
 
 from io import BytesIO
-from typing import Any, List
 
 import pytest
 
@@ -21,26 +20,30 @@ class TestExporterBase:
     def test_export_method_exists(self):
         """Verify ExporterBase has export(records, **options) method."""
         from exporters.base import ExporterBase
-        assert hasattr(ExporterBase, 'export')
+
+        assert hasattr(ExporterBase, "export")
         assert callable(ExporterBase.export)
 
     def test_file_extension_property(self):
         """Verify file_extension property exists and is abstract."""
         from exporters.base import ExporterBase
-        assert hasattr(ExporterBase, 'file_extension')
+
+        assert hasattr(ExporterBase, "file_extension")
         # Verify it's abstract by checking __isabstractmethod__
         assert ExporterBase.file_extension.fget.__isabstractmethod__
 
     def test_mime_type_property(self):
         """Verify mime_type property exists and is abstract."""
         from exporters.base import ExporterBase
-        assert hasattr(ExporterBase, 'mime_type')
+
+        assert hasattr(ExporterBase, "mime_type")
         # Verify it's abstract by checking __isabstractmethod__
         assert ExporterBase.mime_type.fget.__isabstractmethod__
 
     def test_cannot_instantiate_base(self):
         """Verify ExporterBase cannot be instantiated directly."""
         from exporters.base import ExporterBase
+
         with pytest.raises(TypeError):
             ExporterBase()
 
@@ -56,22 +59,23 @@ class TestExporterFactory:
         class MockExporter(ExporterBase):
             @property
             def file_extension(self):
-                return 'mock'
+                return "mock"
 
             @property
             def mime_type(self):
-                return 'application/mock'
+                return "application/mock"
 
             def _generate(self, data, options):
                 from io import BytesIO
-                return BytesIO(b'mock')
+
+                return BytesIO(b"mock")
 
         # Test that register method exists and works
-        ExporterFactory.register('mock', MockExporter)
-        assert 'mock' in ExporterFactory.supported_formats()
+        ExporterFactory.register("mock", MockExporter)
+        assert "mock" in ExporterFactory.supported_formats()
 
         # Clean up registry
-        ExporterFactory._registry.pop('mock', None)
+        ExporterFactory._registry.pop("mock", None)
 
     def test_get_exporter_returns_instance(self):
         """Verify get_exporter(format) returns exporter instance."""
@@ -81,24 +85,25 @@ class TestExporterFactory:
         class TestExporter(ExporterBase):
             @property
             def file_extension(self):
-                return 'test'
+                return "test"
 
             @property
             def mime_type(self):
-                return 'application/test'
+                return "application/test"
 
             def _generate(self, data, options):
                 from io import BytesIO
-                return BytesIO(b'test')
 
-        ExporterFactory.register('test', TestExporter)
-        exporter = ExporterFactory.get_exporter('test')
+                return BytesIO(b"test")
+
+        ExporterFactory.register("test", TestExporter)
+        exporter = ExporterFactory.get_exporter("test")
 
         assert isinstance(exporter, ExporterBase)
         assert isinstance(exporter, TestExporter)
 
         # Clean up registry
-        ExporterFactory._registry.pop('test', None)
+        ExporterFactory._registry.pop("test", None)
 
     def test_get_exporter_invalid_format_raises(self):
         """Verify ValueError raised for unsupported format."""
@@ -110,10 +115,10 @@ class TestExporterFactory:
 
         try:
             with pytest.raises(ValueError) as exc_info:
-                ExporterFactory.get_exporter('invalid')
+                ExporterFactory.get_exporter("invalid")
 
-            assert 'Unsupported export format' in str(exc_info.value)
-            assert 'invalid' in str(exc_info.value)
+            assert "Unsupported export format" in str(exc_info.value)
+            assert "invalid" in str(exc_info.value)
         finally:
             # Restore registry
             ExporterFactory._registry.update(original_registry)
@@ -126,24 +131,25 @@ class TestExporterFactory:
         class FormatExporter(ExporterBase):
             @property
             def file_extension(self):
-                return 'format'
+                return "format"
 
             @property
             def mime_type(self):
-                return 'application/format'
+                return "application/format"
 
             def _generate(self, data, options):
                 from io import BytesIO
-                return BytesIO(b'format')
 
-        ExporterFactory.register('format', FormatExporter)
+                return BytesIO(b"format")
+
+        ExporterFactory.register("format", FormatExporter)
         formats = ExporterFactory.supported_formats()
 
         assert isinstance(formats, list)
-        assert 'format' in formats
+        assert "format" in formats
 
         # Clean up registry
-        ExporterFactory._registry.pop('format', None)
+        ExporterFactory._registry.pop("format", None)
 
 
 class TestImageResolver:
@@ -152,16 +158,18 @@ class TestImageResolver:
     def test_resolve_url_files_prefix(self):
         """Verify /files/filename.jpg converts to absolute path."""
         from exporters.image_resolver import ImageResolver
-        resolver = ImageResolver('/var/www/uploads')
-        result = resolver.resolve_url('/files/test.jpg')
-        assert result == '/var/www/uploads/test.jpg'
+
+        resolver = ImageResolver("/var/www/uploads")
+        result = resolver.resolve_url("/files/test.jpg")
+        assert result == "/var/www/uploads/test.jpg"
 
     def test_resolve_url_external_returns_none(self):
         """Verify external URLs return None."""
         from exporters.image_resolver import ImageResolver
-        resolver = ImageResolver('/var/www/uploads')
-        assert resolver.resolve_url('http://example.com/img.jpg') is None
-        assert resolver.resolve_url('https://example.com/img.jpg') is None
+
+        resolver = ImageResolver("/var/www/uploads")
+        assert resolver.resolve_url("http://example.com/img.jpg") is None
+        assert resolver.resolve_url("https://example.com/img.jpg") is None
 
     def test_get_image_bytes_returns_bytes(self):
         """Verify get_image_bytes(url) returns bytes or None."""
@@ -172,17 +180,17 @@ class TestImageResolver:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create test image file
-            test_file = os.path.join(tmpdir, 'test.png')
-            test_content = b'\x89PNG\r\n\x1a\n'  # PNG header bytes
-            with open(test_file, 'wb') as f:
+            test_file = os.path.join(tmpdir, "test.png")
+            test_content = b"\x89PNG\r\n\x1a\n"  # PNG header bytes
+            with open(test_file, "wb") as f:
                 f.write(test_content)
 
             resolver = ImageResolver(tmpdir)
-            result = resolver.get_image_bytes('/files/test.png')
+            result = resolver.get_image_bytes("/files/test.png")
             assert result == test_content
 
             # Non-existent file returns None
-            assert resolver.get_image_bytes('/files/missing.png') is None
+            assert resolver.get_image_bytes("/files/missing.png") is None
 
     def test_image_exists_returns_bool(self):
         """Verify image_exists(url) returns boolean."""
@@ -193,13 +201,13 @@ class TestImageResolver:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create test file
-            test_file = os.path.join(tmpdir, 'exists.jpg')
-            with open(test_file, 'wb') as f:
-                f.write(b'test')
+            test_file = os.path.join(tmpdir, "exists.jpg")
+            with open(test_file, "wb") as f:
+                f.write(b"test")
 
             resolver = ImageResolver(tmpdir)
-            assert resolver.image_exists('/files/exists.jpg') is True
-            assert resolver.image_exists('/files/missing.jpg') is False
+            assert resolver.image_exists("/files/exists.jpg") is True
+            assert resolver.image_exists("/files/missing.jpg") is False
 
 
 class TestDependencies:
@@ -208,16 +216,19 @@ class TestDependencies:
     def test_python_docx_installed(self):
         """Verify python-docx is importable as docx."""
         import docx
+
         assert docx is not None
 
     def test_weasyprint_installed(self):
         """Verify weasyprint is importable."""
         import weasyprint
+
         assert weasyprint is not None
 
     def test_htmldocx_installed(self):
         """Verify htmldocx is importable."""
         from htmldocx import HtmlToDocx
+
         assert HtmlToDocx is not None
 
 
@@ -230,14 +241,16 @@ class TestPdfExporter:
     def test_file_extension(self):
         """Verify PdfExporter.file_extension returns 'pdf'."""
         from exporters.pdf import PdfExporter
-        exporter = PdfExporter(uploads_path='/tmp')
-        assert exporter.file_extension == 'pdf'
+
+        exporter = PdfExporter(uploads_path="/tmp")
+        assert exporter.file_extension == "pdf"
 
     def test_mime_type(self):
         """Verify PdfExporter.mime_type returns 'application/pdf'."""
         from exporters.pdf import PdfExporter
-        exporter = PdfExporter(uploads_path='/tmp')
-        assert exporter.mime_type == 'application/pdf'
+
+        exporter = PdfExporter(uploads_path="/tmp")
+        assert exporter.mime_type == "application/pdf"
 
     def test_export_returns_bytesio(self):
         """Verify export() returns BytesIO with PDF content."""
@@ -247,17 +260,17 @@ class TestPdfExporter:
 
         # Create mock records
         record = MagicMock()
-        record.content = '<p>Test content</p>'
-        record.date.strftime = lambda fmt: '2026-03-26'
+        record.content = "<p>Test content</p>"
+        record.date.strftime = lambda fmt: "2026-03-26"
 
-        exporter = PdfExporter(uploads_path='/tmp')
-        result = exporter.export([record], title='Test Report')
+        exporter = PdfExporter(uploads_path="/tmp")
+        result = exporter.export([record], title="Test Report")
 
         assert isinstance(result, BytesIO)
         # Verify PDF header
         result.seek(0)
         header = result.read(5)
-        assert header == b'%PDF-'
+        assert header == b"%PDF-"
 
     def test_image_embedding(self):
         """Verify url_fetcher resolves /files/ URLs for image embedding."""
@@ -269,21 +282,21 @@ class TestPdfExporter:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create test image file
-            test_image = os.path.join(tmpdir, 'test.png')
-            with open(test_image, 'wb') as f:
-                f.write(b'\x89PNG\r\n\x1a\n')  # PNG header
+            test_image = os.path.join(tmpdir, "test.png")
+            with open(test_image, "wb") as f:
+                f.write(b"\x89PNG\r\n\x1a\n")  # PNG header
 
             # Create mock record with image
             record = MagicMock()
             record.content = '<img src="/files/test.png">'
-            record.date.strftime = lambda fmt: '2026-03-26'
+            record.date.strftime = lambda fmt: "2026-03-26"
 
             exporter = PdfExporter(uploads_path=tmpdir)
 
             # Test url_fetcher directly
-            result = exporter._resolve_image_url('/files/test.png')
-            assert result['mime_type'] == 'image/png'
-            assert result['string'] == b'\x89PNG\r\n\x1a\n'
+            result = exporter._resolve_image_url("/files/test.png")
+            assert result["mime_type"] == "image/png"
+            assert result["string"] == b"\x89PNG\r\n\x1a\n"
 
     def test_headers_footers(self):
         """Verify CSS Paged Media generates headers with title and footers with page numbers."""
@@ -292,21 +305,21 @@ class TestPdfExporter:
         from exporters.pdf import PdfExporter
 
         record = MagicMock()
-        record.content = '<p>Content</p>'
-        record.date.strftime = lambda fmt: '2026-03-26'
+        record.content = "<p>Content</p>"
+        record.date.strftime = lambda fmt: "2026-03-26"
 
-        exporter = PdfExporter(uploads_path='/tmp')
-        html = exporter._build_html([record], title='Test Title', include_date=True)
+        exporter = PdfExporter(uploads_path="/tmp")
+        html = exporter._build_html([record], title="Test Title", include_date=True)
 
         # Verify CSS Paged Media elements
-        assert '@page' in html
-        assert '@top-center' in html
-        assert '@bottom-left' in html
-        assert '@bottom-right' in html
-        assert 'counter(page)' in html
-        assert 'running(header)' in html
-        assert 'Test Title' in html
-        assert 'Generated:' in html
+        assert "@page" in html
+        assert "@top-center" in html
+        assert "@bottom-left" in html
+        assert "@bottom-right" in html
+        assert "counter(page)" in html
+        assert "running(header)" in html
+        assert "Test Title" in html
+        assert "Generated:" in html
 
 
 class TestDocxExporter:
@@ -320,14 +333,16 @@ class TestDocxExporter:
     def test_file_extension(self):
         """Verify DocxExporter.file_extension returns 'docx'."""
         from exporters.docx import DocxExporter
-        exporter = DocxExporter(uploads_path='/tmp')
-        assert exporter.file_extension == 'docx'
+
+        exporter = DocxExporter(uploads_path="/tmp")
+        assert exporter.file_extension == "docx"
 
     def test_mime_type(self):
         """Verify DocxExporter.mime_type returns correct DOCX MIME type."""
         from exporters.docx import DocxExporter
-        exporter = DocxExporter(uploads_path='/tmp')
-        expected_mime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+
+        exporter = DocxExporter(uploads_path="/tmp")
+        expected_mime = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         assert exporter.mime_type == expected_mime
 
     def test_export_returns_bytesio(self):
@@ -338,17 +353,17 @@ class TestDocxExporter:
 
         # Create mock records
         record = MagicMock()
-        record.content = '<p>Test content</p>'
-        record.date.strftime = lambda fmt: '2026-03-26'
+        record.content = "<p>Test content</p>"
+        record.date.strftime = lambda fmt: "2026-03-26"
 
-        exporter = DocxExporter(uploads_path='/tmp')
-        result = exporter.export([record], title='Test Report')
+        exporter = DocxExporter(uploads_path="/tmp")
+        result = exporter.export([record], title="Test Report")
 
         assert isinstance(result, BytesIO)
         # DOCX files are ZIP archives with PK magic bytes
         result.seek(0)
         header = result.read(2)
-        assert header == b'PK'
+        assert header == b"PK"
 
     def test_html_to_docx_conversion(self):
         """Verify HTML elements are converted to DOCX equivalents."""
@@ -360,7 +375,7 @@ class TestDocxExporter:
 
         # Create mock record with various HTML elements
         record = MagicMock()
-        record.content = '''
+        record.content = """
         <h1>Heading 1</h1>
         <h2>Heading 2</h2>
         <h3>Heading 3</h3>
@@ -379,30 +394,28 @@ class TestDocxExporter:
         </table>
         <a href="https://example.com">Link</a>
         <pre><code>Code block</code></pre>
-        '''
-        record.date.strftime = lambda fmt: '2026-03-26'
+        """
+        record.date.strftime = lambda fmt: "2026-03-26"
 
-        exporter = DocxExporter(uploads_path='/tmp')
-        result = exporter.export([record], title='Test Report')
+        exporter = DocxExporter(uploads_path="/tmp")
+        result = exporter.export([record], title="Test Report")
 
         # Parse the DOCX to verify structure
         result.seek(0)
         from docx import Document
+
         doc = Document(result)
 
         # Verify document is not empty
         assert len(doc.paragraphs) > 0
 
         # Verify headings exist (document should have styled paragraphs)
-        heading_found = any(p.style.name.startswith('Heading') for p in doc.paragraphs)
+        heading_found = any(p.style.name.startswith("Heading") for p in doc.paragraphs)
         assert heading_found, "Document should contain heading styles"
 
         # Verify lists exist (bullet points or numbered)
         # Lists in python-docx appear as paragraphs with list styling
-        list_found = any(
-            p.style.name in ['List Bullet', 'List Number', 'List Paragraph']
-            for p in doc.paragraphs
-        )
+        list_found = any(p.style.name in ["List Bullet", "List Number", "List Paragraph"] for p in doc.paragraphs)
         assert list_found, "Document should contain list styles"
 
         # Verify tables exist
@@ -421,17 +434,17 @@ class TestDocxExporter:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create test image file (valid 1x1 pixel PNG using PIL)
-            test_image = os.path.join(tmpdir, 'test.png')
-            img = Image.new('RGB', (1, 1), color='red')
-            img.save(test_image, 'PNG')
+            test_image = os.path.join(tmpdir, "test.png")
+            img = Image.new("RGB", (1, 1), color="red")
+            img.save(test_image, "PNG")
 
             # Create mock record with image
             record = MagicMock()
             record.content = '<p>Text before image.</p><img src="/files/test.png"><p>Text after image.</p>'
-            record.date.strftime = lambda fmt: '2026-03-26'
+            record.date.strftime = lambda fmt: "2026-03-26"
 
             exporter = DocxExporter(uploads_path=tmpdir)
-            result = exporter.export([record], title='Test Report')
+            result = exporter.export([record], title="Test Report")
 
             # Parse the DOCX and verify image is embedded
             result.seek(0)
@@ -442,10 +455,10 @@ class TestDocxExporter:
             image_count = 0
             for paragraph in doc.paragraphs:
                 for run in paragraph.runs:
-                    if run._element.xpath('.//a:blip'):
+                    if run._element.xpath(".//a:blip"):
                         image_count += 1
                     # Also check for drawing elements
-                    if run._element.xpath('.//w:drawing'):
+                    if run._element.xpath(".//w:drawing"):
                         image_count += 1
 
             # Verify at least one image was found
@@ -455,15 +468,15 @@ class TestDocxExporter:
         """Verify _extract_images extracts img tags from HTML."""
         from exporters.docx import DocxExporter
 
-        exporter = DocxExporter(uploads_path='/tmp')
+        exporter = DocxExporter(uploads_path="/tmp")
 
-        html = '''
+        html = """
         <p>Text before</p>
         <img src="/files/image1.png">
         <p>Text between</p>
         <img src="/files/image2.jpg" alt="Second image">
         <p>Text after</p>
-        '''
+        """
 
         result = exporter._extract_images(html)
 
@@ -474,12 +487,12 @@ class TestDocxExporter:
         # Check images list
         assert isinstance(images, list)
         assert len(images) == 2
-        assert images[0][1] == '/files/image1.png'
-        assert images[1][1] == '/files/image2.jpg'
+        assert images[0][1] == "/files/image1.png"
+        assert images[1][1] == "/files/image2.jpg"
 
         # Check that placeholders were inserted in HTML
-        assert '[[IMAGE_PLACEHOLDER_0]]' in processed_html
-        assert '[[IMAGE_PLACEHOLDER_1]]' in processed_html
+        assert "[[IMAGE_PLACEHOLDER_0]]" in processed_html
+        assert "[[IMAGE_PLACEHOLDER_1]]" in processed_html
 
     def test_add_image_to_document_helper(self):
         """Verify _add_image_to_document embeds image bytes into document."""
@@ -493,9 +506,9 @@ class TestDocxExporter:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             # Create test image using PIL
-            test_image = os.path.join(tmpdir, 'embed_test.png')
-            img = Image.new('RGB', (1, 1), color='blue')
-            img.save(test_image, 'PNG')
+            test_image = os.path.join(tmpdir, "embed_test.png")
+            img = Image.new("RGB", (1, 1), color="blue")
+            img.save(test_image, "PNG")
 
             exporter = DocxExporter(uploads_path=tmpdir)
             doc = Document()
@@ -504,16 +517,14 @@ class TestDocxExporter:
             paragraph = doc.add_paragraph()
 
             # Add image to document
-            image_bytes = exporter.image_resolver.get_image_bytes('/files/embed_test.png')
+            image_bytes = exporter.image_resolver.get_image_bytes("/files/embed_test.png")
             assert image_bytes is not None, "Image bytes should be retrieved"
 
-            exporter._add_image_to_document(doc, paragraph, '/files/embed_test.png', image_bytes)
+            exporter._add_image_to_document(doc, paragraph, "/files/embed_test.png", image_bytes)
 
             # Verify image was added (document should have relationships)
             # Check for drawing elements in the paragraph
-            has_drawing = len(paragraph.runs) > 0 and any(
-                run._element.xpath('.//w:drawing') for run in paragraph.runs
-            )
+            has_drawing = len(paragraph.runs) > 0 and any(run._element.xpath(".//w:drawing") for run in paragraph.runs)
             assert has_drawing, "Paragraph should contain drawing element after image added"
 
 
@@ -527,14 +538,16 @@ class TestExcelExporter:
     def test_file_extension(self):
         """Verify ExcelExporter.file_extension returns 'xlsx'."""
         from exporters.excel import ExcelExporter
+
         exporter = ExcelExporter()
-        assert exporter.file_extension == 'xlsx'
+        assert exporter.file_extension == "xlsx"
 
     def test_mime_type(self):
         """Verify ExcelExporter.mime_type returns correct XLSX MIME type."""
         from exporters.excel import ExcelExporter
+
         exporter = ExcelExporter()
-        expected_mime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        expected_mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         assert exporter.mime_type == expected_mime
 
     def test_export_returns_bytesio(self):
@@ -545,17 +558,17 @@ class TestExcelExporter:
 
         # Create mock records
         record = MagicMock()
-        record.content = '<p>Test content</p>'
-        record.date.strftime = lambda fmt: '2026-03-26'
+        record.content = "<p>Test content</p>"
+        record.date.strftime = lambda fmt: "2026-03-26"
 
         exporter = ExcelExporter()
-        result = exporter.export([record], title='Test Report')
+        result = exporter.export([record], title="Test Report")
 
         assert isinstance(result, BytesIO)
         # XLSX files are ZIP archives with PK magic bytes
         result.seek(0)
         header = result.read(2)
-        assert header == b'PK'
+        assert header == b"PK"
 
     def test_html_to_rich_text_bold(self):
         """Verify _html_to_rich_text converts <strong> to CellRichText with bold InlineFont."""
@@ -564,7 +577,7 @@ class TestExcelExporter:
         from exporters.excel import ExcelExporter
 
         exporter = ExcelExporter()
-        result = exporter._html_to_rich_text('<strong>Bold text</strong>')
+        result = exporter._html_to_rich_text("<strong>Bold text</strong>")
 
         assert isinstance(result, CellRichText)
         # Should have at least one TextBlock with bold font
@@ -581,7 +594,7 @@ class TestExcelExporter:
         from exporters.excel import ExcelExporter
 
         exporter = ExcelExporter()
-        result = exporter._html_to_rich_text('<em>Italic text</em>')
+        result = exporter._html_to_rich_text("<em>Italic text</em>")
 
         assert isinstance(result, CellRichText)
         assert len(result) >= 1
@@ -596,14 +609,14 @@ class TestExcelExporter:
         from exporters.excel import ExcelExporter
 
         exporter = ExcelExporter()
-        result = exporter._html_to_rich_text('<u>Underline text</u>')
+        result = exporter._html_to_rich_text("<u>Underline text</u>")
 
         assert isinstance(result, CellRichText)
         assert len(result) >= 1
         first_block = result[0]
         assert isinstance(first_block, TextBlock)
         # Note: underline must be 'single' string, not boolean True
-        assert first_block.font.u == 'single'
+        assert first_block.font.u == "single"
 
     def test_html_to_rich_text_nested(self):
         """Verify _html_to_rich_text handles nested formatting like <strong>Bold <em>and italic</em></strong>."""
@@ -612,7 +625,7 @@ class TestExcelExporter:
         from exporters.excel import ExcelExporter
 
         exporter = ExcelExporter()
-        result = exporter._html_to_rich_text('<strong>Bold <em>and italic</em></strong>')
+        result = exporter._html_to_rich_text("<strong>Bold <em>and italic</em></strong>")
 
         assert isinstance(result, CellRichText)
         # Should have multiple text blocks for nested formatting
@@ -638,14 +651,15 @@ class TestExcelExporter:
 
         # Create mock record with rich text
         record = MagicMock()
-        record.content = '<p><strong>Bold</strong> and <em>italic</em></p>'
-        record.date.strftime = lambda fmt: '2026-03-26'
+        record.content = "<p><strong>Bold</strong> and <em>italic</em></p>"
+        record.date.strftime = lambda fmt: "2026-03-26"
 
         exporter = ExcelExporter()
-        result = exporter.export([record], title='Test Report')
+        result = exporter.export([record], title="Test Report")
 
         # Re-open to check cell content
         from openpyxl import load_workbook
+
         result.seek(0)
         wb = load_workbook(result, rich_text=True)  # rich_text=True preserves CellRichText
         ws = wb.active

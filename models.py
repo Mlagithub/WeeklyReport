@@ -25,24 +25,28 @@ from extensions import db
 # =============================================================================
 
 user_records = db.Table(
-    'user_records',
-    db.Column("user_id", db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column("record_id", db.Integer, db.ForeignKey('record.id'), primary_key=True))
+    "user_records",
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
+    db.Column("record_id", db.Integer, db.ForeignKey("record.id"), primary_key=True),
+)
 
 roles_users = db.Table(
-    'roles_users',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column('role_id', db.Integer, db.ForeignKey('role.id'), primary_key=True))
+    "roles_users",
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
+    db.Column("role_id", db.Integer, db.ForeignKey("role.id"), primary_key=True),
+)
 
 users_groups = db.Table(
-    'users_groups',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True))
+    "users_groups",
+    db.Column("user_id", db.Integer, db.ForeignKey("user.id"), primary_key=True),
+    db.Column("group_id", db.Integer, db.ForeignKey("group.id"), primary_key=True),
+)
 
 
 # =============================================================================
 # Decorator for database transactions
 # =============================================================================
+
 
 def with_db_transaction(func):
     """
@@ -55,22 +59,21 @@ def with_db_transaction(func):
     Per D-09: Log full stack trace
     Per D-10: Use current_app.logger.error()
     """
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         except SQLAlchemyError as e:
             # Log full exception with stack trace (D-09, D-10)
-            current_app.logger.error(
-                f"Database error in {func.__name__}: {str(e)}",
-                exc_info=True
-            )
+            current_app.logger.error(f"Database error in {func.__name__}: {str(e)}", exc_info=True)
             # Rollback the transaction (D-06)
             db.session.rollback()
             # Flash user-friendly message (D-08)
-            flash('操作失败，请重试', 'warning')
+            flash("操作失败，请重试", "warning")
             # Re-raise for Flask error handler (D-07)
             raise
+
     return wrapper
 
 
@@ -78,8 +81,10 @@ def with_db_transaction(func):
 # Model Classes
 # =============================================================================
 
+
 class Record(db.Model):
     """Weekly report record model."""
+
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
     date = db.Column(db.Date(), index=True)  # Added index per D-10
@@ -88,21 +93,23 @@ class Record(db.Model):
 
 class Role(db.Model, FsRoleMixin):
     """User role model for Flask-Security."""
-    __tablename__ = 'role'
+
+    __tablename__ = "role"
 
 
 class User(db.Model, FsUserMixin):
     """User model with permission-related methods."""
-    __tablename__ = 'user'
+
+    __tablename__ = "user"
     email = db.Column(db.String(255), unique=True)
     username = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), unique=False, nullable=False)
-    records = db.relationship('Record', secondary='user_records', backref='user')
+    records = db.relationship("Record", secondary="user_records", backref="user")
 
     @property
     def is_admin(self):
         """Check if user has admin role."""
-        return any(role.name == 'admin' for role in self.roles)
+        return any(role.name == "admin" for role in self.roles)
 
     @staticmethod
     def with_role(role_name):
@@ -116,7 +123,9 @@ class User(db.Model, FsUserMixin):
     def can_view_group(group):
         """Check if current user can view a specific group's records."""
         all_permissions = User.all_permissions(current_user)
-        if 'view_all' in all_permissions or ('view_group' in all_permissions and any(g.name == group.name for g in current_user.groups)):
+        if "view_all" in all_permissions or (
+            "view_group" in all_permissions and any(g.name == group.name for g in current_user.groups)
+        ):
             return True
         else:
             return False
@@ -124,7 +133,7 @@ class User(db.Model, FsUserMixin):
     @staticmethod
     def all_permissions(user):
         """Get all permissions for a user (request-level cached to avoid stale permissions)."""
-        cache_key = f'_user_perms_{user.id}'
+        cache_key = f"_user_perms_{user.id}"
         if not hasattr(g, cache_key):
             perms = tuple(set(p for role in user.roles for p in role.permissions))
             setattr(g, cache_key, perms)
@@ -135,13 +144,13 @@ class User(db.Model, FsUserMixin):
         """Get groups managed by user (uses eager loading to avoid N+1 queries)."""
         groups = []
         all_permissions = User.all_permissions(user)
-        if 'view_all' in all_permissions:
+        if "view_all" in all_permissions:
             groups = Group.query.options(joinedload(Group.users)).all()
-        elif 'view_group' in all_permissions:
+        elif "view_group" in all_permissions:
             # Use eager loading for groups and users
-            user_with_groups = User.query.options(
-                joinedload(User.groups).joinedload(Group.users)
-            ).filter_by(id=user.id).first()
+            user_with_groups = (
+                User.query.options(joinedload(User.groups).joinedload(Group.users)).filter_by(id=user.id).first()
+            )
             if user_with_groups:
                 groups = [g for g in user_with_groups.groups if User.can_view_group(g)]
 
@@ -158,18 +167,19 @@ class User(db.Model, FsUserMixin):
             flash("密码已更改")
             return True
         else:
-            flash("用户%s不存在" % (username), 'warning')
+            flash(f"用户{username}不存在", "warning")
             return False
 
 
 class Group(db.Model):
     """Group model for organizing users."""
-    __tablename__ = 'group'
+
+    __tablename__ = "group"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
     description = db.Column(db.String(255))
-    users = db.relationship('User', secondary='users_groups', backref='groups')
+    users = db.relationship("User", secondary="users_groups", backref="groups")
 
     @staticmethod
     def list_all(user=None):
@@ -180,12 +190,13 @@ class Group(db.Model):
             return Group.query.options(joinedload(Group.users)).all()
 
     def __repr__(self):
-        return f'{self.name}'
+        return f"{self.name}"
 
 
 # =============================================================================
 # Flask-Admin View
 # =============================================================================
+
 
 class UserModelView(ModelView):
     """Custom ModelView for Flask-Admin with permission checks."""
@@ -194,14 +205,12 @@ class UserModelView(ModelView):
         # For User model, limit related fields to avoid loading large data
         if model == User:
             self.form_ajax_refs = {
-                'roles': {
-                    'fields': ['name']
-                },
+                "roles": {"fields": ["name"]},
             }
-            self.form_excluded_columns = ['records']
+            self.form_excluded_columns = ["records"]
         elif model == Record:
             # Record view uses pagination and lazy loading
-            self.column_filters = ['date', 'content']
+            self.column_filters = ["date", "content"]
             self.page_size = 20
         super().__init__(model, session, **kwargs)
 
@@ -210,8 +219,8 @@ class UserModelView(ModelView):
         if not current_user.is_authenticated:
             return False
         permissions = User.all_permissions(current_user)
-        return current_user.is_admin or 'edit_database' in permissions
+        return current_user.is_admin or "edit_database" in permissions
 
     def inaccessible_callback(self, name, **kwargs):
         """Redirect to login if not accessible."""
-        return redirect(url_for('login', next=request.url))
+        return redirect(url_for("login", next=request.url))

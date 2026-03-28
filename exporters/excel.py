@@ -41,12 +41,12 @@ class ExcelExporter(ExporterBase):
     @property
     def file_extension(self) -> str:
         """Return file extension without dot."""
-        return 'xlsx'
+        return "xlsx"
 
     @property
     def mime_type(self) -> str:
         """Return MIME type for send_file()."""
-        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
     def _generate(self, records: list[Any], options: dict) -> BytesIO:
         """Generate XLSX from records using openpyxl.
@@ -68,9 +68,7 @@ class ExcelExporter(ExporterBase):
         output.seek(0)
         return output
 
-    def _group_records_by_user_week(
-        self, records: list[Any]
-    ) -> tuple[dict[str, dict[tuple, str]], set]:
+    def _group_records_by_user_week(self, records: list[Any]) -> tuple[dict[str, dict[tuple, str]], set]:
         """Group records by user and week.
 
         Args:
@@ -87,8 +85,8 @@ class ExcelExporter(ExporterBase):
                 continue
 
             # Get ISO week info - use strftime for compatibility with mock objects
-            date_str = record.date.strftime('%Y-%m-%d')
-            record_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            date_str = record.date.strftime("%Y-%m-%d")
+            record_date = datetime.strptime(date_str, "%Y-%m-%d").date()
             iso_calendar = record_date.isocalendar()
             year, week = iso_calendar[0], iso_calendar[1]
             week_key = (year, week)
@@ -103,18 +101,18 @@ class ExcelExporter(ExporterBase):
                         user_weekly_data[username] = {}
                     # Combine content if multiple records for same user/week
                     if week_key in user_weekly_data[username]:
-                        user_weekly_data[username][week_key] += '<br>' + record.content
+                        user_weekly_data[username][week_key] += "<br>" + record.content
                     else:
                         user_weekly_data[username][week_key] = record.content
                     users_found = True
 
             # Handle case where no users found (e.g., mock objects or missing user)
             if not users_found:
-                username = '\u672a\u77e5\u7528\u6237'  # '未知用户'
+                username = "\u672a\u77e5\u7528\u6237"  # '未知用户'
                 if username not in user_weekly_data:
                     user_weekly_data[username] = {}
                 if week_key in user_weekly_data[username]:
-                    user_weekly_data[username][week_key] += '<br>' + record.content
+                    user_weekly_data[username][week_key] += "<br>" + record.content
                 else:
                     user_weekly_data[username][week_key] = record.content
 
@@ -134,23 +132,20 @@ class ExcelExporter(ExporterBase):
         """
         wb = Workbook()
         ws = wb.active
-        ws.title = '\u8f6f\u4ef6\u5f00\u53d1\u7ec4\u5468\u62a5'  # '软件开发组周报'
+        ws.title = "\u8f6f\u4ef6\u5f00\u53d1\u7ec4\u5468\u62a5"  # '软件开发组周报'
 
         # Sort weeks by year and week (descending)
         sorted_weeks = sorted(all_weeks, key=lambda x: (x[0], x[1]), reverse=True)
 
         # Create headers: ['姓名'] + [week date ranges]
-        headers = ['\u59d3\u540d'] + [self._get_week_date_range(year, week) for year, week in sorted_weeks]
+        headers = ["\u59d3\u540d"] + [self._get_week_date_range(year, week) for year, week in sorted_weeks]
         ws.append(headers)
 
         # Define and apply header styles
         header_fill = PatternFill(start_color="808080", end_color="808080", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF")
         thin_border = Border(
-            left=Side(style="thin"),
-            right=Side(style="thin"),
-            top=Side(style="thin"),
-            bottom=Side(style="thin")
+            left=Side(style="thin"), right=Side(style="thin"), top=Side(style="thin"), bottom=Side(style="thin")
         )
 
         for cell in ws[1]:
@@ -161,9 +156,7 @@ class ExcelExporter(ExporterBase):
 
         return wb, ws
 
-    def _fill_data_rows(
-        self, ws: Any, user_weekly_data: dict[str, dict[tuple, str]], all_weeks: set
-    ) -> None:
+    def _fill_data_rows(self, ws: Any, user_weekly_data: dict[str, dict[tuple, str]], all_weeks: set) -> None:
         """Fill data rows with rich text content.
 
         Args:
@@ -195,16 +188,11 @@ class ExcelExporter(ExporterBase):
         """
         light_fill = PatternFill(start_color="EAEAEA", end_color="EAEAEA", fill_type="solid")
         thin_border = Border(
-            left=Side(style="thin"),
-            right=Side(style="thin"),
-            top=Side(style="thin"),
-            bottom=Side(style="thin")
+            left=Side(style="thin"), right=Side(style="thin"), top=Side(style="thin"), bottom=Side(style="thin")
         )
 
         # Style data rows
-        for row_idx, row in enumerate(
-            ws.iter_rows(min_row=2, max_col=ws.max_column, max_row=ws.max_row), start=2
-        ):
+        for row_idx, row in enumerate(ws.iter_rows(min_row=2, max_col=ws.max_column, max_row=ws.max_row), start=2):
             for cell in row:
                 cell.border = thin_border
                 if row_idx % 2 == 0:
@@ -212,13 +200,13 @@ class ExcelExporter(ExporterBase):
                 cell.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
         # Style first column (names) - bold and centered
-        for cell in ws['A']:
+        for cell in ws["A"]:
             if cell.row > 1:  # Skip header
                 cell.font = Font(bold=True)
                 cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
         # Set column widths
-        ws.column_dimensions['A'].width = 12  # Name column
+        ws.column_dimensions["A"].width = 12  # Name column
         for col_idx in range(2, ws.max_column + 1):
             col_letter = chr(64 + col_idx)  # B, C, D, etc.
             ws.column_dimensions[col_letter].width = 20
@@ -253,28 +241,23 @@ class ExcelExporter(ExporterBase):
         if not html:
             return ""
 
-        soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, "html.parser")
         runs = []
 
         def process_node(node, styles=None):
             """Recursively process HTML nodes, tracking style state."""
             if styles is None:
-                styles = {
-                    'bold': False,
-                    'italic': False,
-                    'underline': None,
-                    'strike': False
-                }
+                styles = {"bold": False, "italic": False, "underline": None, "strike": False}
 
             # Handle text nodes
             if isinstance(node, NavigableString):
                 text = str(node)
                 if text.strip():
                     font = InlineFont(
-                        b=styles['bold'],
-                        i=styles['italic'],
-                        u=styles['underline'],  # Must be string 'single' or None
-                        strike=styles['strike']
+                        b=styles["bold"],
+                        i=styles["italic"],
+                        u=styles["underline"],  # Must be string 'single' or None
+                        strike=styles["strike"],
                     )
                     runs.append(TextBlock(font, text))
                 return
@@ -290,18 +273,18 @@ class ExcelExporter(ExporterBase):
             new_styles = styles.copy()
 
             # Map HTML tags to font properties
-            if node.name in ('strong', 'b'):
-                new_styles['bold'] = True
-            elif node.name in ('em', 'i'):
-                new_styles['italic'] = True
-            elif node.name == 'u':
+            if node.name in ("strong", "b"):
+                new_styles["bold"] = True
+            elif node.name in ("em", "i"):
+                new_styles["italic"] = True
+            elif node.name == "u":
                 # CRITICAL: underline must be string 'single', not boolean True!
-                new_styles['underline'] = 'single'
-            elif node.name in ('s', 'strike', 'del'):
-                new_styles['strike'] = True
-            elif node.name == 'br':
+                new_styles["underline"] = "single"
+            elif node.name in ("s", "strike", "del"):
+                new_styles["strike"] = True
+            elif node.name == "br":
                 # Handle line breaks
-                runs.append(TextBlock(InlineFont(), '\n'))
+                runs.append(TextBlock(InlineFont(), "\n"))
                 return
 
             # Process children with updated styles

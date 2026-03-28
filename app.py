@@ -2,6 +2,7 @@
 Flask application entry point.
 Uses modular structure with config, extensions, models, forms, and routes.
 """
+
 import logging
 import os
 from logging.handlers import RotatingFileHandler
@@ -37,26 +38,50 @@ from routes import register_routes
 
 # Allowed HTML tags and attributes for sanitize_html filter
 ALLOWED_TAGS = {
-    'p', 'br', 'b', 'i', 'strong', 'em', 'u',
-    'ul', 'ol', 'li', 'a', 'img',
-    'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'blockquote', 'pre', 'code',
-    'table', 'thead', 'tbody', 'tr', 'td', 'th',
-    'span', 'div'
+    "p",
+    "br",
+    "b",
+    "i",
+    "strong",
+    "em",
+    "u",
+    "ul",
+    "ol",
+    "li",
+    "a",
+    "img",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "blockquote",
+    "pre",
+    "code",
+    "table",
+    "thead",
+    "tbody",
+    "tr",
+    "td",
+    "th",
+    "span",
+    "div",
 }
 
 ALLOWED_ATTRIBUTES = {
-    '*': ['class', 'style'],
-    'a': ['href', 'title', 'target', 'rel'],
-    'img': ['src', 'alt', 'title', 'width', 'height'],
+    "*": ["class", "style"],
+    "a": ["href", "title", "target", "rel"],
+    "img": ["src", "alt", "title", "width", "height"],
 }
 
-ALLOWED_PROTOCOLS = {'http', 'https', 'mailto'}
+ALLOWED_PROTOCOLS = {"http", "https", "mailto"}
 
 
 # =============================================================================
 # Application Factory
 # =============================================================================
+
 
 def create_app(config_class=None):
     """Create and configure the Flask application.
@@ -99,6 +124,7 @@ def create_app(config_class=None):
 # Logging Setup
 # =============================================================================
 
+
 def setup_logging(app):
     """Configure production logging for Flask application.
 
@@ -109,7 +135,7 @@ def setup_logging(app):
     if app.debug:
         return
 
-    log_dir = '/var/log/weekly'
+    log_dir = "/var/log/weekly"
 
     # Create log directory if it doesn't exist (with error handling)
     try:
@@ -121,32 +147,33 @@ def setup_logging(app):
 
     # Application log handler - per D-08 (INFO level)
     file_handler = RotatingFileHandler(
-        os.path.join(log_dir, 'app.log'),
+        os.path.join(log_dir, "app.log"),
         maxBytes=10 * 1024 * 1024,  # 10MB
-        backupCount=10
+        backupCount=10,
     )
-    file_handler.setFormatter(logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]'
-    ))
+    file_handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]")
+    )
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
     app.logger.setLevel(logging.INFO)
 
-    app.logger.info('Weekly Report Management System starting up')
+    app.logger.info("Weekly Report Management System starting up")
 
 
 # =============================================================================
 # Database Helper Functions
 # =============================================================================
 
+
 def ensure_record_columns():
     """Ensure Record table has all required columns (schema migration helper)."""
     inspector = inspect(db.engine)
     # Check if record table exists
-    if 'record' not in inspector.get_table_names():
+    if "record" not in inspector.get_table_names():
         return
-    columns = {column['name'] for column in inspector.get_columns('record')}
-    if 'createtime' not in columns:
+    columns = {column["name"] for column in inspector.get_columns("record")}
+    if "createtime" not in columns:
         db.session.execute(text("ALTER TABLE record ADD COLUMN createtime DATETIME"))
         db.session.commit()
 
@@ -155,7 +182,7 @@ def verify_wal_mode():
     """Verify SQLite WAL mode is enabled per D-05, D-06."""
     try:
         result = db.session.execute(text("PRAGMA journal_mode")).scalar()
-        if result and result.lower() == 'wal':
+        if result and result.lower() == "wal":
             pass  # WAL mode verified
     except Exception:
         pass
@@ -165,11 +192,12 @@ def verify_wal_mode():
 # SQLite WAL Mode Setup (Per Phase 3)
 # =============================================================================
 
+
 @event.listens_for(Pool, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     """Enable WAL mode on SQLite connections per D-01, D-02."""
     # Only apply to SQLite connections
-    if hasattr(dbapi_connection, 'execute'):
+    if hasattr(dbapi_connection, "execute"):
         try:
             cursor = dbapi_connection.cursor()
             cursor.execute("PRAGMA journal_mode=WAL")
@@ -190,7 +218,8 @@ app = create_app()
 # Custom Jinja2 Filters
 # =============================================================================
 
-@app.template_filter('sanitize_html')
+
+@app.template_filter("sanitize_html")
 def sanitize_html(text):
     """Sanitize HTML content for safe rendering.
 
@@ -204,13 +233,9 @@ def sanitize_html(text):
         Sanitized HTML string, safe for |safe filter.
     """
     if not text:
-        return ''
+        return ""
     return bleach.clean(
-        text,
-        tags=ALLOWED_TAGS,
-        attributes=ALLOWED_ATTRIBUTES,
-        protocols=ALLOWED_PROTOCOLS,
-        strip=False
+        text, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, protocols=ALLOWED_PROTOCOLS, strip=False
     )
 
 
@@ -232,12 +257,25 @@ from routes import can_edit_record, get_allowed_groups, get_allowed_usernames  #
 
 # Tests import: from app import app, db, user_datastore, User, Record, Role, Group
 __all__ = [
-    'app', 'db', 'user_datastore', 'security', 'admin', 'ckeditor', 'bootstrap',
-    'User', 'Record', 'Role', 'Group',
-    'user_records', 'roles_users', 'users_groups',
-    'with_db_transaction',
-    'can_edit_record', 'get_allowed_usernames', 'get_allowed_groups',
-    'create_app',
+    "app",
+    "db",
+    "user_datastore",
+    "security",
+    "admin",
+    "ckeditor",
+    "bootstrap",
+    "User",
+    "Record",
+    "Role",
+    "Group",
+    "user_records",
+    "roles_users",
+    "users_groups",
+    "with_db_transaction",
+    "can_edit_record",
+    "get_allowed_usernames",
+    "get_allowed_groups",
+    "create_app",
 ]
 
 
@@ -245,7 +283,7 @@ __all__ = [
 # Main Entry Point
 # =============================================================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     with app.app_context():
         db.create_all()
         ensure_record_columns()
@@ -254,6 +292,6 @@ if __name__ == '__main__':
 
     # Production: Gunicorn calls app directly, this block is skipped
     # Development: Run with FLASK_DEBUG=true python app.py
-    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', debug=debug_mode, port=port)
+    debug_mode = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", debug=debug_mode, port=port)

@@ -58,7 +58,27 @@ class ExcelExporter(ExporterBase):
         Returns:
             BytesIO buffer containing XLSX
         """
-        # Group records by user and week (same logic as RecordDownloader)
+        user_weekly_data, all_weeks = self._group_records_by_user_week(records)
+        wb, ws = self._create_styled_workbook(user_weekly_data, all_weeks)
+        self._fill_data_rows(ws, user_weekly_data, all_weeks)
+        self._apply_final_styling(ws)
+
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        return output
+
+    def _group_records_by_user_week(
+        self, records: list[Any]
+    ) -> tuple[dict[str, dict[tuple, str]], set]:
+        """Group records by user and week.
+
+        Args:
+            records: List of Record objects with content and date
+
+        Returns:
+            Tuple of (user_weekly_data dict, all_weeks set)
+        """
         user_weekly_data: dict[str, dict[tuple, str]] = {}
         all_weeks: set = set()
 
@@ -98,15 +118,34 @@ class ExcelExporter(ExporterBase):
                 else:
                     user_weekly_data[username][week_key] = record.content
 
-        # Create workbook
+        return user_weekly_data, all_weeks
+
+    def _create_styled_workbook(
+        self, user_weekly_data: dict[str, dict[tuple, str]], all_weeks: set
+    ) -> tuple[Workbook, Any]:
+        """Create workbook with styles and headers.
+
+        Args:
+            user_weekly_data: Dict of user -> week -> content
+            all_weeks: Set of (year, week) tuples
+
+        Returns:
+            Tuple of (Workbook, Worksheet)
+        """
         wb = Workbook()
         ws = wb.active
         ws.title = '\u8f6f\u4ef6\u5f00\u53d1\u7ec4\u5468\u62a5'  # '软件开发组周报'
 
-        # Define styles
+        # Sort weeks by year and week (descending)
+        sorted_weeks = sorted(all_weeks, key=lambda x: (x[0], x[1]), reverse=True)
+
+        # Create headers: ['姓名'] + [week date ranges]
+        headers = ['\u59d3\u540d'] + [self._get_week_date_range(year, week) for year, week in sorted_weeks]
+        ws.append(headers)
+
+        # Define and apply header styles
         header_fill = PatternFill(start_color="808080", end_color="808080", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF")
-        light_fill = PatternFill(start_color="EAEAEA", end_color="EAEAEA", fill_type="solid")
         thin_border = Border(
             left=Side(style="thin"),
             right=Side(style="thin"),
@@ -114,25 +153,31 @@ class ExcelExporter(ExporterBase):
             bottom=Side(style="thin")
         )
 
-        # Sort weeks by year and week (descending)
-        all_weeks = sorted(all_weeks, key=lambda x: (x[0], x[1]), reverse=True)
-
-        # Create headers: ['姓名'] + [week date ranges]
-        headers = ['\u59d3\u540d'] + [self._get_week_date_range(year, week) for year, week in all_weeks]
-        ws.append(headers)
-
-        # Style header row
         for cell in ws[1]:
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             cell.border = thin_border
 
-        # Fill data rows
+        return wb, ws
+
+    def _fill_data_rows(
+        self, ws: Any, user_weekly_data: dict[str, dict[tuple, str]], all_weeks: set
+    ) -> None:
+        """Fill data rows with rich text content.
+
+        Args:
+            ws: Worksheet to fill
+            user_weekly_data: Dict of user -> week -> content
+            all_weeks: Set of (year, week) tuples
+        """
+        # Sort weeks consistently with header creation
+        sorted_weeks = sorted(all_weeks, key=lambda x: (x[0], x[1]), reverse=True)
+
         for username, weekly_data in user_weekly_data.items():
             row = [username]
 
-            for week in all_weeks:
+            for week in sorted_weeks:
                 content = weekly_data.get(week, "")
                 if content:
                     # Convert HTML to CellRichText
@@ -142,8 +187,24 @@ class ExcelExporter(ExporterBase):
 
             ws.append(row)
 
+    def _apply_final_styling(self, ws: Any) -> None:
+        """Apply final styling to worksheet.
+
+        Args:
+            ws: Worksheet to style
+        """
+        light_fill = PatternFill(start_color="EAEAEA", end_color="EAEAEA", fill_type="solid")
+        thin_border = Border(
+            left=Side(style="thin"),
+            right=Side(style="thin"),
+            top=Side(style="thin"),
+            bottom=Side(style="thin")
+        )
+
         # Style data rows
-        for row_idx, row in enumerate(ws.iter_rows(min_row=2, max_col=ws.max_column, max_row=ws.max_row), start=2):
+        for row_idx, row in enumerate(
+            ws.iter_rows(min_row=2, max_col=ws.max_column, max_row=ws.max_row), start=2
+        ):
             for cell in row:
                 cell.border = thin_border
                 if row_idx % 2 == 0:
@@ -161,12 +222,6 @@ class ExcelExporter(ExporterBase):
         for col_idx in range(2, ws.max_column + 1):
             col_letter = chr(64 + col_idx)  # B, C, D, etc.
             ws.column_dimensions[col_letter].width = 20
-
-        # Save to BytesIO
-        output = BytesIO()
-        wb.save(output)
-        output.seek(0)
-        return output
 
     def _get_week_date_range(self, year: int, week: int) -> str:
         """Get week date range string for header.

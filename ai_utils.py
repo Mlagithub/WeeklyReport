@@ -239,10 +239,12 @@ def call_ai_api(prompt: str, user_id: int, function_type: str, timeout: int = 30
 
         if response.status_code == 200:
             result = response.json()
-            content = result.get("choices", [{}])[0].get("message", {}).get("content")
-            if content:
+            raw_content = result.get("choices", [{}])[0].get("message", {}).get("content")
+            if raw_content:
+                # Process AI response: strip whitespace, convert Markdown to HTML
+                processed_content = process_ai_response(raw_content)
                 log_ai_call(user_id, function_type, input_length, "success")
-                return (True, content, None)
+                return (True, processed_content, None)
             else:
                 error_msg = "API返回内容为空"
                 log_ai_call(user_id, function_type, input_length, "failure", error_msg)

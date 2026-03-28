@@ -26,7 +26,7 @@ class TestAIAPICall:
         Expected behavior:
         - POST request to API endpoint with proper headers
         - Return tuple (success: bool, content: str | None, error: str | None)
-        - Content should be the AI-generated text from response
+        - Content should be processed AI-generated text (Markdown converted to HTML)
         """
         with client.application.app_context():
             # Mock AIConfig.get_config to return a valid config
@@ -49,7 +49,8 @@ class TestAIAPICall:
                         )
 
             assert success is True
-            assert content == "AI generated response"
+            # Content is processed: plain text wrapped in <p> tags
+            assert content == "<p>AI generated response</p>"
             assert error is None
 
     def test_call_ai_api_network_error(self, client):

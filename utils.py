@@ -9,7 +9,6 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 class DateRange:
     TIME_RANGES = {
-        "last_7_days": "最近 7 天",  # Added for FIND-02 default
         "this_week": "本周",
         "last_week": "上周",
         "this_month": "本月",
@@ -80,7 +79,6 @@ class DateRange:
 
         # 创建时间范围映射字典
         time_range_methods = {
-            "last_7_days": lambda: DateRange.last_n_days(7),  # Added for FIND-02
             "this_week": DateRange.this_week,
             "last_week": DateRange.last_week,
             "this_month": DateRange.this_month,

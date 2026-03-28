@@ -102,20 +102,7 @@ class TestDateRange:
         delta = (end - start).days
         assert delta == n
 
-    def test_last_7_days_in_time_ranges(self):
-        """Test that 'last_7_days' exists in TIME_RANGES with correct label."""
-        assert "last_7_days" in DateRange.TIME_RANGES
-        assert DateRange.TIME_RANGES["last_7_days"] == "最近 7 天"
-
-    def test_get_range_last_7_days(self):
-        """Test that get_range('last_7_days') returns 7-day range."""
-        from datetime import timedelta
-
-        start, end = DateRange.get_range("last_7_days")
-        assert (end - start).days == 7
-
-
-class TestHtmlToText:
+    class TestHtmlToText:
     """Tests for the html_to_text function."""
 
     def test_empty_input(self):

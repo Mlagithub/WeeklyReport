@@ -193,6 +193,46 @@ class Group(db.Model):
         return f"{self.name}"
 
 
+class AIConfig(db.Model):
+    """AI service configuration model - single system-wide config.
+
+    Per CONFIG-03: Configuration persists in database.
+    Per SEC-01: API Key encrypted, not plaintext.
+    Per CONTEXT.md: Single record - one AI config for the whole system.
+    """
+
+    __tablename__ = "ai_config"
+
+    id = db.Column(db.Integer, primary_key=True)
+    api_url = db.Column(db.String(255), nullable=False)
+    api_key_encrypted = db.Column(db.Text, nullable=False)  # Encrypted storage per SEC-01
+    model_name = db.Column(db.String(100), nullable=False)
+
+    @staticmethod
+    def get_config():
+        """Get the single AI config record or None if not configured.
+
+        Per CONTEXT.md: Show config form with empty fields if missing.
+        """
+        return AIConfig.query.first()
+
+    @property
+    def masked_key(self):
+        """Get masked API key for display (last 4 chars visible).
+
+        Per CONTEXT.md D-locked: Show masked value in UI.
+        Per UI-SPEC.md: Masked display format '****abcd'.
+        """
+        from ai_utils import decrypt_api_key, mask_api_key
+
+        try:
+            decrypted = decrypt_api_key(self.api_key_encrypted)
+            return mask_api_key(decrypted)
+        except Exception:
+            # If decryption fails, return placeholder
+            return "****"
+
+
 # =============================================================================
 # Flask-Admin View
 # =============================================================================

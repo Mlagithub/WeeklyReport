@@ -7,6 +7,7 @@
 目标服务器需要：
 - Ubuntu 22.04 LTS（或类似 Linux 发行版）
 - Python 3.10+ 已安装
+- **中文字体**（PDF 导出必需）：fonts-noto-cjk 或 fonts-wqy-microhei
 - 有足够的磁盘空间（约 500MB）
 
 ---
@@ -32,17 +33,24 @@ ls offline_packages/
 ### 1.2 打包项目代码
 
 ```bash
+# 进入项目目录
+cd /home/one/weekly
+
 # 创建部署包目录
 mkdir -p deploy_package
 
 # 复制项目文件（排除虚拟环境和缓存）
-cp -r app.py config.py extensions.py models.py forms.py routes.py utils.py deploy_package/
-cp -r templates static instance deploy_package/ 2>/dev/null || true
-cp requirements.txt gunicorn.conf.py weekly.service logrotate.weekly deploy_package/
-cp -r tests deploy_package/  # 可选：测试文件
+cp app.py config.py extensions.py models.py forms.py routes.py utils.py ai_utils.py summary_utils.py deploy_package/
+cp -r templates static exporters tests deploy_package/
+mkdir -p deploy_package/instance deploy_package/uploads deploy_package/logs
+cp requirements.txt gunicorn.conf.py weekly.service weekly-user.service logrotate.weekly install.sh deploy_package/
+cp README.md DEPLOY-OFFLINE.md deploy_package/
 
 # 复制依赖包
 cp -r offline_packages deploy_package/
+
+# 清理缓存文件
+find deploy_package/ -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 
 # 打包
 tar -czvf weekly-offline.tar.gz deploy_package/
@@ -71,7 +79,21 @@ tar -xzvf weekly-offline.tar.gz
 cd deploy_package
 ```
 
-### 3.2 创建虚拟环境
+### 3.2 安装中文字体（PDF 导出必需）
+
+```bash
+# 检查是否已安装中文字体
+fc-list :lang=zh 2>/dev/null | head -5
+
+# 如未安装，执行以下命令
+sudo apt install fonts-noto-cjk
+# 或: sudo apt install fonts-wqy-microhei
+
+# 刷新字体缓存
+fc-cache -fv
+```
+
+### 3.3 创建虚拟环境
 
 ```bash
 # 确保 Python 3 已安装
@@ -84,19 +106,18 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### 3.3 离线安装依赖
+### 3.4 离线安装依赖
 
 ```bash
 # 从本地 wheel 包安装
 pip install --no-index --find-links=offline_packages/ -r requirements.txt
 ```
 
-### 3.4 创建必要的目录
+### 3.5 创建必要的目录
 
 ```bash
-# 创建日志目录
-sudo mkdir -p /var/log/weekly
-sudo chown $USER:$USER /var/log/weekly
+# 创建日志目录（使用本地目录，无需 sudo）
+mkdir -p logs
 
 # 创建上传目录（如果不存在）
 mkdir -p uploads
@@ -105,22 +126,24 @@ mkdir -p uploads
 mkdir -p instance
 ```
 
-### 3.5 设置环境变量（可选但推荐）
+### 3.6 设置环境变量（可选但推荐）
 
 ```bash
 # 创建环境变量文件
 cat > .env << 'EOF'
 SECRET_KEY=your-secret-key-here-change-me
 SECURITY_PASSWORD_SALT=your-salt-here-change-me
+AI_ENCRYPTION_KEY=your-ai-encryption-key-32bytes-base64
 DATABASE_URL=sqlite:///instance/app.db
 EOF
 
 # 或直接设置系统环境变量
 export SECRET_KEY="your-secret-key-here"
 export SECURITY_PASSWORD_SALT="your-salt-here"
+export AI_ENCRYPTION_KEY="your-ai-encryption-key"
 ```
 
-### 3.6 测试运行
+### 3.7 测试运行
 
 ```bash
 # 初始化数据库并测试启动

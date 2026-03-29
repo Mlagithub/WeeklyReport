@@ -3,6 +3,7 @@
 ## Milestones
 
 - ✅ **v1.3 AI** — Phases 14-18 (shipped 2026-03-28)
+- 🚧 **v1.4 Code Quality** — Phase 19 (planning)
 - ✅ **v1.2 增强富文本导出功能** — Phases 8-13 (shipped 2026-03-28)
 - ✅ **v1.1 UI Optimization** — Phases 6-7 (shipped 2026-03-28)
 - ✅ **v1.0 FixIOBug** — Phases 1-5 (shipped 2026-03-24)
@@ -190,8 +191,9 @@ Plans:
 | SEC | SEC-01, SEC-03 | 14 |
 | SEC | SEC-02 | 15 |
 | UI | UI-01, UI-02 | 17 |
+| CODE-REVIEW | CODE-REVIEW-01, CODE-REVIEW-02 | 19 |
 
-**Total mapped:** 23/23 (100%)
+**Total mapped:** 25/25 (100%)
 
 **Orphaned:** None
 
@@ -219,6 +221,7 @@ Plans:
 | 16. Template Management | v1.3 | 3/3 | Complete    | 2026-03-28 |
 | 17. Personal Summary Generation | v1.3 | 3/4 | Complete    | 2026-03-28 |
 | 18. Filtered Summary & Text Polish | v1.3 | 2/2 | Complete    | 2026-03-28 |
+| 19. Code Review - Redundancy & Style | v1.4 | 0/2 | Not started | - |
 
 ---
 
@@ -241,9 +244,33 @@ Phase 17: Personal Summary Generation
                │
                ▼
 Phase 18: Filtered Summary & Text Polish (COMPLETE)
+               │
+               ▼
+Phase 19: Code Review - Redundancy & Style (PLANNING)
 ```
+
+### Phase 19: Code Review - Redundancy & Style
+
+**Goal:** 审查所有代码，查找冗余和代码风格问题
+
+**Depends on:** Phase 18
+
+**Requirements:** CODE-REVIEW-01, CODE-REVIEW-02
+
+**Success Criteria** (what must be TRUE):
+1. All Python files reviewed for redundant code
+2. All Python files pass ruff linting with zero warnings
+3. Code style consistent across all modules
+4. No duplicate code blocks identified
+5. Unused imports and variables removed
+
+**Plans:** 2/2 plans
+
+Plans:
+- [ ] 19-00-PLAN.md — Wave 0: Run ruff to identify all linting issues (CODE-REVIEW-01)
+- [ ] 19-01-PLAN.md — Wave 1: Fix all identified issues (CODE-REVIEW-01, CODE-REVIEW-02)
 
 ---
 
 *For milestone details, see `.planning/milestones/`*
-*Last updated: 2026-03-28 — Phase 18 complete, v1.3 milestone shipped*
+*Last updated: 2026-03-29 — Phase 19 planned, ready for execution*

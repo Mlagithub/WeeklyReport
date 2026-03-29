@@ -11,9 +11,9 @@ Per FILTER-SUM-02: Assemble prompt with multi-user grouping.
 
 from datetime import date
 
+from ai_utils import call_ai_api
 from models import AITemplate, Record, User, user_records
 from utils import DateRange, html_to_text
-from ai_utils import call_ai_api
 
 
 def fetch_user_records(user_id: int, start_date: date, end_date: date) -> list[dict]:

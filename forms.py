@@ -9,7 +9,16 @@ from datetime import date
 
 from flask_security.forms import ChangePasswordForm, LoginForm
 from flask_wtf import FlaskForm
-from wtforms import DateField, HiddenField, PasswordField, SelectField, SelectMultipleField, StringField, SubmitField, TextAreaField
+from wtforms import (
+    DateField,
+    HiddenField,
+    PasswordField,
+    SelectField,
+    SelectMultipleField,
+    StringField,
+    SubmitField,
+    TextAreaField,
+)
 from wtforms.validators import DataRequired, EqualTo, Length, Regexp, ValidationError
 
 from models import AITemplate

@@ -17,12 +17,21 @@ from sqlalchemy import and_, case, func
 from sqlalchemy.orm import joinedload
 from werkzeug.utils import secure_filename
 
+from ai_utils import decrypt_api_key, encrypt_api_key, test_ai_connection
 from exporters import ExporterFactory
 from extensions import db
-from forms import AIConfigForm, MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, TemplateForm, ThemeForm
-from models import Group, Record, Role, User, user_records, with_db_transaction, AIConfig, AITemplate
-from ai_utils import decrypt_api_key, encrypt_api_key, test_ai_connection
-from summary_utils import generate_summary, generate_filtered_summary
+from forms import (
+    AIConfigForm,
+    MyChangePasswordForm,
+    MyForgotPasswordForm,
+    MyLoginForm,
+    MyRegisterForm,
+    RecordFilterForm,
+    TemplateForm,
+    ThemeForm,
+)
+from models import AIConfig, AITemplate, Group, Record, Role, User, user_records, with_db_transaction
+from summary_utils import generate_filtered_summary, generate_summary
 from utils import DateRange
 
 # =============================================================================
@@ -703,6 +712,7 @@ def register_routes(app):
         """
         from flask import jsonify
         from flask_wtf.csrf import validate_csrf
+
         from ai_utils import call_ai_api
 
         # Validate CSRF token from header

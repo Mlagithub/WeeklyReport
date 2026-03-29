@@ -7,7 +7,6 @@ Per TEMPLATE-03: Initialize default templates on first access.
 from extensions import db
 from models import AITemplate
 
-
 # Default templates for each time range type
 DEFAULT_TEMPLATES = [
     {

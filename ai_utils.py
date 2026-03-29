@@ -10,13 +10,13 @@ Per SEC-02: Audit logging without full content
 Per API-04: Response processing (whitespace, Markdown to HTML)
 """
 
-import os
 import logging
+import os
 
 import markdown
 import requests
 from cryptography.fernet import Fernet
-from flask import has_app_context, current_app
+from flask import current_app, has_app_context
 from requests.exceptions import ConnectionError, RequestException, Timeout
 
 

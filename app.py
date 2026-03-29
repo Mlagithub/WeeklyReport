@@ -249,8 +249,13 @@ def sanitize_html(text):
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 
 # Ensure database tables exist (for WSGI/Gunicorn startup)
+# Handle race condition when multiple workers start simultaneously
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+    except Exception as e:
+        # Log but continue - tables may already exist from another worker
+        app.logger.debug(f"create_all skipped: {e}")
     ensure_record_columns()
     verify_wal_mode()
 
@@ -291,7 +296,10 @@ __all__ = [
 
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()
+        try:
+            db.create_all()
+        except Exception as e:
+            app.logger.debug(f"create_all skipped: {e}")
         ensure_record_columns()
         verify_wal_mode()
         # update_db_from_json() would be called here if needed

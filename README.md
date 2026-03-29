@@ -8,7 +8,10 @@
 - **周报管理** - 创建、编辑、删除周报，支持富文本编辑（CKEditor）
 - **权限控制** - 基于角色的访问控制（view_self/view_group/view_all/edit_database）
 - **分组管理** - 用户分组，组长可查看组员周报
-- **Excel 导出** - 批量导出周报到 Excel 文件
+- **多格式导出** - PDF、DOCX、Excel 三种格式，支持富文本格式保留
+- **批量导出** - 团队领导可批量导出整组周报为 ZIP
+- **AI 总结生成** - 一键生成工作总结，支持周/月/季度/年范围
+- **AI 文本润色** - AI 增强周报文本质量
 - **主题切换** - 支持 Bootstrap Bootswatch 主题
 - **文件上传** - CKEditor 图片上传支持
 - **后台管理** - Flask-Admin 管理界面
@@ -50,6 +53,7 @@ weekly/
 
 - Python 3.10+
 - pip
+- **中文字体**（PDF 导出必需）：fonts-noto-cjk 或 fonts-wqy-microhei
 
 ### 安装步骤
 
@@ -58,19 +62,24 @@ weekly/
 git clone <repository-url>
 cd weekly
 
-# 2. 创建虚拟环境
+# 2. 安装中文字体（PDF 导出必需）
+sudo apt install fonts-noto-cjk
+# 或: sudo apt install fonts-wqy-microhei
+
+# 3. 创建虚拟环境
 python3 -m venv .venv
 source .venv/bin/activate  # Linux/macOS
 # 或 .venv\Scripts\activate  # Windows
 
-# 3. 安装依赖
+# 4. 安装依赖
 pip install -r requirements.txt
 
-# 4. 设置环境变量
+# 5. 设置环境变量
 export SECRET_KEY="your-secret-key"
 export SECURITY_PASSWORD_SALT="your-salt"
+export AI_ENCRYPTION_KEY="your-ai-encryption-key"  # AI 功能必需
 
-# 5. 运行应用
+# 6. 运行应用
 python app.py
 ```
 
@@ -99,6 +108,7 @@ sudo systemctl start weekly
 |--------|------|--------|
 | `SECRET_KEY` | Flask 密钥 | 内置值（生产环境必须更改） |
 | `SECURITY_PASSWORD_SALT` | 密码加密盐值 | 内置值（生产环境必须更改） |
+| `AI_ENCRYPTION_KEY` | AI API Key 加密密钥（32字节Base64） | 无（AI 功能必需） |
 | `DATABASE_URL` | 数据库 URL | `sqlite:///instance/app.db` |
 | `FLASK_DEBUG` | 调试模式 | `false` |
 | `PORT` | 监听端口 | `5000` |
@@ -177,6 +187,29 @@ pytest -v
 MIT License
 
 ## 更新日志
+
+### v1.3 (2026-03-28)
+
+- AI 工作总结生成（周/月/季度/年范围）
+- AI 周报文本润色功能
+- 管理员 AI 服务配置（API URL/Key/模型）
+- 总结模板管理（支持变量占位符）
+- 篩选结果 AI 总结（组长可用）
+- API Key Fernet 加密存储
+- 194 个单元测试
+
+### v1.2 (2026-03-28)
+
+- PDF 导出（WeasyPrint，支持中文）
+- DOCX 导出（python-docx）
+- Excel 富文本导出
+- 批量导出 ZIP 压缩包
+- 代码质量审查（ruff + black）
+
+### v1.1 (2026-03-28)
+
+- 查找页面默认过滤（当前用户、本周）
+- 主页富文本渲染与 XSS 防护
 
 ### v1.0 (2026-03-24)
 

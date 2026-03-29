@@ -27,23 +27,39 @@ echo "安装目录: $APP_DIR"
 echo "运行用户: $APP_USER"
 echo ""
 
-# [1/5] 创建虚拟环境
-if [ ! -d ".venv" ]; then
-    echo "[1/5] 创建虚拟环境..."
-    python3 -m venv .venv
+# [0/6] 检查/安装中文字体（PDF 导出必需）
+echo "[0/6] 检查中文字体..."
+if fc-list :lang=zh 2>/dev/null | grep -q .; then
+    echo "  → 中文字体已安装"
 else
-    echo "[1/5] 虚拟环境已存在，跳过"
+    echo "  → 未检测到中文字体，正在安装..."
+    if command -v apt-get &> /dev/null; then
+        sudo apt-get install -y fonts-noto-cjk || sudo apt-get install -y fonts-wqy-microhei
+        fc-cache -fv
+        echo "  → 中文字体安装完成"
+    else
+        echo "  【警告】请手动安装中文字体（fonts-noto-cjk 或 fonts-wqy-microhei）"
+        echo "  PDF 导出中文将显示为乱码"
+    fi
 fi
 
-# [2/5] 激活虚拟环境并安装依赖
-echo "[2/5] 激活虚拟环境..."
+# [1/6] 创建虚拟环境
+if [ ! -d ".venv" ]; then
+    echo "[1/6] 创建虚拟环境..."
+    python3 -m venv .venv
+else
+    echo "[1/6] 虚拟环境已存在，跳过"
+fi
+
+# [2/6] 激活虚拟环境并安装依赖
+echo "[2/6] 激活虚拟环境..."
 source .venv/bin/activate
 
-echo "[3/5] 离线安装依赖包..."
+echo "[3/6] 离线安装依赖包..."
 pip install --no-index --find-links=offline_packages/ -r requirements.txt
 
-# [4/5] 创建必要的目录
-echo "[4/5] 创建应用目录..."
+# [4/6] 创建必要的目录
+echo "[4/6] 创建应用目录..."
 mkdir -p uploads instance logs
 
 # 创建 gunicorn 日志配置（使用本地目录）
@@ -75,8 +91,8 @@ limit_request_fields = 100
 limit_request_field_size = 8190
 GUNICORN_CONF
 
-# [5/5] 配置用户级 systemd 服务
-echo "[5/5] 配置系统服务..."
+# [5/6] 配置用户级 systemd服务
+echo "[5/6] 配置系统服务..."
 if [ "$INSTALL_SERVICE" = true ]; then
     # 创建 systemd 用户目录
     mkdir -p ~/.config/systemd/user
@@ -140,11 +156,13 @@ echo "【重要】请设置环境变量："
 echo ""
 echo "  export SECRET_KEY='your-secret-key-here'"
 echo "  export SECURITY_PASSWORD_SALT='your-salt-here'"
+echo "  export AI_ENCRYPTION_KEY='your-ai-encryption-key'"  # AI 功能必需（32字节Base64）
 echo ""
 echo "或添加到 ~/.bashrc："
 echo ""
 echo "  echo 'export SECRET_KEY=\"your-secret-key\"' >> ~/.bashrc"
 echo "  echo 'export SECURITY_PASSWORD_SALT=\"your-salt-here\"' >> ~/.bashrc"
+echo "  echo 'export AI_ENCRYPTION_KEY=\"your-ai-encryption-key\"' >> ~/.bashrc"
 echo "  source ~/.bashrc"
 echo ""
 

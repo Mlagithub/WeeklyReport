@@ -19,7 +19,7 @@ from werkzeug.utils import secure_filename
 
 from exporters import ExporterFactory
 from extensions import db
-from forms import MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, ThemeForm, AIConfigForm, TemplateForm, SummaryGenerationForm
+from forms import AIConfigForm, MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, TemplateForm, ThemeForm
 from models import Group, Record, Role, User, user_records, with_db_transaction, AIConfig, AITemplate
 from ai_utils import decrypt_api_key, encrypt_api_key, test_ai_connection
 from summary_utils import generate_summary, generate_filtered_summary

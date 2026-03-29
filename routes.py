@@ -21,7 +21,7 @@ from exporters import ExporterFactory
 from extensions import db
 from forms import MyChangePasswordForm, MyForgotPasswordForm, MyLoginForm, MyRegisterForm, RecordFilterForm, ThemeForm, AIConfigForm, TemplateForm, SummaryGenerationForm
 from models import Group, Record, Role, User, user_records, with_db_transaction, AIConfig, AITemplate
-from ai_utils import encrypt_api_key, test_ai_connection
+from ai_utils import decrypt_api_key, encrypt_api_key, test_ai_connection
 from summary_utils import generate_summary, generate_filtered_summary
 from utils import DateRange
 

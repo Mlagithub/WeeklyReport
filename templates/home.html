@@ -62,7 +62,7 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="summary-time-range" class="form-label">时间范围</label>
                         <select id="summary-time-range" class="form-select">
                             <option value="this_week" selected>本周</option>
@@ -71,7 +71,7 @@
                             <option value="this_year">本年</option>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="summary-template" class="form-label">模板（可选）</label>
                         <select id="summary-template" class="form-select">
                             <option value="" selected>默认模板</option>
@@ -79,10 +79,6 @@
                             <option value="{{ tmpl.id }}">{{ tmpl.name }}</option>
                             {% endfor %}
                         </select>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="summary-custom-prompt" class="form-label">自定义提示词（可选）</label>
-                        <input type="text" id="summary-custom-prompt" class="form-control" placeholder="例如：简洁风格、突出重点项目...">
                     </div>
                 </div>
                 <div class="mb-3">
@@ -162,7 +158,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const regenerateBtn = document.getElementById('regenerate-summary-btn');
     const timeRangeSelect = document.getElementById('summary-time-range');
     const templateSelect = document.getElementById('summary-template');
-    const customPromptInput = document.getElementById('summary-custom-prompt');
 
     // Get CSRF token from meta tag or cookie
     function getCsrfToken() {
@@ -202,15 +197,8 @@ document.addEventListener('DOMContentLoaded', function() {
         setLoading(true);
         errorDiv.style.display = 'none';
 
-        // Combine localStorage prompt with user input
-        const savedPrompt = localStorage.getItem('ai_summary_prompt') || '';
-        const userPrompt = customPromptInput.value;
-        let customPrompt = '';
-        if (savedPrompt && userPrompt) {
-            customPrompt = savedPrompt + '\n' + userPrompt;
-        } else {
-            customPrompt = savedPrompt || userPrompt;
-        }
+        // Use saved prompt from localStorage (configured in settings page)
+        const customPrompt = localStorage.getItem('ai_summary_prompt') || '';
 
         const data = {
             time_range: timeRangeSelect.value,

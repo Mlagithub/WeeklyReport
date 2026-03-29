@@ -109,6 +109,18 @@
                 </form>
             </div>
         </div>
+        <!-- AI Template Management -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">{{ render_icon('file-text') }} AI 总结模板</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">管理主页 AI 工作总结的提示词模板，支持占位符自动填充。</p>
+                <a href="{{ url_for('ai_templates') }}" class="btn btn-outline-primary">
+                    {{ render_icon('gear') }} 管理模板
+                </a>
+            </div>
+        </div>
         {% endif %}
 
         <!-- Account management card -->
